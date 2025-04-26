@@ -31,6 +31,7 @@ const AppRoutes = () => {
       <Route path="/problems/completed" element={<Layout><ProblemsPage /></Layout>} />
 
       <Route path="/manage/problems" element={<Layout><ProblemsTable /></Layout>} />
+      <Route path="/manage/users" element={<Layout><ProblemsTable /></Layout>} />
 
       <Route path="/user-profile" element={<Layout><UserProfilePage /></Layout>} />
       <Route path="/gov-profile" element={<Layout><GovProfilePage /></Layout>} /> 
