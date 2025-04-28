@@ -2,9 +2,12 @@ import { MainChart } from "@/components/MainChart";
 import { ProblemsCarousel } from "@/components/ProblemsCarousel";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
+
+
   return (
     <div className="w-full flex flex-col gap-15">
       <div className="flex flex-col">
@@ -48,7 +51,7 @@ const HomePage = () => {
             <ChevronLeft />
           </Link>
         </div>
-        <MainChart />
+        <MainChart/>
       </div>
 
     </div>

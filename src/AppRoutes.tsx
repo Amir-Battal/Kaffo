@@ -13,6 +13,9 @@ import { ProblemsTable } from "./pages/ProblemsTable";
 import AuctionsPage from "./pages/AuctionsPage";
 import UserActivitiesPage from "./pages/UserActivitiesPage";
 import MyAucationsPage from "./pages/MyAucationsPage";
+import { UsersTable } from "./pages/UsersTable";
+import { GovsTable } from "./pages/GovsTable";
+import NewAccount from "./pages/NewAccount";
 
 const AppRoutes = () => {
   return (
@@ -31,7 +34,9 @@ const AppRoutes = () => {
       <Route path="/problems/completed" element={<Layout><ProblemsPage /></Layout>} />
 
       <Route path="/manage/problems" element={<Layout><ProblemsTable /></Layout>} />
-      <Route path="/manage/users" element={<Layout><ProblemsTable /></Layout>} />
+      <Route path="/manage/users" element={<Layout><UsersTable /></Layout>} />
+      <Route path="/manage/govs" element={<Layout><GovsTable /></Layout>} />
+      <Route path="/manage/new-account" element={<Layout><NewAccount /></Layout>} />
 
       <Route path="/user-profile" element={<Layout><UserProfilePage /></Layout>} />
       <Route path="/gov-profile" element={<Layout><GovProfilePage /></Layout>} /> 

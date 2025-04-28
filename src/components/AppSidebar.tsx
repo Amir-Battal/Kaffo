@@ -1,4 +1,4 @@
-import {Building2, ChartArea, ChartNoAxesGantt, Check, Copy, Folder, Heart, Home, Inbox, LogOut, ShoppingCart, Users } from "lucide-react"
+import {Briefcase, Building2, ChartArea, ChartNoAxesGantt, Check, Copy, Folder, Heart, Home, Inbox, LogOut, ShoppingCart, UserPlus, Users } from "lucide-react"
 
 import {
   Sidebar,
@@ -105,6 +105,39 @@ const subGovItems = [
     title: "المنجزة",
     url: "/problems/completed",
     icon: Check,
+  },
+]
+
+const AdminItems = [
+  {
+    title: "المشكلات",
+    url: "/manage/problems",
+    icon: Building2,
+  },
+  {
+    title: "المستخدمين",
+    url: "/manage/users",
+    icon: Users,
+  },
+  {
+    title: "الجهات المعنية",
+    url: "/manage/govs",
+    icon: Briefcase,
+  },
+  {
+    title: "الإحصائيات",
+    url: "/statistics",
+    icon: ChartArea,
+  },
+  {
+    title: "إنشاء حساب",
+    url: "/manage/new-account",
+    icon: UserPlus,
+  },
+  {
+    title: "تسجيل الخروج",
+    url: "#",
+    icon: LogOut,
   },
 ]
 

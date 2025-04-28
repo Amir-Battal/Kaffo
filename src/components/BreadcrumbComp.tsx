@@ -5,7 +5,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Building2, ChartArea, ChartNoAxesGantt, Check, DollarSign, Folder, Home, Inbox, MessageSquare, User, Users } from "lucide-react";
+import { Briefcase, Building2, ChartArea, ChartNoAxesGantt, Check, DollarSign, Folder, Home, Inbox, MessageSquare, User, UserPlus, Users } from "lucide-react";
 
 type BreadcrumbProps = {
   name: string;
@@ -249,6 +249,46 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
                 <BreadcrumbLink className="flex flex-row items-center gap-2">
                   <Folder />
                   <h3>الشكاوي</h3>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </div>
+          ): prop.name === "/manage/problems"
+          ?(
+            <div className="w-full flex flex-row items-center gap-2">
+              <BreadcrumbItem>
+                <BreadcrumbLink className="flex flex-row items-center gap-2">
+                  <Building2 />
+                  <h3>المشكلات (100)</h3>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </div>
+          ): prop.name === "/manage/users"
+          ?(
+            <div className="w-full flex flex-row items-center gap-2">
+              <BreadcrumbItem>
+                <BreadcrumbLink className="flex flex-row items-center gap-2">
+                  <Users />
+                  <h3>المستخدمين (50)</h3>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </div>
+          ): prop.name === "/manage/govs"
+          ?(
+            <div className="w-full flex flex-row items-center gap-2">
+              <BreadcrumbItem>
+                <BreadcrumbLink className="flex flex-row items-center gap-2">
+                  <Briefcase />
+                  <h3>الجهات المعنية (50)</h3>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            </div>
+          ): prop.name === "/manage/new-account"
+          ?(
+            <div className="w-full flex flex-row items-center gap-2">
+              <BreadcrumbItem>
+                <BreadcrumbLink className="flex flex-row items-center gap-2">
+                  <UserPlus />
+                  <h3>إنشاء حساب</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </div>

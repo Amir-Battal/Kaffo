@@ -14,47 +14,105 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
-const chartData = [
-  { activity: "الشكاوي", activityNum: 10, fill: "red" },
-  { activity: "الأنشطة التطوعية", activityNum: 10, fill: "blue" },
-  { activity: "المساهمات", activityNum: 5, fill: "green" },
-  { activity: "التبرعات", activityNum: 5, fill: "purple" },
+
+const StatisticsData = [
+  {
+    title: 'issues',
+    ar_title: 'الشكاوي',
+    label: 'الشكاوي المقدمة من قبلك',
+    number: 25,
+    color: 'red',
+    fill: 'bg-red-600',
+    path: '/problems',
+    activityNum: 10
+  },
+  {
+    title: 'volunteering',
+    ar_title: 'الأنشطة التطوعية',
+    label: 'الأنشطة التطوعية التي قمت بها',
+    number: 25,
+    color: 'blue',
+    fill: 'bg-blue-600',
+    path: '/volunteering',
+    activityNum: 10
+  },
+  {
+    title: 'contributions',
+    ar_title: 'المساهمات',
+    label: 'المساهمات التي قمت بها',
+    number: 25,
+    color: 'green',
+    fill: 'bg-green-600',
+    path: '/volunteering/contributions',
+    activityNum: 5
+  },
+  {
+    title: 'donations',
+    ar_title: 'التبرعات',
+    label: 'التبرعات التي قمت بها',
+    number: 25,
+    color: 'purple',
+    fill: 'bg-purple-600',
+    path: '/volunteering/donations',
+    activityNum: 5
+  },
 ]
 
-const labelData = [
-  { activity: "الشكاوي", fill: "bg-red-600" },
-  { activity: "الأنشطة التطوعية", fill: "bg-blue-600" },
-  { activity: "المساهمات", fill: "bg-green-600" },
-  { activity: "التبرعات", fill: "bg-purple-600" },
-]
 
-const chartConfig = {
-  activityNum: {
-    label: "عدد الأنشطة",
-  },
-  complaints: {
-    label: "الشكاوي",
-    color: "red",
-  },
-  activities: {
-    label: "الأنشطة التطوعية",
-    color: "blue",
-  },
-  contributions: {
-    label: "المساهمات",
-    color: "green",
-  },
-  donations: {
-    label: "التبرعات",
-    color: "purple",
-  },
+export function MainChart({...props}): React.JSX.Element {
+  const [chartData, setChartData] = React.useState<any>(
+    props.isAdmin || props.isGov
+    ?
+      props.data.map((data: any) => ({ 
+        activity: data.ar_title, 
+        activityNum: data.activityNum, 
+        fill: data.color 
+      }))
+    :
+    StatisticsData.map((data: any) => ({ 
+      activity: data.ar_title, 
+      activityNum: data.activityNum, 
+      fill: data.color 
+    }))
+  );
 
-} satisfies ChartConfig
+  const [chartConfig, setChartConfig] = React.useState<any>(
+    props.isAdmin
+    ?
+      {
+        activityNum: { lable: "عدد الأنشطة" },
+        receivedIssues: { label: "الشكاوي الواصلة", color: "red" },
+        users: { label: "المستخدمين", color: "blue" },
+        concernedGovs: { label: "الجهات المعنية", color: "green" },
+        doneIssues: { label: "الشكاوي المنجزة", color: "purple" },
+      }
+    :props.isGov
+    ?
+      {
+        activityNum: { lable: "عدد الأنشطة" },
+        receivedIssues: { label: "الشكاوي الواصلة", color: "red" },
+        doneIssues: { label: "الشكاوي المنجزة", color: "blue" },
+        auctions: { label: "المناقصات", color: "green" },
+      }
+    :
+      {
+        activityNum: { lable: "عدد الأنشطة" },
+        complaints: { label: 'الشكاوي', color: "red" },
+        activities: { label: "الأنشطة التطوعية", color: "blue" },
+        contributions: { label: "المساهمات", color: "green" },
+        donations: { label: "التبرعات", color: "purple" },
+      }
+  );
 
-export function MainChart() {
+
   const totalVisitors = React.useMemo(() => {
-    return chartData.reduce((acc, curr) => acc + curr.activityNum, 0)
+    return chartData.reduce((acc: any, curr: any) => acc + curr.activityNum, 0)
   }, [])
+
+
+  
+
+
 
   return (
     <Card className="flex flex-col w-[40%]">
@@ -108,12 +166,27 @@ export function MainChart() {
           </PieChart>
         </ChartContainer>
         <div className="flex flex-col gap-5">
-          {labelData.map((item) => (
-            <div className="flex flex-row gap-2 items-center">
-              <div className={`w-[15px] h-[15px] ${item.fill}`}></div>
-              <h3>{item.activity}</h3>
-            </div>
-          ))}
+          {props.isAdmin || props.isGov
+            ?(
+              <div>
+                {props.data.map((item: any) => (
+                  <div className="flex flex-row gap-2 items-center">
+                    <div className={`w-[15px] h-[15px] ${item.fill}`}></div>
+                    <h3>{item.ar_title}</h3>
+                  </div>
+                ))}
+              </div>
+            ):(
+              <div>
+                {StatisticsData.map((item: any) => (
+                  <div className="flex flex-row gap-2 items-center">
+                    <div className={`w-[15px] h-[15px] ${item.fill}`}></div>
+                    <h3>{item.ar_title}</h3>
+                  </div>
+                ))}
+              </div>
+            )
+          }
         </div>
 
       </CardContent>
