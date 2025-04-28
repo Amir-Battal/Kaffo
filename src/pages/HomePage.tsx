@@ -2,10 +2,13 @@ import { MainChart } from "@/components/MainChart";
 import { ProblemsCarousel } from "@/components/ProblemsCarousel";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
 
+  const [isGov, setIsGov] = useState<Boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<Boolean>(false);
 
   return (
     <div className="w-full flex flex-col gap-15">
