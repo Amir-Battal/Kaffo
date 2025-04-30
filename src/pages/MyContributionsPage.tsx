@@ -1,27 +1,31 @@
+import PaginationComp from "@/components/PaginationComp";
 import ContributionCard from "@/forms/contribution-form/ContributionCard";
-import { useState } from "react";
 
 const contribution = [
     {
         username: 'أمير بطال',
         date: '23/3/2025',
         contribution: "استطيع حل المشكلة من خلال عدة نقاط أهمها النقطة الأولى من خلال شراء المواد الأولية",
-        budget: 120
+        budget: 120,
+        status: 'التعديل مسموح',
     },{
         username: 'أمير بطال',
         date: '23/3/2025',
         contribution: "استطيع حل المشكلة من خلال عدة نقاط أهمها النقطة الأولى من خلال شراء المواد الأولية",
-        budget: 120
+        budget: 120,
+        status: 'جاري المعالجة',
     },{
         username: 'أمير بطال',
         date: '23/3/2025',
         contribution: "استطيع حل المشكلة من خلال عدة نقاط أهمها النقطة الأولى من خلال شراء المواد الأولية",
-        budget: 120
+        budget: 120,
+        status: 'تم القبول',
     },{
         username: 'أمير بطال',
         date: '23/3/2025',
         contribution: "استطيع حل المشكلة من خلال عدة نقاط أهمها النقطة الأولى من خلال شراء المواد الأولية",
-        budget: 120
+        budget: 120,
+        status: 'تم الرفض',
     },
 ]
 
@@ -36,13 +40,15 @@ const MyContributionsPage = () => {
                 {contribution.map((item) => (
                     <ContributionCard
                         username={item.username}
-                            date={item.date}
-                            contribution={item.contribution}
-                            budget={item.budget}
-                            isMyContribution
+                        date={item.date}
+                        contribution={item.contribution}
+                        budget={item.budget}
+                        status={item.status}
+                        isMyContribution
                     />
                 ))}
             </div>
+            <PaginationComp />
         </div>
     )
 }

@@ -13,6 +13,12 @@ import { ProblemsTable } from "./pages/ProblemsTable";
 import AuctionsPage from "./pages/AuctionsPage";
 import UserActivitiesPage from "./pages/UserActivitiesPage";
 import MyAucationsPage from "./pages/MyAucationsPage";
+import { UsersTable } from "./pages/UsersTable";
+import { GovsTable } from "./pages/GovsTable";
+import NewAccount from "./pages/NewAccount";
+import MyVolunteeringPage from "./pages/MyVolunteeringPage";
+import MyContributionsPage from "./pages/MyContributionsPage";
+import MyDonationsPage from "./pages/MyDonationsPage";
 
 const AppRoutes = () => {
   return (
@@ -45,6 +51,7 @@ const AppRoutes = () => {
       <Route path="/user-activities/volunteering" element={<Layout><MyVolunteeringPage /></Layout>} />
       <Route path="/user-activities/contributions" element={<Layout><MyContributionsPage /></Layout>} />
       <Route path="/user-activities/donations" element={<Layout><MyDonationsPage /></Layout>} />
+
 
 
       <Route path="*" element={<Navigate to="/" />} />

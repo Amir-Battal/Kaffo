@@ -1,4 +1,5 @@
 import {
+  Briefcase,
   Building2,
   ChartArea,
   ChartNoAxesGantt,
@@ -10,6 +11,7 @@ import {
   Home,
   Inbox,
   LogOut,
+  UserPlus,
   Users
 } from "lucide-react"
 

@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Form, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ type ContributionCardProp = {
   date?: string,
   contribution?: string,
   budget?: number,
+  status?: string,
   children?: React.ReactNode,
   isSelfSolv?: boolean,
   isMyContribution?: boolean,
@@ -49,7 +51,24 @@ const ContributionCard = (prop: ContributionCardProp) => {
             }
             <h3>{prop.username} - {prop.date}</h3>
           </div>
-          <h1>جاري المعلجة</h1>
+          {prop.status
+          ?(
+            <Badge className={`w-[20%] h-[35px] ml-1 ${prop.status === 'جاري المعالجة'
+              ? 'bg-orange-600'
+              : prop.status === 'التعديل مسموح'
+                ? 'bg-blue-600'
+                : prop.status === 'تم الرفض'
+                  ? 'bg-red-600'
+                  : prop.status === 'تم القبول'
+                    ? 'bg-green-600'
+                    : 'bg-fuchsia-600'}`}>
+                      <h3 className="text-lg">{prop.status}</h3>
+              
+            </Badge>
+          ):(
+            <div></div>
+          )}
+          
           {prop.children}
         </div>
 
