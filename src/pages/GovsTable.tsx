@@ -16,7 +16,6 @@ import {
 import { ChevronLeft, Filter, Plus, Repeat, Search } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Table,
   TableBody,
@@ -26,137 +25,115 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import NewProblemOverlay from "@/forms/problem-form/NewProblemOverlay"
 import { Input } from "@/components/ui/input"
-import ProblemStatusSelect from "@/components/ProblemStatusSelect"
+import { Link } from "react-router-dom"
+import ProblemCategorySelect from "@/components/ProblemCategorySelect"
 
-const data: Problem[] = [
+const data: Gov[] = [
   {
     id: "derv1ws0",
-    title: 'رصيف مكسور',
-    user: "مديرية كهرباء حلب",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب', 'اي شي', 'اي شي ٢'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جديدة",
+    role: 'admin'
   },
   {
     id: "3u1reuv4",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري التحقق",
+    role: 'حساب عادي'
   },
   {
     id: "m5gr84i9",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
+    role: 'حساب عادي'
   },
   {
     id: "m5gr84i8",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
+    role: 'حساب عادي'
   },
   {
     id: "m5gr84i7",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
+    role: 'حساب عادي'
   },
   {
     id: "m5gr84i6",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
+    role: 'حساب عادي'
   },
   {
     id: "m5gr84i5",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
+    role: 'حساب عادي'
   },
   {
     id: "m5gr84i4",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
+    role: 'حساب عادي'
   },
   {
     id: "5kma53ae",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "تم حل المشكلة",
+    role: 'حساب عادي'
   },
   {
     id: "bhqecj4p",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
+    email: 'email@example.com',
+    phoneNumber: "0999 999 999",
     concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
     governorate: "حلب",
-    location: "العزيزية",
-    status: "تم الرفض",
+    role: 'حساب عادي'
   }
 ]
 
-export type Problem = {
+export type Gov = {
   id: string
-  title: string
-  user: string
+  email: string
+  phoneNumber: string
   concernedGov: string
-  category: string[]
   governorate: string
-  location: string
-  status: "جاري التحقق" | "جاري المعالجة" | "جديدة" | "تم الرفض" | "تم حل المشكلة"
+  role: string
 }
 
-export const columns: ColumnDef<Problem>[] = [
+export const columns: ColumnDef<Gov>[] = [
   {
-    accessorKey: "title",
-    header: "العنوان",
+    accessorKey: "email",
+    header: "البريد الإلكتروني",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("title")}</div>
+      <div>{row.getValue("email")}</div>
     ),
   },
   {
-    accessorKey: "user",
-    header: "المستخدم",
+    accessorKey: "phoneNumber",
+    header: "رقم الهاتف",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("user")}</div>
+      <div dir="ltr" className="capitalize">{row.getValue("phoneNumber")}</div>
     ),
   },
   {
@@ -167,21 +144,6 @@ export const columns: ColumnDef<Problem>[] = [
     ),
   },
   {
-    accessorKey: "category",
-    header: "الصنف",
-
-    cell: ({ row }) => (
-      <div className="flex flex-row gap-2 justify-center">
-        {row.original.category.slice(0, 2).map((item, index) => (
-          <Badge key={index} className="w-[40%] h-[30px] bg-neutral-200 text-black font-normal">{item}</Badge>
-        ))}
-        {row.original.category.length > 2 && (
-          <Badge className="w-[40px] h-[30px] bg-neutral-200 text-black font-normal"><Plus /></Badge>
-        )}
-      </div>
-    ),
-  },
-  {
     accessorKey: "governorate",
     header: "المحافظة",
     cell: ({ row }) => (
@@ -189,27 +151,10 @@ export const columns: ColumnDef<Problem>[] = [
     ),
   },
   {
-    accessorKey: "location",
-    header: "المنطقة",
+    accessorKey: "role",
+    header: "صفة الحساب",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("location")}</div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: "الحالة",
-    cell: ({ row }) => (
-      <Badge className={`w-[80%] h-[30px] ${row.original.status === 'جاري المعالجة'
-        ? 'bg-orange-600'
-        : row.original.status === 'جاري التحقق'
-          ? 'bg-blue-600'
-          : row.original.status === 'تم الرفض'
-            ? 'bg-red-600'
-            : row.original.status === 'تم حل المشكلة'
-              ? 'bg-green-600'
-              : 'bg-fuchsia-600'}`}>
-        {row.original.status}
-      </Badge>
+      <div className="capitalize">{row.getValue("role")}</div>
     ),
   },
   {
@@ -224,7 +169,7 @@ export const columns: ColumnDef<Problem>[] = [
   }
 ]
 
-export function ProblemsTable() {
+export function GovsTable() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -253,20 +198,23 @@ export function ProblemsTable() {
     <div className="w-full flex flex-col items-center">
       <div className="w-[90%] flex flex-col gap-5">
 
-        <NewProblemOverlay />
+        <Link to='/gov-profile' className="w-[12%]  flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
+          <h3 className="text-sm">مستخدم جديد</h3>
+          <Plus size={17} />
+        </Link>
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl">المشكلات (الشكاوي)</h1>
-          <h3 className="text-sm text-neutral-600 font-light">تستطيع إيجاد كل المشكلات والتعديل عليها</h3>
+          <h1 className="text-2xl">الجهات المعنية</h1>
+          <h3 className="text-sm text-neutral-600 font-light">تستطيع إيجاد كل حسابات الجهات المعنية والتعديل عليها</h3>
         </div>
 
         <div className="w-full flex flex-row justify-between">
           <div className="w-[50%] flex flex-row gap-5">
             <div className="w-full flex flex-row items-center">
               <Search />
-              <Input placeholder="تبحث عن مشكلة معينة ..."/>
+              <Input placeholder="تبحث عن مستخدم معين ..."/>
             </div>
-            <ProblemStatusSelect status='جاري المعالجة' />
+            <ProblemCategorySelect category='أرصفة' />
           </div>
           <div className="w-[50%] flex flex-row gap-5 justify-end">
             <Button className="rounded-none cursor-pointer">

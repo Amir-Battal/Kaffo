@@ -121,6 +121,39 @@ const subGovItems = [
   },
 ]
 
+const AdminItems = [
+  {
+    title: "المشكلات",
+    url: "/manage/problems",
+    icon: Building2,
+  },
+  {
+    title: "المستخدمين",
+    url: "/manage/users",
+    icon: Users,
+  },
+  {
+    title: "الجهات المعنية",
+    url: "/manage/govs",
+    icon: Briefcase,
+  },
+  {
+    title: "الإحصائيات",
+    url: "/statistics",
+    icon: ChartArea,
+  },
+  {
+    title: "إنشاء حساب",
+    url: "/manage/new-account",
+    icon: UserPlus,
+  },
+  {
+    title: "تسجيل الخروج",
+    url: "#",
+    icon: LogOut,
+  },
+]
+
 export function AppSidebar() {
   return (
     <Sidebar side="right">

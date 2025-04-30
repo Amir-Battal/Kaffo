@@ -5,7 +5,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { Building2, ChartArea, ChartNoAxesGantt, Check, Copy, DollarSign, Folder, HandHeart, Heart, Home, Inbox, MessageSquare, User, Users } from "lucide-react";
+import { Building2, ChartArea, ChartNoAxesGantt, Check, DollarSign, Folder, Home, Inbox, MessageSquare, User, Users } from "lucide-react";
 
 type BreadcrumbProps = {
   name: string;
@@ -249,63 +249,6 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
                 <BreadcrumbLink className="flex flex-row items-center gap-2">
                   <Folder />
                   <h3>الشكاوي</h3>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </div>
-          ): prop.name === "/user-activities/volunteering"
-          ?(
-            <div className="w-full flex flex-row items-center gap-2">
-              <BreadcrumbItem>
-                <BreadcrumbLink className="flex flex-row items-center gap-2" href="/user-activities">
-                  <ChartNoAxesGantt />
-                  <h3>مشاركاتي</h3>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink className="flex flex-row items-center gap-2">
-                  <Heart />
-                  <h3>التطوع</h3>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </div>
-          ): prop.name === "/user-activities/contributions"
-          ?(
-            <div className="w-full flex flex-row items-center gap-2">
-              <BreadcrumbItem>
-                <BreadcrumbLink className="flex flex-row items-center gap-2" href="/user-activities">
-                  <ChartNoAxesGantt />
-                  <h3>مشاركاتي</h3>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink className="flex flex-row items-center gap-2">
-                  <Copy />
-                  <h3>المساهمات</h3>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </div>
-          ): prop.name === "/user-activities/donations"
-          ?(
-            <div className="w-full flex flex-row items-center gap-2">
-              <BreadcrumbItem>
-                <BreadcrumbLink className="flex flex-row items-center gap-2" href="/user-activities">
-                  <ChartNoAxesGantt />
-                  <h3>مشاركاتي</h3>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink className="flex flex-row items-center gap-2">
-                  <HandHeart />
-                  <h3>التبرعات</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </div>
