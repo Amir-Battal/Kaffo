@@ -1,9 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Form, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DollarSign } from "lucide-react";
+import { ChevronLeft, DollarSign } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
 
@@ -20,8 +22,10 @@ type ContributionCardProp = {
   date?: string,
   contribution?: string,
   budget?: number,
+  status?: string,
   children?: React.ReactNode,
-  isSelfSolv?: boolean
+  isSelfSolv?: boolean,
+  isMyContribution?: boolean,
 }
 
 const ContributionCard = (prop: ContributionCardProp) => {
@@ -47,6 +51,24 @@ const ContributionCard = (prop: ContributionCardProp) => {
             }
             <h3>{prop.username} - {prop.date}</h3>
           </div>
+          {prop.status
+          ?(
+            <Badge className={`w-[20%] h-[35px] ml-1 ${prop.status === 'جاري المعالجة'
+              ? 'bg-orange-600'
+              : prop.status === 'التعديل مسموح'
+                ? 'bg-blue-600'
+                : prop.status === 'تم الرفض'
+                  ? 'bg-red-600'
+                  : prop.status === 'تم القبول'
+                    ? 'bg-green-600'
+                    : 'bg-fuchsia-600'}`}>
+                      <h3 className="text-lg">{prop.status}</h3>
+              
+            </Badge>
+          ):(
+            <div></div>
+          )}
+          
           {prop.children}
         </div>
 
@@ -66,17 +88,31 @@ const ContributionCard = (prop: ContributionCardProp) => {
           />
         </div>
 
-        <div className="flex flex-col gap-2 px-2">
-          <FormLabel>التكلفة المتوقعة</FormLabel>
-          <div className="flex flex-row w-[20%] items-center justify-between">
-            <DollarSign/>
-            <Input
-              className="w-full"
-              value={prop.budget}
-              placeholder="100" 
-              disabled
-            />
+      
+        <div className="flex flex-row justify-between items-center pl-5">
+          <div className="w-full flex flex-col gap-2 px-2">
+            <FormLabel>التكلفة المتوقعة</FormLabel>
+            <div className="flex flex-row w-[20%] items-center justify-between">
+              <DollarSign/>
+              <Input
+                className="w-full"
+                value={prop.budget}
+                placeholder="100" 
+                disabled
+              />
+            </div>
           </div>
+          {prop.isMyContribution
+            ?(
+              <Button>
+              <h3>الذهاب إلى مكان المساهمة</h3>
+              <ChevronLeft />
+            </Button>
+            ):(
+              <div></div>
+            )
+          }
+          
         </div>
       </form>
     </Form>
