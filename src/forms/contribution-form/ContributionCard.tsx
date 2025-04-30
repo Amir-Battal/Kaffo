@@ -105,9 +105,9 @@ const ContributionCard = (prop: ContributionCardProp) => {
           {prop.isMyContribution
             ?(
               <Button>
-              <h3>الذهاب إلى مكان المساهمة</h3>
-              <ChevronLeft />
-            </Button>
+                <h3>الذهاب إلى مكان المساهمة</h3>
+                <ChevronLeft />
+              </Button>
             ):(
               <div></div>
             )
