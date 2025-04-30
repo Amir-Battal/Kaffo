@@ -1,4 +1,17 @@
-import {Building2, ChartArea, ChartNoAxesGantt, Check, Copy, Folder, Heart, Home, Inbox, LogOut, ShoppingCart, Users } from "lucide-react"
+import {
+  Building2,
+  ChartArea,
+  ChartNoAxesGantt,
+  Check,
+  Copy,
+  Folder,
+  HandHeart,
+  Heart,
+  Home,
+  Inbox,
+  LogOut,
+  Users
+} from "lucide-react"
 
 import {
   Sidebar,
@@ -57,18 +70,18 @@ const subUserItems = [
   },
   {
     title: "التطوع",
-    url: "#",
+    url: "/user-activities/volunteering",
     icon: Heart,
   },
   {
     title: "المساهمات",
-    url: "#",
+    url: "/user-activities/contributions",
     icon: Copy,
   },
   {
     title: "التبرعات",
-    url: "#",
-    icon: ShoppingCart,
+    url: "/user-activities/donations",
+    icon: HandHeart,
   },
 ]
 
