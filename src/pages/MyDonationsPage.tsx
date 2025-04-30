@@ -8,7 +8,7 @@ const donation = [
         date: '23/3/2025',
         budget: "",
     },{
-        username: 'أمير بطال',
+        username: 'عبد الهادي العاصي',
         time: 'منذ 9 ساعات',
         date: '23/3/2025',
         budget: 40,
@@ -18,12 +18,12 @@ const donation = [
         date: '23/3/2025',
         budget: 40,
     },{
-        username: 'أمير بطال',
+        username: 'حسام علوان',
         time: 'منذ 9 ساعات',
         date: '23/3/2025',
         budget: 40,
     },{
-        username: 'أمير بطال',
+        username: 'جورجيوس',
         time: 'منذ 9 ساعات',
         date: '23/3/2025',
         budget: 40,
