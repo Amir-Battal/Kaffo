@@ -24,6 +24,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/" element={<Layout><HomePage /></Layout>} />
+
       <Route path="/problems" element={<Layout><ProblemsPage /></Layout>} />
       <Route path="/problems/:problemId" element={<Layout><ProblemPage /></Layout>} />
       <Route path="/volunteering" element={<Layout><VolunteeringPage /></Layout>} />

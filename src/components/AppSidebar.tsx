@@ -28,6 +28,7 @@ import {
 
 import SidebarHeaderElements from "./SidebarHeaderElements"
 import { Separator } from "./ui/separator"
+import LogoutDialog from "./LogoutDialog"
 
 
 // Menu items.
@@ -198,13 +199,19 @@ export function AppSidebar() {
                       ))}
                     </SidebarMenu>
                     </div>
-                  ):
+                  ):item.title === 'تسجيل الخروج'
+                  ?(
+                    <SidebarMenuButton asChild>
+                      <LogoutDialog />
+                    </SidebarMenuButton>
+                  ):(
                     <SidebarMenuButton asChild>
                       <a href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
                       </a>
                     </SidebarMenuButton>
+                  )
                   }
                 </SidebarMenuItem>
               ))}

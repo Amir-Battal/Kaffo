@@ -8,27 +8,31 @@ import {
 } from "@/components/ui/dialog"
 import { Check, Delete, X } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import keycloak from "@/lib/keycloack";
 
 
-const DeleteOverlay = () => {
+const LogoutDialog = () => {
 
 
   const handleYes = () => {
-    console.log("Account Deleted");
+    console.log("Logout Successfully");
+    keycloak.logout({
+      redirectUri: window.location.origin,
+    });
   }
 
   return (
-    <div className="w-full">
+    <div dir="ltr" className="w-full">
       <Dialog>
-        <DialogTrigger className="w-full items-center cursor-pointer pr-20">
-          <Button className="w-[80%] h-[40px] flex flex-row gap-10 cursor-pointer text-red-500">
-            <h3>حذف الحساب</h3>
+        <DialogTrigger className="w-full items-center cursor-pointer">
+          <Button className="w-full flex flex-row gap-10 cursor-pointer">
+            <h3>تسجيل الخروج</h3>
             <Delete />
           </Button>
         </DialogTrigger>
         <DialogContent className="flex flex-col gap-10">
           <DialogHeader className="flex flex-row-reverse">
-            <DialogTitle>هل أنت متأكد أنك تريد حذف الحساب؟</DialogTitle>
+            <DialogTitle>هل أنت متأكد أنك تريد تسجيل الخروج؟</DialogTitle>
           </DialogHeader>
 
           <div>
@@ -49,4 +53,4 @@ const DeleteOverlay = () => {
   );
 };
 
-export default DeleteOverlay;
+export default LogoutDialog;
