@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +14,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ChevronLeft } from "lucide-react"
+import { useGetMyUser, useUpdateUserBasicInfo } from "@/api/MyUserApi"
+// import { toast } from "sonner"
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -21,43 +24,55 @@ const formSchema = z.object({
   lastName: z.string().min(2, {
     message: "Username must be at least 2 characters.",
   }),
-  phoneNumber: z.string().min(10).max(10),
-  email: z.string().min(10).max(20),
+  phone: z.string(),
+  email: z.string(),
 })
 
-interface personMainData {
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  email: string;
-}
-
-const user: personMainData[] = [
-  {
-    firstName: 'أمير',
-    lastName: 'بطال',
-    phoneNumber: '0999999999',
-    email: 'amir@example.com'
-  },
-]
-
-
 export function EditMainForm() {
+  const { currentUser, isLoading } = useGetMyUser();
+  const { updateUserBasicInfo } = useUpdateUserBasicInfo();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: user[0].firstName,
-      lastName: user[0].lastName,
-      phoneNumber: user[0].phoneNumber,
-      email: user[0].email,
+      firstName: "",
+      lastName: "",
+      phone: "",
+      email: "",
     },
   })
-  // 2. Define a submit handler.
+
+  useEffect(() => {
+    if (currentUser) {
+      form.reset({
+        firstName: currentUser.firstName || "",
+        lastName: currentUser.lastName || "",
+        phone: currentUser.phone || "",
+        email: currentUser.email || "",
+      })
+    }
+  }, [currentUser, form])
+
+  if (isLoading) return <p>جاري التحميل...</p>
+  if (!currentUser) return <p>لم يتم العثور على المستخدم</p>
+
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+    // if (!currentUser?._id) {
+    //   toast.error("لا يمكن تعديل المستخدم: المعرف غير موجود");
+    //   return;
+    // }
+    
+    updateUserBasicInfo({
+      id: currentUser?.id,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phone: values.phone,
+      email: values.email,
+    });
+
+    // load page to render new data
+    window.location.reload();
   }
 
   return (
@@ -89,11 +104,11 @@ export function EditMainForm() {
         />
         <FormField
           control={form.control}
-          name="phoneNumber"
+          name="phone"
           render={({ field }) => (
             <FormItem>
               <FormLabel>رقم الهاتف</FormLabel>
-              <FormControl>
+              <FormControl dir="ltr" className="text-end">
                 <Input placeholder="0999 999 999" {...field} />
               </FormControl>
             </FormItem>

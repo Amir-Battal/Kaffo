@@ -6,18 +6,23 @@ import { BrowserRouter as Router } from 'react-router-dom'
 import AppRoutes from './AppRoutes'
 import keycloak from './lib/keycloack';
 
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+
+const queryClient = new QueryClient();
+
 keycloak.init({ onLoad: "login-required" }).then((authenticated) => {
   if (authenticated) {
-    // ✅ حفظ التوكن في localStorage
+    
     localStorage.setItem("token", keycloak.token!);
-
-    // (اختياري) حفظ الـ refresh token
     localStorage.setItem("refreshToken", keycloak.refreshToken!);
 
     createRoot(document.getElementById('root')!).render(
       <StrictMode>
         <Router>
-          <AppRoutes />
+          <QueryClientProvider client={queryClient}>
+            <AppRoutes />
+          </QueryClientProvider>
         </Router>
       </StrictMode>,
     )

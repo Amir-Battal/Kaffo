@@ -15,7 +15,9 @@ import { Textarea } from "@/components/ui/textarea"
 import DatePicker from "@/components/DatePicker"
 import { Button } from "@/components/ui/button"
 import { Check, Edit } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useGetMyUser, useUpdateUserBasicInfo } from "@/api/MyUserApi"
+import { useCreateAddress } from "@/hooks/use-Address"
 
 const formSchema = z.object({
   governorate: z.string(),
@@ -56,17 +58,36 @@ const user: SecondaryData[] = [
 
 export function SecondaryForm() {
 
+    const { currentUser, isLoading } = useGetMyUser();
+    const { updateUserBasicInfo } = useUpdateUserBasicInfo();
+  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      governorate: user[0].governorate,
-      address: user[0].address,
-      birth: user[0].birth,
-      study: user[0].study,
-      work: user[0].work,
-      about: user[0].about,
+      governorate: "",
+      address: "",
+      birth: "",
+      study: "",
+      work: "",
+      about: "",
     },
-  })
+  });
+
+  useEffect(() => {
+    if (currentUser) {
+      form.reset({
+        governorate: currentUser.governorate || "",
+        address: currentUser.address || "",
+        birth: currentUser.birth || "",
+        study: currentUser.study || "",
+        work: currentUser.work || "",
+        about: currentUser.study || "",
+      });
+    }
+  }, [currentUser, form]);
+
+
   
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
@@ -78,7 +99,29 @@ export function SecondaryForm() {
         month: 'long', 
         day: 'numeric' 
       });
+
     console.log(values)
+
+    useCreateAddress({
+      governorate: values.governorate,
+      address: values.address
+    })
+
+    updateUserBasicInfo({
+      id: currentUser?.id,
+      firstName: currentUser?.firstName,
+      lastName: currentUser?.lastName,
+      phone: currentUser?.phone,
+      email: currentUser?.email,
+
+      governorate: values.governorate,
+      address: values.address,
+      birth: values.birth,
+      study: values.study,
+      work: values.work,
+      about: values.about
+    });
+
     setEditable(false);
   }
 

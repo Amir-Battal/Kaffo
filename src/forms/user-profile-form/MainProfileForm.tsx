@@ -12,6 +12,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
 import { ChevronLeft } from "lucide-react"
+import { useGetMyUser } from "@/api/MyUserApi"
+import { useEffect } from "react"
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -25,38 +27,47 @@ const formSchema = z.object({
 })
 
 interface personMainData {
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   phoneNumber: string;
-  email: string;
+  email?: string;
 }
 
-const user: personMainData[] = [
-  {
-    firstName: 'أمير',
-    lastName: 'بطال',
-    phoneNumber: '0999999999',
-    email: 'amir@example.com'
-  },
-]
+
 
 export function MainProfileForm() {
+
+  const { currentUser, isLoading } = useGetMyUser();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: user[0].firstName,
-      lastName: user[0].lastName,
-      phoneNumber: user[0].phoneNumber,
-      email: user[0].email,
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      email: "",
     },
-  })
-  // 2. Define a submit handler.
+  });
+
+  // تحديث القيم الافتراضية بعد الحصول على بيانات المستخدم
+  useEffect(() => {
+    if (currentUser) {
+      form.reset({
+        firstName: currentUser.firstName || "",
+        lastName: currentUser.lastName || "",
+        phoneNumber: currentUser.phone || "",
+        email: currentUser.email || "",
+      });
+    }
+  }, [currentUser, form]);
+
+  if (isLoading) return <p>جاري التحميل...</p>;
+  if (!currentUser) return <p>لم يتم العثور على المستخدم</p>;
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
+    console.log(values);
   }
+  
 
   return (
     <Form {...form}>
@@ -98,7 +109,7 @@ export function MainProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>رقم الهاتف</FormLabel>
-              <FormControl>
+              <FormControl dir="ltr" className="text-end">
                 <Input placeholder="0999 999 999" {...field} />
               </FormControl>
             </FormItem>
@@ -117,7 +128,6 @@ export function MainProfileForm() {
             </FormItem>
           )}
         />
-
         <Link to="/changePassword" className="flex flex-row justify-around cursor-pointer w-[60%] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
           <h3>تغيير كلمة المرور</h3>
           <ChevronLeft />
