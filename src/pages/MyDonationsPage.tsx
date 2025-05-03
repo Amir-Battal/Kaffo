@@ -26,7 +26,7 @@ const donation = [
         username: 'جورجيوس',
         time: 'منذ 9 ساعات',
         date: '23/3/2025',
-        budget: 40,
+        budget: 145000,
     },{
         username: 'أمير بطال',
         time: 'منذ 9 ساعات',
