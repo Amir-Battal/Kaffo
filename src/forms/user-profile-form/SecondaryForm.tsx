@@ -36,25 +36,25 @@ const birthDate = tDate.toLocaleDateString('en-US',
     day: 'numeric' 
   });
 
-interface SecondaryData {
-  governorate: string;
-  address: string;
-  birth: string;
-  study: string;
-  work: string;
-  about: string;
-}
+// interface SecondaryData {
+//   governorate: string;
+//   address: string;
+//   birth: string;
+//   study: string;
+//   work: string;
+//   about: string;
+// }
 
-const user: SecondaryData[] = [
-  {
-    governorate: 'حلب',
-    address: 'حلب، الجميلية',
-    birth: birthDate,
-    study: 'الهندسة المعلوماتية',
-    work: 'مهندس برمجيات',
-    about: 'هذا النص تجريبي يصف وصف عن المستخدم حيث أن المستخدم يجب أن يملئ هذا الحقل من أجل وصف ما هي المهارات التي يملكها ويستطيع العمل بها لتعطي موثوقية لتسليمه العمل على الأنشطة التطوعية'
-  },
-]
+// const user: SecondaryData[] = [
+//   {
+//     governorate: 'حلب',
+//     address: 'حلب، الجميلية',
+//     birth: birthDate,
+//     study: 'الهندسة المعلوماتية',
+//     work: 'مهندس برمجيات',
+//     about: 'هذا النص تجريبي يصف وصف عن المستخدم حيث أن المستخدم يجب أن يملئ هذا الحقل من أجل وصف ما هي المهارات التي يملكها ويستطيع العمل بها لتعطي موثوقية لتسليمه العمل على الأنشطة التطوعية'
+//   },
+// ]
 
 export function SecondaryForm({...props}): JSX.Element {
 
@@ -185,7 +185,7 @@ export function SecondaryForm({...props}): JSX.Element {
     }
     
     // const [governorate, setGovernorate] = useState(user[0].governorate);
-    const [newDate, setNewDate] = useState(user[0].birth);
+    const [newDate, setNewDate] = useState('');
     const nDate: Date = new Date(newDate);
     
     if (isLoading) return <div>جاري تحميل بيانات العنوان...</div>;
