@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ChevronLeft } from "lucide-react"
-import { useUpdateUserBasicInfo } from "@/api/MyUserApi"
+import { useUpdateUserBasicInfo } from "@/hooks/use-user"
 // import { toast } from "sonner"
 
 const formSchema = z.object({

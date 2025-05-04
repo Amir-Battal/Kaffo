@@ -8,14 +8,25 @@ import {
 } from "@/components/ui/dialog"
 import { Check, Delete, X } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { JSX } from "react";
+import keycloak from "@/lib/keycloack";
+import { useDeleteUser } from "@/hooks/use-user";
 
 
-const DeleteOverlay = () => {
+const DeleteOverlay = ({...props}): JSX.Element => {
 
+  const { deleteUser } = useDeleteUser();
 
-  const handleYes = () => {
-    console.log("Account Deleted");
-  }
+  const handleYes = async () => {
+    if (!props.userId) return;
+  
+    try {
+      await deleteUser(props.userId);
+      keycloak.logout(); // ⬅️ يسجل الخروج بعد الحذف
+    } catch (err) {
+      console.error("فشل الحذف:", err);
+    }
+  };
 
   return (
     <div className="w-full">

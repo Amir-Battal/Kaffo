@@ -130,3 +130,38 @@ export const  useUpdateUserBasicInfo = () => {
 
   return { updateUserBasicInfo, isLoading };
 };
+
+
+// ============= DELETE USER =============
+export const useDeleteUser = () => {
+  const deleteUserRequest = async (userId: string) => {
+    const accessToken = keycloak.token;
+
+    await axios.delete(`${API_BASE_URL}/api/v1/users/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+  };
+
+  const {
+    mutateAsync: deleteUser,
+    isLoading,
+    isSuccess,
+    error,
+  } = useMutation(deleteUserRequest);
+
+  if (isSuccess) {
+    toast.success("تم حذف المستخدم بنجاح");
+  }
+
+  if (error) {
+    toast.error((error as Error).message);
+  }
+
+  return {
+    deleteUser,
+    isLoading,
+  };
+};

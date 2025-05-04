@@ -9,13 +9,26 @@ import { SecondaryForm } from "@/forms/user-profile-form/SecondaryForm";
 // import { Button } from "@/components/ui/button";
 // import { Upload } from "lucide-react";
 import DeleteOverlay from "@/forms/user-profile-form/DeleteOverlay";
-import { useGetMyUser } from "@/api/MyUserApi";
+import { useGetMyUser } from "@/hooks/use-user";
+import { User } from "@/types";
 
 // import initFile from '../assets/Amir-Battal-Resume V3.4.0.pdf';
 
 const UserProfilePage = () => {
 
     const { currentUser, isLoading } = useGetMyUser();
+
+    const isSecondaryDataComplete = (user: User | undefined): boolean => {
+      if (!user) return false;
+    
+      return (
+        !!user.dateOfBirth &&
+        !!user.collegeDegree &&
+        !!user.job &&
+        !!user.description &&
+        !!user.addressId // نتحقق فقط من وجود ID، لأن البيانات الكاملة تُجلب لاحقًا
+      );
+    };
     
 
   // const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
@@ -76,8 +89,12 @@ const UserProfilePage = () => {
 
           <Separator/>
           
-          <div className="w-full">
-            <h3 className="text-gray-400 my-5">يرجى إكمال البيانات الشخصية لتستطيع المشاركة في الأنشطة الخاصة بالمنصة</h3>
+          <div className="w-full my-5 py-5">
+            {!isSecondaryDataComplete(currentUser) && (
+              <h3 className="text-gray-400">
+                يرجى إكمال البيانات الشخصية لتستطيع المشاركة في الأنشطة الخاصة بالمنصة
+              </h3>
+            )}
             <SecondaryForm user={currentUser} isLoading={isLoading} />
           </div>
         </div>
@@ -108,7 +125,7 @@ const UserProfilePage = () => {
               <Upload />
             </Button> */}
           {/* </div> */}
-          <DeleteOverlay />
+          <DeleteOverlay userId={currentUser?.id} />
         </div>
       </div>
   );

@@ -1,5 +1,5 @@
-import { useGetMyUser } from "@/api/MyUserApi";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useGetMyUser } from "@/hooks/use-user";
 import { Link } from "react-router-dom";
 
 const SidebarHeaderElements = () => {

@@ -16,8 +16,8 @@ import DatePicker from "@/components/DatePicker"
 import { Button } from "@/components/ui/button"
 import { Check, Edit } from "lucide-react"
 import { JSX, useEffect, useState } from "react"
-import { useGetMyUser, useUpdateUserBasicInfo } from "@/api/MyUserApi"
 import { useAddress, useCreateAddress } from "@/hooks/use-Address"
+import { useUpdateUserBasicInfo } from "@/hooks/use-user"
 
 const formSchema = z.object({
   governorate: z.string(),
@@ -107,7 +107,13 @@ export function SecondaryForm({...props}): JSX.Element {
     
     function onSubmit(values: z.infer<typeof formSchema>) {
       values.governorate = governorate;
-      values.birth = nDate.toISOString();
+
+
+      // values.birth = nDate.toISOString();
+
+      const finalDate = newDate ? new Date(newDate) : new Date(values.birth);
+      values.birth = finalDate.toISOString();
+
     
       // ✅ تحقق من تطابق العنوان الحالي مع المدخل
       const isSameAddress =
@@ -186,7 +192,7 @@ export function SecondaryForm({...props}): JSX.Element {
     
     // const [governorate, setGovernorate] = useState(user[0].governorate);
     const [newDate, setNewDate] = useState('');
-    const nDate: Date = new Date(newDate);
+    // const nDate: Date = new Date(newDate);
     
     if (isLoading) return <div>جاري تحميل بيانات العنوان...</div>;
     if (isError) return <div>حدث خطأ أثناء جلب بيانات العنوان.</div>;

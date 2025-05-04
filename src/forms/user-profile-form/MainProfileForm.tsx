@@ -127,7 +127,7 @@ export function MainProfileForm({...props}): JSX.Element {
             </FormItem>
           )}
         />
-        <Link to="/changePassword" className="flex flex-row justify-around cursor-pointer w-[60%] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
+        <Link to="http://localhost:9098/realms/kafu-realm/login-actions/reset-credentials?client_id=kafu-client" className="flex flex-row justify-around cursor-pointer w-[60%] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
           <h3>تغيير كلمة المرور</h3>
           <ChevronLeft />
         </Link>

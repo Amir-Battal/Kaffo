@@ -8,10 +8,10 @@ export type User = {
 
   photoUrl?: string;
 
-  birth?: Date;
-  study?: string;
-  work?: string;
-  about?: string;
-  address?: string;
-  governorate?: string;
+  dateOfBirth?: Date;
+  collegeDegree?: string;
+  job?: string;
+  description?: string;
+
+  addressId?: number;
 };
