@@ -13,7 +13,6 @@ import { Link } from "react-router-dom";
 import ProblemOverlay from "@/forms/problem-form/ProblemOverlay";
 import { ProblemDTO } from "@/types";
 // import UserPhoto from "@/forms/user-profile-form/UserPhoto";
-import { useEffect, useState } from "react";
 import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
 
 type ProblemCardProp = {
