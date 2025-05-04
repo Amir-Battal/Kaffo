@@ -84,6 +84,7 @@ const UserProfilePage = () => {
               <h1 className="text-3xl" >البيانات الشخصية</h1>
               <EditOverlay user={currentUser} isLoading={isLoading} />
             </div>
+            {/* // NOTE: phone number is required  */}
             <MainProfileForm user={currentUser} isLoading={isLoading} />
           </div>
 
