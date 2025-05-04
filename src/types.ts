@@ -6,6 +6,8 @@ export type User = {
   email: string;
   phone?: string;
 
+  photoUrl?: string;
+
   birth?: Date;
   study?: string;
   work?: string;

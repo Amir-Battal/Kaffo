@@ -7,9 +7,12 @@ import {
 } from "@/components/ui/dialog"
 import { Edit } from "lucide-react";
 import { EditMainForm } from "./EditMainForm";
+import { JSX } from "react";
 
 
-const EditOverlay = () => {
+const EditOverlay = ({...props}): JSX.Element => {
+
+
   return (
     <div>
       <Dialog>
@@ -25,7 +28,7 @@ const EditOverlay = () => {
               and remove your data from our servers.
             </DialogDescription> */}
           </DialogHeader>
-          <EditMainForm />
+          <EditMainForm user={props.user} isLoading={props.isLoading} />
         </DialogContent>
       </Dialog>
     </div>

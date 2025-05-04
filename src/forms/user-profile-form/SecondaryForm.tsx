@@ -15,9 +15,9 @@ import { Textarea } from "@/components/ui/textarea"
 import DatePicker from "@/components/DatePicker"
 import { Button } from "@/components/ui/button"
 import { Check, Edit } from "lucide-react"
-import { useEffect, useState } from "react"
+import { JSX, useEffect, useState } from "react"
 import { useGetMyUser, useUpdateUserBasicInfo } from "@/api/MyUserApi"
-import { useCreateAddress } from "@/hooks/use-Address"
+import { useAddress, useCreateAddress } from "@/hooks/use-Address"
 
 const formSchema = z.object({
   governorate: z.string(),
@@ -56,86 +56,142 @@ const user: SecondaryData[] = [
   },
 ]
 
-export function SecondaryForm() {
+export function SecondaryForm({...props}): JSX.Element {
 
-    const { currentUser, isLoading } = useGetMyUser();
+    const addressId = props.user?.addressId;
+
     const { updateUserBasicInfo } = useUpdateUserBasicInfo();
-  
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      governorate: "",
-      address: "",
-      birth: "",
-      study: "",
-      work: "",
-      about: "",
-    },
-  });
-
-  useEffect(() => {
-    if (currentUser) {
-      form.reset({
-        governorate: currentUser.governorate || "",
-        address: currentUser.address || "",
-        birth: currentUser.birth || "",
-        study: currentUser.study || "",
-        work: currentUser.work || "",
-        about: currentUser.study || "",
-      });
-    }
-  }, [currentUser, form]);
-
-
-  
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    values.governorate = governorate;
-    values.birth = nDate.toLocaleDateString('en-US', 
-      {
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
-
-    console.log(values)
-
-    useCreateAddress({
-      governorate: values.governorate,
-      address: values.address
-    })
-
-    updateUserBasicInfo({
-      id: currentUser?.id,
-      firstName: currentUser?.firstName,
-      lastName: currentUser?.lastName,
-      phone: currentUser?.phone,
-      email: currentUser?.email,
-
-      governorate: values.governorate,
-      address: values.address,
-      birth: values.birth,
-      study: values.study,
-      work: values.work,
-      about: values.about
+    const { mutate } = useCreateAddress();
+    const { data: addressData, isLoading, isError } = useAddress(addressId!, {
+      enabled: !!addressId, // ✅ لا تُنفذ الاستعلام إلا إذا كان id موجود
     });
 
-    setEditable(false);
-  }
 
-  const [editable, setEditable] = useState(false);
+    const [governorate, setGovernorate] = useState("");
+    const [address, setAddress] = useState("");
+    
+    
+    useEffect(() => {
+      if (addressData) {
+        setGovernorate(addressData.city);
+        setAddress(addressData.description);
+      }
+    }, [addressData]);
+    
+    
+    const form = useForm<z.infer<typeof formSchema>>({
+      resolver: zodResolver(formSchema),
+      defaultValues: {
+        governorate: "",
+        address: "",
+        birth: "",
+        study: "",
+        work: "",
+        about: "",
+      },
+    });
+    
+    useEffect(() => {
+      if (props.user && addressData) {
+        form.reset({
+          governorate: addressData.city || "",
+          address: addressData.description || "",
+          birth: props.user.dateOfBirth || "",
+          study: props.user.collegeDegree || "",
+          work: props.user.job || "",
+          about: props.user.description || "",
+        });
+      }
+    }, [props.user, addressData, form]);
+    
+    
+    function onSubmit(values: z.infer<typeof formSchema>) {
+      values.governorate = governorate;
+      values.birth = nDate.toISOString();
+    
+      // ✅ تحقق من تطابق العنوان الحالي مع المدخل
+      const isSameAddress =
+        addressData &&
+        addressData.city === values.governorate &&
+        addressData.description === values.address;
+    
+      // إذا نفس العنوان، استخدم id الحالي مباشرة
+      if (isSameAddress) {
+        updateUserBasicInfo({
+          id: props.user?.id,
+          firstName: props.user?.firstName,
+          lastName: props.user?.lastName,
+          phone: props.user?.phone,
+          email: props.user?.email,
+    
+          dateOfBirth: new Date(values.birth),
+          collegeDegree: values.study,
+          job: values.work,
+          description: values.about,
 
-  const handleEdit = () => {
-    setEditable(true);
-  }
+          addressId: props.user?.addressId, // 👈 استخدم العنوان الحالي
+        });
+    
+        console.log("تم استخدام العنوان الحالي، لم يتم إنشاؤه من جديد.");
+        setEditable(false);
+        window.location.reload();
+        return;
+      }
+    
+      // 🆕 عنوان مختلف → إنشاء جديد
+      mutate(
+        {
+          city: values.governorate,
+          description: values.address,
+          longitude: 0,
+          latitude: 0,
+        },
+        {
+          onSuccess: (data) => {
+            const addressId = data.id;
+    
+            updateUserBasicInfo({
+              id: props.user?.id,
+              firstName: props.user?.firstName,
+              lastName: props.user?.lastName,
+              phone: props.user?.phone,
+              email: props.user?.email,
+    
+              dateOfBirth: new Date(values.birth),
+              collegeDegree: values.study,
+              job: values.work,
+              description: values.about,
 
-  const [governorate, setGovernorate] = useState(user[0].governorate);
-  const [newDate, setNewDate] = useState(user[0].birth);
-  const nDate: Date = new Date(newDate);
-
-
+              addressId: addressId, // 👈 ربط العنوان الجديد
+            });
+    
+            console.log("✅ تم إنشاء عنوان جديد وربطه:", addressId);
+            setEditable(false);
+            window.location.reload();
+          },
+          onError: (error) => {
+            console.error("❌ فشل إنشاء العنوان:", error);
+          },
+        }
+      );
+    }
+    
+    
+    
+    const [editable, setEditable] = useState(false);
+    
+    const handleEdit = () => {
+      setEditable(true);
+    }
+    
+    // const [governorate, setGovernorate] = useState(user[0].governorate);
+    const [newDate, setNewDate] = useState(user[0].birth);
+    const nDate: Date = new Date(newDate);
+    
+    if (isLoading) return <div>جاري تحميل بيانات العنوان...</div>;
+    if (isError) return <div>حدث خطأ أثناء جلب بيانات العنوان.</div>;
+    
+    
   return (
     <Form {...form}>
           {editable

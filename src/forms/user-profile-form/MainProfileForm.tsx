@@ -12,8 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
 import { ChevronLeft } from "lucide-react"
-import { useGetMyUser } from "@/api/MyUserApi"
-import { useEffect } from "react"
+import { JSX, useEffect } from "react"
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -26,19 +25,18 @@ const formSchema = z.object({
   email: z.string().min(10).max(20),
 })
 
-interface personMainData {
-  firstName?: string;
-  lastName?: string;
-  phoneNumber: string;
-  email?: string;
-}
+// interface personMainData {
+//   firstName?: string;
+//   lastName?: string;
+//   phoneNumber: string;
+//   email?: string;
+// }
 
 
 
-export function MainProfileForm() {
+export function MainProfileForm({...props}): JSX.Element {
 
-  const { currentUser, isLoading } = useGetMyUser();
-
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,21 +46,22 @@ export function MainProfileForm() {
       email: "",
     },
   });
-
+  
   // تحديث القيم الافتراضية بعد الحصول على بيانات المستخدم
   useEffect(() => {
-    if (currentUser) {
+    if (props.user) {
       form.reset({
-        firstName: currentUser.firstName || "",
-        lastName: currentUser.lastName || "",
-        phoneNumber: currentUser.phone || "",
-        email: currentUser.email || "",
+        firstName: props.user.firstName || "",
+        lastName: props.user.lastName || "",
+        phoneNumber: props.user.phone || "",
+        email: props.user.email || "",
       });
     }
-  }, [currentUser, form]);
+  }, [props.user, form]);
+  
+  if (props.isLoading) return <p>جاري التحميل...</p>;
+  if (!props.user) return <p>لم يتم العثور على المستخدم</p>;
 
-  if (isLoading) return <p>جاري التحميل...</p>;
-  if (!currentUser) return <p>لم يتم العثور على المستخدم</p>;
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);

@@ -6,18 +6,15 @@ const SidebarHeaderElements = () => {
 
   const { currentUser, isLoading } = useGetMyUser();
 
-  console.log(currentUser);
 
   if (isLoading) return <p>جاري التحميل...</p>;
   if (!currentUser) return <p>لم يتم العثور على المستخدم</p>;
-
-
 
   return (
     <div>
       <Link to="/user-profile" className="w-[100%] flex flex-row gap-2 p-1">
         <Avatar>
-          <AvatarImage src="https://github.com/shadcn.png" />
+          <AvatarImage src={`${currentUser.photoUrl}`} />
           <AvatarFallback>K</AvatarFallback>
         </Avatar>
         <div className="pt-1">

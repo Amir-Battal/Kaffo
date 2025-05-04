@@ -9,10 +9,14 @@ import { SecondaryForm } from "@/forms/user-profile-form/SecondaryForm";
 // import { Button } from "@/components/ui/button";
 // import { Upload } from "lucide-react";
 import DeleteOverlay from "@/forms/user-profile-form/DeleteOverlay";
+import { useGetMyUser } from "@/api/MyUserApi";
 
 // import initFile from '../assets/Amir-Battal-Resume V3.4.0.pdf';
 
 const UserProfilePage = () => {
+
+    const { currentUser, isLoading } = useGetMyUser();
+    
 
   // const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
@@ -65,21 +69,21 @@ const UserProfilePage = () => {
           <div className="w-full">
             <div className="flex flex-row justify-between">
               <h1 className="text-3xl" >البيانات الشخصية</h1>
-              <EditOverlay />
+              <EditOverlay user={currentUser} isLoading={isLoading} />
             </div>
-            <MainProfileForm />
+            <MainProfileForm user={currentUser} isLoading={isLoading} />
           </div>
 
           <Separator/>
           
           <div className="w-full">
             <h3 className="text-gray-400 my-5">يرجى إكمال البيانات الشخصية لتستطيع المشاركة في الأنشطة الخاصة بالمنصة</h3>
-            <SecondaryForm />
+            <SecondaryForm user={currentUser} isLoading={isLoading} />
           </div>
         </div>
 
         <div className="w-[40%] h-full flex flex-col gap-30 justify-between items-center">
-          <UserPhoto  />
+          <UserPhoto photoUrl={currentUser?.photoUrl} />
           {/* <div className="w-full pr-20 flex flex-col gap-5">
             <div className="grid w-full max-w-sm gap-1.5">
               <Label htmlFor="picture">السيرة الذاتية</Label>

@@ -5,34 +5,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useState } from "react";
+import { useCities } from "@/hooks/use-Address";
+import { useEffect, useState } from "react";
+
+
+// interface City {
+//   arabic: string;
+//   english: string;
+//   value: string;
+// }
+
 
 
 const GovernorateSelect = ({...props}) : React.JSX.Element => {
 
-  const [governorate, setGovernorate] = useState(props.gov);
+  const { data: cities, isLoading, isError } = useCities()
+  const [selected, setSelected] = useState(props.gov || "")
 
 
-  const handleChange = (value: string) => {
-    if(props.setGov){
-      props.setGov(value);
-    }
-    else {
-      setGovernorate(value);
-    }
+
+  useEffect(() => {
+    if (props.gov) setSelected(props.gov)
+  }, [props.gov])
+
+
+const handleChange = (value: string) => {
+  setSelected(value);
+  if(props.setGov){
+    props.setGov(value);
+  }
+}
+
+  if (isLoading) {
+    return <p>...جاري تحميل المحافظات</p>
+  }
+
+  if (isError) {
+    return <p className="text-red-500">فشل في تحميل المحافظات</p>
   }
 
 
   return (
-    <Select dir="rtl" name="governorate" value={governorate} onValueChange={handleChange}>
+    <Select dir="rtl" name="governorate" value={selected} onValueChange={handleChange}>
       {props.disabled
       ?(
         <SelectTrigger disabled  className="w-full border-0 bg-none border-b-2 border-b-gray-300 rounded-none">
-          <SelectValue placeholder={props.value} />
+          <SelectValue placeholder={
+            cities?.find((city) => city.english === props.value)?.arabic || "اختر محافظة"
+          } />
         </SelectTrigger>
       ):(
         <SelectTrigger className="w-full border-0 bg-none border-b-2 border-b-gray-300 rounded-none cursor-pointer hover:bg-accent">
-          <SelectValue placeholder={props.value} />
+          <SelectValue placeholder={
+            cities?.find((city) => city.english === props.value)?.arabic || "اختر محافظة"
+          } />
         </SelectTrigger>
       )}
       {/* <SelectTrigger className="w-full border-0 bg-none border-b-2 border-b-gray-300 rounded-none cursor-pointer hover:bg-accent">
@@ -40,20 +66,11 @@ const GovernorateSelect = ({...props}) : React.JSX.Element => {
       </SelectTrigger> */}
 
       <SelectContent>
-        <SelectItem value="دمشق">دمشق</SelectItem>
-        <SelectItem value="ريف دمشق">ريف دمشق</SelectItem>
-        <SelectItem value="حلب">حلب</SelectItem>
-        <SelectItem value="حمص">حمص</SelectItem>
-        <SelectItem value="حماة">حماة</SelectItem>
-        <SelectItem value="إدلب">إدلب</SelectItem>
-        <SelectItem value="القنيطرة">القنيطرة</SelectItem>
-        <SelectItem value="درعا">درعا</SelectItem>
-        <SelectItem value="السويداء">السويداء</SelectItem>
-        <SelectItem value="طرطوس">طرطوس</SelectItem>
-        <SelectItem value="اللاذقية">اللاذقية</SelectItem>
-        <SelectItem value="الرقة">الرقة</SelectItem>
-        <SelectItem value="دير الزور">دير الزرو</SelectItem>
-        <SelectItem value="الحسكة">الحسكة</SelectItem>
+        {cities?.map((city) => (
+          <SelectItem key={city.value} value={city.value}>
+            {city.arabic}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
 

@@ -74,14 +74,15 @@ type UpdateUserBasicInfoRequest = {
   lastName: string;
   phone: string | undefined;
   email: string;
-  
-  governorate?: string;
-  address?: string;
-  birth?: Date;
-  study?: string;
-  work?: string;
-  about?: string;
+
+  addressId?: number; // ✅ عدّل الاسم هنا ليتوافق أيضًا
+
+  dateOfBirth?: Date;
+  collegeDegree?: string;
+  job?: string;
+  description?: string;
 };
+
 
 export const  useUpdateUserBasicInfo = () => {
   const updateUserBasicInfoRequest = async (data: UpdateUserBasicInfoRequest) => {
@@ -92,12 +93,13 @@ export const  useUpdateUserBasicInfo = () => {
       lastName: data.lastName,
       phone: data.phone,
       email: data.email,
-      governorate: data.governorate,
-      address: data.address,
-      birth: data.birth,
-      study: data.study,  
-      work: data.work,
-      about: data.about
+
+      addressId: data.addressId,
+
+      dateOfBirth: data.dateOfBirth,
+      collegeDegree: data.collegeDegree,  
+      job: data.job,
+      description: data.description
     }, {
       headers: {
         Authorization: `Bearer ${accessToken}`,

@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { useEffect, useState } from "react"
+import { JSX, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { ChevronLeft } from "lucide-react"
-import { useGetMyUser, useUpdateUserBasicInfo } from "@/api/MyUserApi"
+import { useUpdateUserBasicInfo } from "@/api/MyUserApi"
 // import { toast } from "sonner"
 
 const formSchema = z.object({
@@ -28,8 +28,9 @@ const formSchema = z.object({
   email: z.string(),
 })
 
-export function EditMainForm() {
-  const { currentUser, isLoading } = useGetMyUser();
+export function EditMainForm({...props}): JSX.Element {
+
+  console.log(props.user);
   const { updateUserBasicInfo } = useUpdateUserBasicInfo();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,18 +44,18 @@ export function EditMainForm() {
   })
 
   useEffect(() => {
-    if (currentUser) {
+    if (props.user) {
       form.reset({
-        firstName: currentUser.firstName || "",
-        lastName: currentUser.lastName || "",
-        phone: currentUser.phone || "",
-        email: currentUser.email || "",
+        firstName: props.user.firstName || "",
+        lastName: props.user.lastName || "",
+        phone: props.user.phone || "",
+        email: props.user.email || "",
       })
     }
-  }, [currentUser, form])
+  }, [props.user, form])
 
-  if (isLoading) return <p>جاري التحميل...</p>
-  if (!currentUser) return <p>لم يتم العثور على المستخدم</p>
+  if (props.isLoading) return <p>جاري التحميل...</p>
+  if (!props.user) return <p>لم يتم العثور على المستخدم</p>
 
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -64,7 +65,7 @@ export function EditMainForm() {
     // }
     
     updateUserBasicInfo({
-      id: currentUser?.id,
+      id: props.user?.id,
       firstName: values.firstName,
       lastName: values.lastName,
       phone: values.phone,

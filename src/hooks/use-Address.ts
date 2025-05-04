@@ -8,8 +8,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 type Address = {
   id?: number;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   description: string;
   city: string; // اسم المدينة (enum key)
 };
@@ -34,16 +34,24 @@ export const useAddresses = (page: number = 0, size: number = 10) => {
 };
 
 // جلب عنوان واحد عبر ID
-export const useAddress = (id: number) => {
-  return useQuery(["address", id], async () => {
-    const response = await axios.get(`${API_BASE_URL}/api/v1/addresses/${id}`, {
-      headers: {
-        Authorization: `Bearer ${keycloak.token}`,
-      },
-    });
-    return response.data;
-  });
+export const useAddress = (id: number, options = {}) => {
+  return useQuery(
+    ["address", id],
+    async () => {
+      const response = await axios.get(`${API_BASE_URL}/api/v1/addresses/${id}`, {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+      return response.data;
+    },
+    {
+      enabled: !!id, // ✅ تنفيذ الاستعلام فقط إذا كان id موجود
+      ...options,
+    }
+  );
 };
+
 
 // إنشاء عنوان جديد
 export const useCreateAddress = () => {
