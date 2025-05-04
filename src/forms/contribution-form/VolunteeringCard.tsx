@@ -23,11 +23,7 @@ const VolunteeringCard = (prop: VolunteeringCardProp) => {
           <div className="pb-4">
             <h3>{prop.username} - {prop.date}</h3>
             <h1 className="text-xl p-2 pr-0">{prop.problem_type}</h1>
-            <Textarea
-              className="w-full" 
-              placeholder="إحدى بلاطات الرصيف مكسورة تؤدي إلى إصابة الناس وعرقلتهم أثناء المشي." 
-              // disabled 
-            />
+            <p>إحدى بلاطات الرصيف مكسورة تؤدي إلى إصابة الناس وعرقلتهم أثناء المشي.</p>
             <div className="flex flex-row gap-2 pt-5">
               <Badge className="rounded-none" variant="default">محافظة حلب</Badge>
               <Badge className="rounded-none" variant="secondary">رصيف مكسور</Badge>
@@ -45,7 +41,7 @@ const VolunteeringCard = (prop: VolunteeringCardProp) => {
               <Textarea
                 className="w-full"
                 placeholder="أستطيع حل المشكلة خلال اقل من 24 ساعة حيث أنني سوق أقوم بما يلي:"
-                // disabled 
+                disabled 
               />
           </div>
         </div>
@@ -62,6 +58,7 @@ const VolunteeringCard = (prop: VolunteeringCardProp) => {
                 className="w-full"
                 value={prop.budget}
                 placeholder="100"
+                disabled
               />
           </div>
         </div>
