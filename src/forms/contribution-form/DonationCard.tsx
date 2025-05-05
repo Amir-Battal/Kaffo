@@ -33,6 +33,7 @@ const DonationCard = (prop: DonationCardProp) => {
                 className="w-full"
                 value={prop.budget}
                 placeholder="100"
+                disabled
               />
           </div>
         </div>
