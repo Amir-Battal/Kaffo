@@ -34,6 +34,31 @@ export const useGetMyUser = () => {
   return { currentUser, isLoading };
 };
 
+// ============= GET USER BY ID =============
+export const useGetUserById = (userId: string, options = {}) => {
+  return useQuery(
+    ["user", userId],
+    async () => {
+      const accessToken = keycloak.token;
+
+      const response = await axios.get(`${API_BASE_URL}/api/v1/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      return response.data as User;
+    },
+    {
+      enabled: !!userId,
+      onError: (error: any) => {
+        toast.error(error.message || "حدث خطأ أثناء جلب المستخدم");
+      },
+      ...options,
+    }
+  );
+};
+
 // ============= CREATE USER =============
 type CreateUserRequest = {
   keycloakId: string;

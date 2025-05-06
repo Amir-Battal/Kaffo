@@ -18,13 +18,13 @@ const UserCard = (prop: UserCardProps) => {
   return (
     <div className="flex flex-col gap-5 border-2 py-5">
       <div className="flex flex-row justify-between gap-5">
-        <div className="mt-[-20px]">
+        <div className="w-[20%] mt-[-20px]">
           <Avatar className="w-[100px] h-[100px] rounded-none">
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback>أب</AvatarFallback>
           </Avatar>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-2">
           <div>
             <h1 className="text-xl font-bold">{prop.username}</h1>
             <h3>تاريخ الميلاد: {prop.date}</h3>

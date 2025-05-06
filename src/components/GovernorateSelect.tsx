@@ -29,12 +29,16 @@ const GovernorateSelect = ({...props}) : React.JSX.Element => {
   }, [props.gov])
 
 
-const handleChange = (value: string) => {
-  setSelected(value);
-  if(props.setGov){
-    props.setGov(value);
-  }
-}
+  const handleChange = (value: string) => {
+    setSelected(value);
+    if (props.setGov) {
+      props.setGov(value);
+    }
+    if (props.onChange) {
+      props.onChange(value);
+    }
+  };
+  
 
   if (isLoading) {
     return <p>...جاري تحميل المحافظات</p>

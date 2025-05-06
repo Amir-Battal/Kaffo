@@ -9,34 +9,29 @@ type ProblemPageProp = {
 }
 
 const ProblemPage = (prop: ProblemPageProp) => {
-
-  const {problemId} = useParams();
+  const { problemId } = useParams();
 
   return (
     <div className="mb-[500px]">
-      {prop.contribution
-        ?(
-          <div>
-            <div>Contribution {problemId}</div>
-            <ProblemMainDetails contribution />
-          </div>
-
-        ): prop.donation
-        ?(
-          <div>
-            <div>Donation {problemId}</div>
-            <ProblemMainDetails donation />
-          </div>
-          
-        ):(
-          <div>
-            <div>Problem {problemId}</div>
-            <ProblemMainDetails />
-          </div>
-        )
-      }
+      {prop.contribution ? (
+        <div>
+          <div>Contribution {problemId}</div>
+          <ProblemMainDetails contribution />
+        </div>
+      ) : prop.donation ? (
+        <div>
+          <div>Donation {problemId}</div>
+          <ProblemMainDetails donation />
+        </div>
+      ) : (
+        <div>
+          <div>Problem {problemId}</div>
+          <ProblemMainDetails />
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default ProblemPage;

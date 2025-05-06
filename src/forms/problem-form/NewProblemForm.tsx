@@ -18,105 +18,127 @@ import GovernorateSelect from "@/components/GovernorateSelect"
 
 import { useState } from "react"
 import MapPicker from "@/components/MapPicker"
-import FileUploader from "@/components/FileUploader"
-
-
+import { useCreateProblem } from "@/hooks/use-problem"
+import { toast } from "sonner"
+import { useCreateAddress } from "@/hooks/use-Address"
+import { useCreateCategory } from "@/hooks/use-category"
+// import FileUploader from "@/components/FileUploader" // يمكن تفعيله لاحقًا
 
 const formSchema = z.object({
   title: z.string(),
-  details: z.string(),
-  category: z.string(),
+  description: z.string(),
+  categoryId: z.number(),
   governorate: z.string(),
-  lat: z.number() ,
-  lng: z.number()
-  // coordinate: z.object({
-  //   lat: z.number(), lng: z.number()
-  // }),
-})
+  lat: z.number(),
+  lng: z.number(),
+});
+
 
 interface problemData {
   title: string;
   details: string;
-  category: string;
+  categoryId: number;
   governorate: string;
   lat: number;
   lng: number;
 }
 
-const problem: problemData[] = [
-  {
-    title: 'حلب العزيزية',
-    details: 'رصيف مكسور في مكان ما',
-    category: 'أرصفة',
-    governorate: 'حلب',
-    lat: 36.208465, 
-    lng: 37.1555411,
-  },
-]
-
-
 export function NewProblemForm() {
 
-  const [location, setLocation] = useState<{ lat: number; lng: number }>({lat: 0, lng: 0});
-  const [governorate, setGovernorate] = useState(problem[0].governorate);
-  const [category, setCategory] = useState(problem[0].category);
+  const { createProblem, isLoading } = useCreateProblem();
+
+  const [location, setLocation] = useState<{ lat: number; lng: number }>({
+    lat: 36.2021,
+    lng: 37.1343,
+  })
+  const [governorate, setGovernorate] = useState('')
+  const [categoryId, setCategoryId] = useState('')
+
+  const { mutateAsync: createAddress } = useCreateAddress();
+  const { mutateAsync: createCategory } = useCreateCategory();
+  
 
   const handleLocationSelect = (lat: number, lng: number) => {
-    setLocation({ lat, lng });
-    // console.log("الموقع المحدد:", lat, lng);
-  };
+    setLocation({ lat, lng })
+  }
+  
+
+  const requestUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          })
+          form.setValue('lat', position.coords.latitude);
+          form.setValue('lng', position.coords.longitude);
+        },
+        (error) => {
+          console.warn("الموقع غير متاح أو تم رفض الإذن:", error.message)
+          alert("لم يتم منح إذن الموقع. سيتم عرض الموقع الافتراضي.")
+        }
+      )
+    } else {
+      alert("المتصفح لا يدعم ميزة الموقع الجغرافي.")
+    }
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: problem[0].title,
-      details: problem[0].details,
-      category: problem[0].category,
-      governorate: problem[0].governorate,
-      lat: problem[0].lat,
-      lng: problem[0].lng,
+      title: '',
+      description: '',
+      categoryId: 0,
+      governorate: '',
+      lat: 0,
+      lng: 0,
     },
   })
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    values.governorate = governorate;
-    values.category = category;
-    values.lat = location?.lat
-    values.lng = location?.lng
-    console.log(location);
 
-    if (selectedFiles.length === 0) {
-      // alert("الرجاء اختيار صورة أولاً.");
-      console.log("الرجاء اختيار صورة أولاً.");
-      return;
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      let categoryId = data.categoryId;
+  
+      // إن لم يتم تحديد صنف، أنشئ صنفًا جديدًا
+      // TODO: إنشاء صنف بلا ربطه مع جهة معنية
+      if (!categoryId && data.categoryName) {
+        const newCategory = await createCategory({
+          name: data.categoryName,
+          govId: 1,
+        }); 
+        categoryId = newCategory.id;
+      }
+  
+      const newAddress = await createAddress({
+        city: data.governorate,
+        description: data.description,
+        latitude: data.lat,
+        longitude: data.lng,
+      });
+      await createProblem({
+        title: data.title,
+        description: data.description,
+        categoryId: data.categoryId,
+        addressId: newAddress.id,
+        isReal: true,
+        forContribution: false,
+        forDonation: false,
+        createdDate: new Date().toISOString(),
+      });
+      
+      
+      toast.success("تم إنشاء المشكلة بنجاح!");
+    } catch (err) {
+      toast.error("فشل في إنشاء المشكلة");
+      console.error(err);
     }
-    uploadToServer(selectedFiles);
-    console.log(selectedFiles);
-
-    console.log(values)
-  }
-
-
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
-  const uploadToServer = async (files: File[]) => {
-    const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-
-    const response = await fetch('http://localhost:4000/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json();
-    console.log('تم الرفع:', data.fileNames);
   };
-
+  
+  
+  
 
   return (
-    
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="px-5 gap-2 m-0" dir="rtl">
         <div className="w-full grid grid-cols-1 gap-10">
@@ -135,7 +157,7 @@ export function NewProblemForm() {
             />
             <FormField
               control={form.control}
-              name="details"
+              name="description"
               render={({ field }) => (
                 <FormItem className="gap-2">
                   <FormLabel>المزيد من التفاصيل</FormLabel>
@@ -145,19 +167,23 @@ export function NewProblemForm() {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              name="category"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem className="gap-2">
                   <FormLabel className="font-semibold">صنف المشكلة</FormLabel>
                   <FormControl>
-                    {/* <Input placeholder="0999 999 999" {...field} /> */}
-                    <ProblemCategorySelect setCategory={setCategory} {...field} />
+                    <ProblemCategorySelect
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                   </FormControl>
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="governorate"
@@ -170,38 +196,52 @@ export function NewProblemForm() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="lat"
+              render={({ field }) => <input type="hidden" {...field} />}
+            />
+            <FormField
+              control={form.control}
+              name="lng"
+              render={({ field }) => <input type="hidden" {...field} />}
+            />
+
           </div>
 
           <div className="flex flex-row-reverse justify-between gap-5">
-            <div className=" w-full flex flex-col gap-2">
-              <h3>الموقع على الخريطة</h3>
-              <MapPicker onLocationSelect={handleLocationSelect} isNew={true} lat={problem[0].lat} lng={problem[0].lng} isEdit={false} />
-              {/* {location && (
-                <p>الموقع المحدد: {location.lat.toFixed(5)}, {location.lng.toFixed(5)}</p>
-              )}   */}
-              <h3 className="text-sm">قم بالضغط على الموقع على الخريطة</h3>
-            </div>
-            {/* <div className="flex flex-col items-start w-full max-w-sm gap-1">
-              <Label htmlFor="picture">صور المشكلة</Label>
-              <Input id="picture" type="file" />
-            </div> */}
             <div className="w-full flex flex-col gap-2">
-              <h3>صور المشكلة</h3>
-              <FileUploader onFilesChange={setSelectedFiles} /> 
-              <h4>أسماء الملفات:</h4>
-              <ul>
-                {selectedFiles.map((file: File) => <li key={file.name}>{file.name}</li>)}
-              </ul>
+              <h3>الموقع على الخريطة</h3>
+              <Button type="button" variant="outline" onClick={requestUserLocation}>
+                📍 استخدام موقعي الحالي
+              </Button>
+              <MapPicker
+                key={`${location.lat}-${location.lng}`} // هذا يجبر React على إعادة بناء المكون عند تغير الموقع
+                onLocationSelect={handleLocationSelect}
+                isNew={true}
+                lat={location.lat}
+                lng={location.lng}
+                isEdit={false}
+              />
+              <p>📍 الموقع الحالي: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}</p>
+
+
+              <h3 className="text-sm">قم بالضغط على الموقع على الخريطة</h3>
             </div>
           </div>
         </div>
-        
+
         <DialogPrimitive.Close>
-          <Button type="submit" className="cursor-pointer">
-            <h3>رفع المشكلة</h3>
-            <Plus />
+          <Button type="submit" className="cursor-pointer mt-5" disabled={isLoading}>
+            {isLoading ? "جاري الإرسال..." : (
+              <>
+                <h3>رفع المشكلة</h3>
+                <Plus />
+              </>
+            )}
           </Button>
         </DialogPrimitive.Close>
+
       </form>
     </Form>
   )
