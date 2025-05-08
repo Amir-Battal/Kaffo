@@ -20,8 +20,19 @@ type ProblemPageResponse = {
   number: number;
 };
 
+type ProblemCriteria = {
+  searchText?: string;
+  city?: string;
+  status?: string;
+  categoryId?: number;
+};
+
 // ============= GET ALL PROBLEMS =============
-export const useGetAllProblems = ({ page, size = 6, sort = [] }: GetProblemsParams) => {
+
+export const useGetAllProblems = (
+  { page, size = 6, sort = [] }: GetProblemsParams,
+  criteria: ProblemCriteria
+) => {
   const accessToken = keycloak.token;
 
   const fetchProblems = async (): Promise<ProblemPageResponse> => {
@@ -34,19 +45,15 @@ export const useGetAllProblems = ({ page, size = 6, sort = [] }: GetProblemsPara
         page,
         size,
         sort,
+        ...criteria, // مرر الفلاتر هنا
       },
     });
     return response.data;
   };
 
-  const queryKey = ["problems", page, size, sort];
+  const queryKey = ["problems", page, size, sort, criteria];
 
-  const {
-    data,
-    isLoading,
-    isError,
-    error,
-  } = useQuery(queryKey, fetchProblems);
+  const { data, isLoading, isError, error } = useQuery(queryKey, fetchProblems);
 
   return {
     problems: data?.content ?? [],
@@ -69,12 +76,16 @@ export const useGetProblemById = (id: number) => {
       },
     });
 
-    return response.data as ProblemDTO;
+    return response.data;
   };
 
-  const { data: problem, isLoading, error } = useQuery(["fetchProblem", id], fetchProblemById, {
-    enabled: !!id,
-  });
+  const { data: problem, isLoading, error } = useQuery<ProblemDTO>(
+    ["fetchProblem", id],
+    fetchProblemById,
+    {
+      enabled: !!id,
+    }
+  );
 
   if (error) toast.error((error as Error).message);
 

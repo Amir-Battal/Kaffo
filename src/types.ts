@@ -25,13 +25,20 @@ export interface ProblemDTO {
   isReal: boolean;
   forContribution: boolean;
   forDonation: boolean;
-  submissionDate: string; // ISO string
+  submissionDate: string;
   status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
   rejectionReason: string;
   addressId: number;
   submittedByUserId?: number;
   approvedByUserId?: number;
   categoryId: number;
-
   photoUrl?: string;
+  lat?: number;
+  lng?: number;
+  createdDate: string;
+  solutionProposal?: string;
+  requiredBudget?: number;
+
+
+  details?: string;
 }

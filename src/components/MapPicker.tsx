@@ -1,101 +1,60 @@
-import React, { useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { MapPin } from 'lucide-react';
-import { divIcon } from 'leaflet';
-import ReactDOMServer from 'react-dom/server';
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { divIcon } from "leaflet";
+import { MapPin } from "lucide-react";
+import ReactDOMServer from "react-dom/server";
 
-type Props = {
-  onLocationSelect?: (lat: number, lng: number) => void;
-  isNew: boolean;
+interface MapPickerProps {
   lat: number;
   lng: number;
-  isEdit: boolean;
-};
-
-type markerProps ={
-  onSelect?: (lat: number, lng: number) => void;
-  isNew: boolean;
-  lat: number;
-  lng: number;
-  isEdit: boolean;
+  onLocationSelect: (lat: number, lng: number) => void;
 }
 
-const CustomLucideMarker = ({ position }: { position: [number, number] }) => {
-  const iconMarkup = ReactDOMServer.renderToString(
-    <MapPin size={32} />
-  );
+export default function MapPicker({
+  lat,
+  lng,
+  onLocationSelect,
+}: MapPickerProps) {
+  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number }>({
+    lat,
+    lng,
+  });
 
-  const customIcon = divIcon({
-    html: iconMarkup,
-    className: '',
+  useEffect(() => {
+    setMarkerPosition({ lat, lng });
+  }, [lat, lng]);
+
+  function MapClickHandler() {
+    useMapEvents({
+      click(e) {
+        const { lat, lng } = e.latlng;
+        setMarkerPosition({ lat, lng });
+        onLocationSelect(lat, lng);
+      },
+    });
+    return null;
+  }
+
+  const markerIcon = divIcon({
+    html: ReactDOMServer.renderToString(<MapPin size={32} />),
+    className: "custom-marker",
     iconSize: [32, 32],
     iconAnchor: [16, 32],
   });
 
-  return <Marker position={position} icon={customIcon} />;
-};
-
-const LocationMarker: React.FC<markerProps> = ({ onSelect, isNew, lat, lng, isEdit }) => {
-  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
-
-  if(isNew){
-    useMapEvents({
-      click(e: any) {
-        setPosition(e.latlng);
-        onSelect?.(e.latlng.lat, e.latlng.lng);
-      },
-    });
-    return position ? <CustomLucideMarker position={[position.lat, position.lng]} /> : null;
-  } else if(isEdit) {
-    useMapEvents({
-      click(e: any) {
-        setPosition(e.latlng);
-        onSelect?.(e.latlng.lat, e.latlng.lng);
-      },
-    });
-    return position ? <CustomLucideMarker position={[position.lat, position.lng]} /> : <CustomLucideMarker position={[lat, lng]} />;
-  } else {
-    return <CustomLucideMarker position={[lat, lng]} />;
-  }
-};
-
-
-const MapPicker: React.FC<Props> = ({ onLocationSelect, isNew, lat, lng, isEdit  }) => {
-
-  const [cur, setCur] = useState<{ lat: number; lng: number }>({ lat: lat, lng: lng});
-
-
-  if (isNew) {
-    navigator.geolocation.getCurrentPosition((p) => {
-      setCur({ lat: p.coords.latitude, lng: p.coords.longitude});
-      // console.log(p);
-    });
-  }
-
-    // unlimited function execution ...
-
-
   return (
     <MapContainer
-      // center={[36.208465, 37.1555411]}
-      center={cur}
-      zoom={18}
-      style={{ height: '250px', width: '100%' }}
+      center={[lat, lng]}
+      zoom={30}
+      scrollWheelZoom={true}
+      style={{ height: "300px", width: "100%" }}
     >
       <TileLayer
+        attribution='&copy; <a href="https://osm.org/copyright">OSM</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {isNew && !isEdit
-        ?(
-          <LocationMarker onSelect={onLocationSelect} isNew={isNew} lat={lat} lng={lng} isEdit={isEdit} />
-        ): !isNew && !isEdit
-        ?(
-          <LocationMarker onSelect={onLocationSelect} isNew={isNew} lat={lat} lng={lng} isEdit={isEdit} />
-        ):(
-          <LocationMarker onSelect={onLocationSelect} isNew={isNew} lat={lat} lng={lng} isEdit={isEdit} />
-        )}
+      <MapClickHandler />
+      <Marker position={[markerPosition.lat, markerPosition.lng]} icon={markerIcon} />
     </MapContainer>
   );
-};
-
-export default MapPicker;
+}

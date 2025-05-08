@@ -14,6 +14,9 @@ import ProblemOverlay from "@/forms/problem-form/ProblemOverlay";
 import { ProblemDTO } from "@/types";
 // import UserPhoto from "@/forms/user-profile-form/UserPhoto";
 import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
+import { useAddress, useCities } from "@/hooks/use-Address";
+import { useCategory } from "@/hooks/use-category";
+import { useGetUserById } from "@/hooks/use-user";
 
 type ProblemCardProp = {
   problem: ProblemDTO;
@@ -27,6 +30,13 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
 
   const { photos, isLoading } = useGetProblemPhotos(problem.id);
   const photoUrl = photos.length > 0 ? photos[0].photoUrl : null;
+
+  const { data: address } = useAddress(problem.addressId);
+  const { data: category } = useCategory(problem.categoryId);
+  const { data: user, isLoading: userLoading } = useGetUserById(problem.submittedByUserId?.toString() ?? "");
+    const { data: cities } = useCities();
+  
+    const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 
 
 
@@ -56,8 +66,8 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
         <div className="flex flex-row justify-between px-6 items-center">
           <div className="flex flex-col gap-2 mt-2">
             <CardDescription className="text-sm">
-              {problem.submittedBy?.fullName ?? "مستخدم مجهول"} -{" "}
-              {new Date(problem.submissionDate).toLocaleDateString("ar-EG")}
+              {user?.firstName} {user?.lastName ?? "مستخدم مجهول"} -{" "}
+              {new Date(problem.submissionDate).toLocaleDateString()}
             </CardDescription>
             <CardTitle className="text-xl">{problem.title}</CardTitle>
           </div>
@@ -68,7 +78,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex flex-col gap-5">
+      {/* <CardContent className="flex flex-col gap-5">
         <p className="text-sm">{problem.description}</p>
         <div className="flex flex-row gap-2">
           <Badge className="rounded-none" variant="default">
@@ -79,6 +89,20 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
           </Badge>
           <Badge className="rounded-none" variant="secondary">
             {problem.address?.municipality}
+          </Badge>
+        </div>
+      </CardContent> */}
+      <CardContent className="flex flex-col gap-5">
+        <p className="text-sm">{problem.description}</p>
+        <div className="flex flex-row gap-2">
+          <Badge className="rounded-none" variant="default">
+            {cityArabicName ?? "غير معروف"}
+          </Badge>
+          <Badge className="rounded-none" variant="secondary">
+            {category?.name ?? "غير معروف"}
+          </Badge>
+          <Badge className="rounded-none" variant="secondary">
+            {address?.description ?? "غير معروف"}
           </Badge>
         </div>
       </CardContent>
