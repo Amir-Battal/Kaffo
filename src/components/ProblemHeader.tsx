@@ -6,7 +6,17 @@ import ProblemStatusSelect from "./ProblemStatusSelect";
 import { Input } from "./ui/input";
 import NewProblemOverlay from "@/forms/problem-form/NewProblemOverlay";
 
-const ProblemHeader = ({ onFilterChange }: any) => {
+type ProblemHeaderProps = {
+  onFilterChange?: (filters: {
+    searchText: string;
+    city: string | null;
+    status: string | null;
+    categoryId: number | null;
+  }) => void;
+  myAucation?: boolean;
+};
+
+const ProblemHeader = ({ onFilterChange, myAucation }: ProblemHeaderProps) => {
   const [searchText, setSearchText] = useState("");
   const [city, setCity] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -14,12 +24,9 @@ const ProblemHeader = ({ onFilterChange }: any) => {
 
   useEffect(() => {
     // عند تغيير أي فلتر، يتم استدعاء onFilterChange تلقائيًا
-    onFilterChange({
-      searchText,
-      city,
-      status,
-      categoryId,
-    });
+    if (onFilterChange) {
+      onFilterChange({ searchText, city, status, categoryId });
+    }
   }, [searchText, city, status, categoryId]); // راقب هذه القيم فقط
 
   return (
@@ -46,7 +53,13 @@ const ProblemHeader = ({ onFilterChange }: any) => {
           onChange={(e) => setSearchText(e.target.value)}
         />
       </div>
-      <NewProblemOverlay />
+      {myAucation
+        ?(
+          <div></div>
+        ):(
+          <NewProblemOverlay />
+        )
+      }
     </div>
   );
 };

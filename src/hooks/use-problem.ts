@@ -92,6 +92,37 @@ export const useGetProblemById = (id: number) => {
   return { problem, isLoading };
 };
 
+export const useGetProblemsByUser = (userId: number) => {
+  const accessToken = keycloak.token;
+
+  const fetchUserProblems = async (): Promise<ProblemDTO[]> => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/problems/by-user/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  };
+
+  const { data, isLoading, isError, error } = useQuery(
+    ["userProblems", userId],
+    fetchUserProblems,
+    { enabled: !!userId }
+  );
+
+  if (error) {
+    toast.error((error as Error).message);
+  }
+
+  return {
+    problems: data ?? [],
+    isLoading,
+    isError,
+  };
+};
+
+
 // ============= CREATE PROBLEM =============
 type CreateProblemRequest = Omit<ProblemDTO, "id" | "status" | "rejectionReason" | "submissionDate">;
 
@@ -208,3 +239,5 @@ export const useDeleteProblem = () => {
 
   return { deleteProblem, isLoading };
 };
+
+
