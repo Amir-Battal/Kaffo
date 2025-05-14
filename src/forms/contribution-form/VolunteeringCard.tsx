@@ -12,6 +12,7 @@ type VolunteeringCardProp = {
   problem_type?: string,
   time?: string,
   budget?: string | number,
+  status?: string,
 }
 
 const VolunteeringCard = (prop: VolunteeringCardProp) => {
