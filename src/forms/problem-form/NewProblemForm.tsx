@@ -26,6 +26,7 @@ import { useCreateCategory } from "@/hooks/use-category"
 
 const formSchema = z.object({
   title: z.string(),
+  address: z.string(),
   description: z.string(),
   categoryId: z.number(),
   governorate: z.string(),
@@ -36,6 +37,7 @@ const formSchema = z.object({
 
 interface problemData {
   title: string;
+  address: string;
   details: string;
   categoryId: number;
   governorate: string;
@@ -88,6 +90,7 @@ export function NewProblemForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
+      address: '',
       description: '',
       categoryId: 0,
       governorate: '',
@@ -112,7 +115,7 @@ export function NewProblemForm() {
   
       const newAddress = await createAddress({
         city: data.governorate,
-        description: data.description,
+        description: data.address,
         latitude: data.lat,
         longitude: data.lng,
       });
@@ -148,9 +151,9 @@ export function NewProblemForm() {
               name="title"
               render={({ field }) => (
                 <FormItem className="gap-2">
-                  <FormLabel className="font-semibold">عنوان المشكلة</FormLabel>
+                  <FormLabel className="font-semibold">المشكلة</FormLabel>
                   <FormControl>
-                    <Input placeholder="حلب، العزيزية" {...field} />
+                    <Input placeholder="رصيف مكسور" {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -192,6 +195,18 @@ export function NewProblemForm() {
                   <FormLabel className="font-semibold">المحافظة</FormLabel>
                   <FormControl>
                     <GovernorateSelect setGov={setGovernorate} {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem className="gap-2">
+                  <FormLabel className="font-semibold">عنوان المشكلة</FormLabel>
+                  <FormControl>
+                    <Input placeholder="حلب، العزيزية" {...field} />
                   </FormControl>
                 </FormItem>
               )}

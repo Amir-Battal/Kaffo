@@ -9,7 +9,7 @@ import {
 import { Check, Delete, X } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { JSX } from "react";
-import keycloak from "@/lib/keycloack";
+import keycloak from "@/lib/keycloak";
 import { useDeleteUser } from "@/hooks/use-user";
 
 

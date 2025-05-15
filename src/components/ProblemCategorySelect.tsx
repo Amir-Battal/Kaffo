@@ -15,10 +15,12 @@ import {
 } from "@/hooks/use-category";
 
 interface ProblemCategorySelectProps {
-  value: number;
+  value?: number; // Make sure to pass category ID as a number
   onChange: (id: number) => void;
   userGovId?: number; // لو عنده govId فهو جهة معنية
   disabled?: boolean;
+  setCategory?: (category: string) => void;
+  category?: string;
 }
 
 const ProblemCategorySelect = ({
@@ -26,6 +28,8 @@ const ProblemCategorySelect = ({
   onChange,
   userGovId,
   disabled = false,
+  setCategory,
+  category
 }: ProblemCategorySelectProps) => {
   const [isCustom, setIsCustom] = useState(false);
   const [customName, setCustomName] = useState("");
@@ -40,15 +44,20 @@ const ProblemCategorySelect = ({
   const handleSelectChange = (selected: string) => {
     if (selected === "__custom__") {
       setIsCustom(true);
-      onChange(0); // Clear current selection
+      onChange(0); // Clear current selection when selecting "Add Custom"
     } else {
       setIsCustom(false);
       const selectedCategory = categories?.find((c) => c.name === selected);
+      if (setCategory && selectedCategory?.name) {
+        setCategory(selectedCategory.name); // Update the category name (optional)
+      }
+
       if (selectedCategory) {
-        onChange(selectedCategory.id);
+        onChange(selectedCategory.id); // Send category ID to parent component
       }
     }
   };
+
 
   const handleAddCustom = async () => {
     if (!customName.trim()) {
@@ -64,8 +73,10 @@ const ProblemCategorySelect = ({
 
       setCustomName("");
       setIsCustom(false);
-      onChange(newCategory.id);
+      onChange(newCategory.id); // Return the new category's ID
       toast.success("تم إنشاء التصنيف الجديد");
+
+      // Optionally, re-fetch categories or add the new category to the list
     } catch (err) {
       toast.error("فشل في إنشاء التصنيف");
     }
@@ -76,7 +87,7 @@ const ProblemCategorySelect = ({
   return (
     <div className="flex flex-col gap-2">
       <Select
-        value={selectedCategoryName}
+        value={category || selectedCategoryName} // Ensure value reflects category name
         onValueChange={handleSelectChange}
         disabled={disabled || isLoading}
         dir="rtl"

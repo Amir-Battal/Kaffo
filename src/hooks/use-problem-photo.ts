@@ -1,7 +1,7 @@
 // hooks/useProblemPhoto.ts
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import axios from "axios";
-import keycloak from "@/lib/keycloack";
+import keycloak from "@/lib/keycloak";
 import { toast } from "sonner";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -40,44 +40,73 @@ export const useGetProblemPhotos = (problemId: number) => {
 // ============= CREATE PHOTO (BY URL) =============
 type CreateProblemPhotoInput = {
   problemId: number;
-  photoUrl: string; // مرفوعة مسبقاً على Cloudinary أو S3 مثلاً
+  file: File;
 };
 
 export const useCreateProblemPhoto = () => {
   const queryClient = useQueryClient();
 
-  const createPhoto = async (data: CreateProblemPhotoInput) => {
+  const createPhoto = async ({ problemId, file }: CreateProblemPhotoInput) => {
     const accessToken = keycloak.token;
 
-    const response = await axios.post(`${API_BASE_URL}/api/v1/problem-photos`, data, {
+    // 1. طلب Presigned PUT URL
+    const presignRes = await fetch(`${API_BASE_URL}/api/v1/problem-photos/presign?problemId=${problemId}`, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     });
 
-    return response.data;
+    if (!presignRes.ok) throw new Error("فشل في جلب presigned URL");
+
+    const { s3Key: presignedUrl } = await presignRes.json();
+
+    // 2. رفع الصورة إلى S3
+    const uploadRes = await fetch(presignedUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type,
+      },
+      body: file,
+    });
+
+    if (!uploadRes.ok) throw new Error("فشل في رفع الصورة إلى S3");
+
+    // 3. إنشاء سجل الصورة في قاعدة البيانات باستخدام نفس الـ presigned URL بدون query params (إن أمكن)
+    const photoUrl = presignedUrl.split("?")[0]; // لإزالة التواقيع المؤقتة
+
+    const createPhotoRes = await axios.post(`${API_BASE_URL}/api/v1/problem-photos`, {
+      problemId,
+      photoUrl,
+    }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return createPhotoRes.data;
   };
 
   const {
     mutateAsync: createProblemPhoto,
     isLoading,
     error,
-    reset,
   } = useMutation(createPhoto, {
     onSuccess: () => {
-      toast.success("تم إنشاء الصورة بنجاح!");
+      toast.success("✅ تم رفع صورة المشكلة!");
       queryClient.invalidateQueries("problemPhotos");
+    },
+    onError: () => {
+      toast.error("❌ فشل رفع صورة المشكلة");
     },
   });
 
-  if (error) {
-    toast.error("فشل في إنشاء الصورة");
-    reset();
-  }
-
   return { createProblemPhoto, isLoading };
 };
+
+
 
 // ============= DELETE PHOTO =============
 export const useDeleteProblemPhoto = () => {

@@ -14,7 +14,7 @@ import { useGetProblemById } from "@/hooks/use-problem";
 import { useAddress, useCities } from "@/hooks/use-Address";
 import { useCategory } from "@/hooks/use-category";
 import { useGetUserById } from "@/hooks/use-user";
-import keycloak from "@/lib/keycloack";
+import keycloak from "@/lib/keycloak";
 // import * as jwt_decode from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
 
@@ -22,6 +22,7 @@ import { jwtDecode } from "jwt-decode";
 type MainDetailsProp = {
   contribution?: boolean;
   donation?: boolean;
+  problemId?: number;
 };
 
 const ProblemMainDetails = (prop: MainDetailsProp) => {
@@ -140,7 +141,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
           <div>
             {isGov ? <SolveControl /> : (
               <div className="flex flex-row gap-5">
-                <ProblemOverlay status="edit" />
+                <ProblemOverlay problemId={prop.problemId} status="edit" />
                 <ProblemOverlay status="delete" />
               </div>
             )}
@@ -164,7 +165,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
         <div className="w-[75%] flex flex-col gap-2 z-0">
           <>
-            <MapPicker isNew={false} lat={address?.latitude} lng={address?.longitude} isEdit={false} />
+            <MapPicker disableMap lat={address?.latitude} lng={address?.longitude} onLocationSelect={() => {}} />
             <h3>{address ? `${cityArabicName}، ${address.description}` : "الموقع غير معروف"}</h3>
           </>
 

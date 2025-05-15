@@ -26,7 +26,7 @@ const ProblemPage = (prop: ProblemPageProp) => {
       ) : (
         <div>
           <div>Problem {problemId}</div>
-          <ProblemMainDetails />
+          <ProblemMainDetails problemId={Number(problemId)} />
         </div>
       )}
     </div>

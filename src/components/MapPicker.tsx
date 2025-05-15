@@ -8,17 +8,16 @@ interface MapPickerProps {
   lat: number;
   lng: number;
   onLocationSelect: (lat: number, lng: number) => void;
+  disableMap?: boolean;
 }
 
 export default function MapPicker({
   lat,
   lng,
   onLocationSelect,
+  disableMap = false,
 }: MapPickerProps) {
-  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number }>({
-    lat,
-    lng,
-  });
+  const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number }>({ lat, lng });
 
   useEffect(() => {
     setMarkerPosition({ lat, lng });
@@ -27,6 +26,7 @@ export default function MapPicker({
   function MapClickHandler() {
     useMapEvents({
       click(e) {
+        if (disableMap) return;
         const { lat, lng } = e.latlng;
         setMarkerPosition({ lat, lng });
         onLocationSelect(lat, lng);
@@ -46,14 +46,21 @@ export default function MapPicker({
     <MapContainer
       center={[lat, lng]}
       zoom={30}
-      scrollWheelZoom={true}
-      style={{ height: "300px", width: "100%" }}
+      scrollWheelZoom={!disableMap}
+      dragging={!disableMap}
+      doubleClickZoom={!disableMap}
+      zoomControl={!disableMap}
+      style={{
+        height: "300px",
+        width: "100%",
+        pointerEvents: disableMap ? "none" : "auto", // يمنع كل التفاعل عند تعطيل الخريطة
+      }}
     >
       <TileLayer
         attribution='&copy; <a href="https://osm.org/copyright">OSM</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapClickHandler />
+      {!disableMap && <MapClickHandler />}
       <Marker position={[markerPosition.lat, markerPosition.lng]} icon={markerIcon} />
     </MapContainer>
   );

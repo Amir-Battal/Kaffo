@@ -2,7 +2,7 @@
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import axios from "axios";
 import { toast } from "sonner";
-import keycloak from "@/lib/keycloack";
+import keycloak from "@/lib/keycloak";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -85,6 +85,37 @@ export const useAllCategories = () => {
     const response = await axios.get(`${API_BASE_URL}/api/v1/problem-categories`, {
       headers: { Authorization: `Bearer ${keycloak.token}` },
     });
-    return response.data.content; // لأن findAll يرجع Page
+    return response.data; // لأن findAll يرجع Page
   });
+};
+
+
+// تعديل صنف
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (category: Category) => {
+      const response = await axios.put(
+        `${API_BASE_URL}/api/v1/problem-categories/${category.id}`,
+        category,
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        toast.success("تم تحديث الصنف بنجاح!");
+        queryClient.invalidateQueries("categories");
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "حدث خطأ أثناء تحديث الصنف.");
+      },
+    }
+  );
 };

@@ -21,6 +21,8 @@ const ProblemHeader = ({ onFilterChange, myAucation }: ProblemHeaderProps) => {
   const [city, setCity] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<number | null>(null);
+  const [categoryName, setCategoryName] = useState<string | null>(null);
+
 
   useEffect(() => {
     // عند تغيير أي فلتر، يتم استدعاء onFilterChange تلقائيًا
@@ -41,9 +43,11 @@ const ProblemHeader = ({ onFilterChange, myAucation }: ProblemHeaderProps) => {
         />
 
         <ProblemCategorySelect
-          category="أرصفة"
-          onChange={(id: any) => setCategoryId(id)}
+          onChange={(id) => setCategoryId(id)}
+          category={categoryName ?? ""}
+          setCategory={(name) => setCategoryName(name)} // تأكد أن هذا name وليس object
         />
+
       </div>
       <div className="w-full flex flex-row items-center gap-2">
         <Search />

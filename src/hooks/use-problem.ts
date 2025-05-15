@@ -1,7 +1,7 @@
 // hooks/useProblem.ts
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import axios from "axios";
-import keycloak from "@/lib/keycloack";
+import keycloak from "@/lib/keycloak";
 import { toast } from "sonner";
 import { ProblemDTO } from "@/types";
 
@@ -175,7 +175,7 @@ export const useUpdateProblem = () => {
   const updateProblemRequest = async ({ id, data }: UpdateProblemRequest) => {
     const accessToken = keycloak.token;
 
-    const response = await axios.put(`${API_BASE_URL}/api/v1/problems/${id}`, data, {
+    const response = await axios.patch(`${API_BASE_URL}/api/v1/problems/${id}`, data, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",

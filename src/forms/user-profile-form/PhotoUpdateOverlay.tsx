@@ -11,32 +11,51 @@ import { Button } from "@/components/ui/button";
 import '../../index.css'
 import FileUploader from "@/components/FileUploader";
 import { useState } from "react";
+import keycloak from "@/lib/keycloak";
 
 
 const PhotoUpdateOverlay = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const uploadToServer = async (files: File[]) => {
-    const formData = new FormData();
-    files.forEach(file => formData.append('files', file));
-
-    const response = await fetch('http://localhost:4000/upload', {
+  const uploadToS3 = async (file: File): Promise<string | null> => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/v1/aws/presign?fileName=${file.name}&fileType=${file.type}`, {
       method: 'POST',
-      body: formData,
+      headers: {
+        Authorization: `Bearer ${keycloak.token}`,
+      },
     });
 
-    const data = await response.json();
-    console.log('تم الرفع:', data.fileNames);
-  };
+    const { presignedUrl, fileUrl } = await res.json();
 
-  const onSubmit = () => {
-    if (selectedFiles.length === 0) {
-      // alert("الرجاء اختيار صورة أولاً.");
-      console.log("الرجاء اختيار صورة أولاً.");
-      return;
-    }
-    uploadToServer(selectedFiles);
+    // Step 2: رفع الملف إلى S3
+    await fetch(presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type,
+      },
+    });
+
+    return fileUrl;
+  } catch (err) {
+    console.error("❌ فشل في رفع الصورة إلى S3", err);
+    return null;
   }
+};
+
+const onSubmit = async () => {
+  if (selectedFiles.length === 0) {
+    console.log("الرجاء اختيار صورة أولاً.");
+    return;
+  }
+
+  const uploadedUrls = await Promise.all(selectedFiles.map(uploadToS3));
+  console.log("✅ روابط الصور:", uploadedUrls);
+
+  // يمكنك هنا حفظ الرابط في الواجهة أو إرساله للسيرفر لتحديث `photoUrl` في حساب المستخدم
+};
+
 
   return (
     <div>

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog"
 import { Check, Delete, X } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import keycloak from "@/lib/keycloack";
+import keycloak from "@/lib/keycloak";
 
 
 const LogoutDialog = () => {

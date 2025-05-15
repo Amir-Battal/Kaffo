@@ -14,6 +14,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog"
 type EditProp = {
   status: String;
   isMyAucation?: boolean;
+  problemId?: number;
 }
 
 const ProblemOverlay = ({...props}: EditProp) => {
@@ -50,7 +51,7 @@ const ProblemOverlay = ({...props}: EditProp) => {
                   <DialogTitle>تعديل بيانات المشكلة</DialogTitle>
                 </DialogHeader>
 
-                <EditProblemForm />
+                <EditProblemForm problemId={props.problemId} />
               </DialogContent>
             </div>
           ): props.status === 'delete'
