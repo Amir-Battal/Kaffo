@@ -8,6 +8,7 @@ const volunteer = [
         problem_type: 'رصيف مكسور',
         time: 'منذ 9 ساعات',
         budget: "120",
+        status: 'التعديل مسموح',
     },
     {
         username: 'أمير بطال',
@@ -15,6 +16,23 @@ const volunteer = [
         problem_type: 'رصيف مكسور',
         time: 'منذ 9 ساعات',
         budget: "120",
+        status: 'جاري المعالجة',
+    },
+    {
+        username: 'أمير بطال',
+        date: '23/3/2025',
+        problem_type: 'رصيف مكسور',
+        time: 'منذ 9 ساعات',
+        budget: "120",
+        status: 'تم القبول',
+    },
+    {
+        username: 'أمير بطال',
+        date: '23/3/2025',
+        problem_type: 'رصيف مكسور',
+        time: 'منذ 9 ساعات',
+        budget: "120",
+        status: 'تم الرفض',
     },
 ]
 

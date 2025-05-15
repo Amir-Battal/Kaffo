@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft, DollarSign } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod"
+import { Image } from "lucide-react"
 
 
 const formSchema = z.object({
@@ -21,6 +22,7 @@ type ContributionCardProp = {
   username?: string,
   date?: string,
   contribution?: string,
+  problem_type?: string,
   budget?: number,
   status?: string,
   children?: React.ReactNode,
@@ -36,7 +38,7 @@ const ContributionCard = (prop: ContributionCardProp) => {
 
   return (
     <Form {...form}>
-      <form className="w-[100%] flex flex-col gap-5 border-2 pb-5"  dir="rtl">
+      <form className="w-[100%] flex flex-col gap-5 border-2 pb-5 p-2"  dir="rtl">
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-2">
             {prop.isSelfSolv
@@ -63,33 +65,54 @@ const ContributionCard = (prop: ContributionCardProp) => {
                     ? 'bg-green-600'
                     : 'bg-fuchsia-600'}`}>
                       <h3 className="text-lg">{prop.status}</h3>
-              
             </Badge>
           ):(
             <div></div>
           )}
-          
           {prop.children}
         </div>
-
-        <div className="flex flex-col gap-2 px-2">
-          {prop.isSelfSolv
-            ?(
-              <FormLabel>حل المشكلة</FormLabel>
-            ):(
-              <FormLabel>المساهمة في حل المشكلة</FormLabel>
-            )
-          }
-          <Textarea 
-            className="w-full"
-            value={prop.contribution} 
-            placeholder="استطيع حل المشكلة من خلال..." 
-            disabled 
-          />
+        
+        <div className="flex flex-row justify-between items-start">
+          <div className="pb-4">
+            <div>
+              <h1 className="text-xl p-2 pr-0">{prop.problem_type}</h1>
+              {prop.problem_type
+                ?(
+                  <div></div>
+                ):(
+                  <h1 className="text-xl p-2 pr-0">{prop.problem_type}</h1>
+                )
+              }
+              {prop.children}
+            </div>
+            <p>إحدى بلاطات الرصيف مكسورة تؤدي إلى إصابة الناس وعرقلتهم أثناء المشي.</p>
+            <div className="flex flex-row gap-2 pt-5">
+              <Badge className="rounded-none" variant="default">محافظة حلب</Badge>
+              <Badge className="rounded-none" variant="secondary">رصيف مكسور</Badge>
+              <Badge className="rounded-none" variant="secondary">بلدية حلب</Badge>
+            </div>
+            <div className="flex flex-col gap-2 pt-10">
+              {prop.isSelfSolv
+                ?(
+                  <FormLabel>حل المشكلة</FormLabel>
+                ):(
+                  <FormLabel>المساهمة في حل المشكلة</FormLabel>
+                )
+              }
+              <Textarea
+                className="w-full"
+                value={prop.contribution}
+                placeholder="استطيع حل المشكلة من خلال ..." 
+                disabled 
+              />
+            </div>
+          </div>
+          <div className="flex justify-center items-center bg-gray-500 w-[250px] h-[250px]">
+            <Image className="text-white" size={60}/>
+          </div>
         </div>
 
-      
-        <div className="flex flex-row justify-between items-center pl-5">
+        <div className="flex flex-row justify-between items-center pl-1">
           <div className="w-full flex flex-col gap-2 px-2">
             <FormLabel>التكلفة المتوقعة</FormLabel>
             <div className="flex flex-row w-[20%] items-center justify-between">
@@ -112,7 +135,6 @@ const ContributionCard = (prop: ContributionCardProp) => {
               <div></div>
             )
           }
-          
         </div>
       </form>
     </Form>

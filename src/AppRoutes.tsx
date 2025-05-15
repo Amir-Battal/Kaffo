@@ -49,7 +49,7 @@ const AppRoutes = () => {
 
       <Route path="/user-activities" element={<Layout><UserActivitiesPage /></Layout>} />
       <Route path="/user-activities/aucations" element={<Layout><MyAucationsPage /></Layout>} />
-      <Route path="/user-activities/volunteering" element={<Layout><MyVolunteeringPage /></Layout>} />
+      {/* <Route path="/user-activities/volunteering" element={<Layout><MyVolunteeringPage /></Layout>} /> */}
       <Route path="/user-activities/contributions" element={<Layout><MyContributionsPage /></Layout>} />
       <Route path="/user-activities/donations" element={<Layout><MyDonationsPage /></Layout>} />
 
