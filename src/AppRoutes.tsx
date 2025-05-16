@@ -23,7 +23,7 @@ import MyDonationsPage from "./pages/MyDonationsPage";
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Layout><HomePage /></Layout>} />
+      <Route path="/" element={<HomePage />} />
 
       <Route path="/problems" element={<Layout><ProblemsPage /></Layout>} />
       <Route path="/problems/:problemId" element={<Layout><ProblemPage /></Layout>} />
