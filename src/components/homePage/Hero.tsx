@@ -1,15 +1,14 @@
 import DownloadButton from "./DownlaodButton";
 import Navbar from "./Navbar";
-import NotificationCard from "./NotificationCard";
 import Pattern from "./Pattern";
-import Phone from "./Phone";
+import Phones from "./Phones";
 
 
 
 const Hero = () => {
 
   return (
-    <div className="w-full h-100% overflow-hidden shadow-[inset_0_-180px_35px_rgba(0,0,0,0.3)]">
+    <div className="w-full h-100% overflow-hidden shadow-[inset_0_-180px_35px_rgba(0,0,0,0.3)] rounded-b-4xl">
       <Pattern />
       <div className="flex justify-center relative">
         <Navbar />
@@ -25,25 +24,7 @@ const Hero = () => {
 
         <DownloadButton />
 
-        <div className="w-full h-[30vh] flex flex-row justify-center gap-40 mt-10">
-          <div className="rotate-335 mt-15">
-            <Phone content="Notifications"/>
-          </div>
-          <div className="mt-10 mr-150 absolute z-0">
-            <NotificationCard reject />
-          </div>
-          <div className="mt-25 ml-30 absolute z-0">
-            <NotificationCard pending />
-          </div>
-          <Phone content="Problems" size />
-          <div className="mt-40 mr-120 absolute z-0">
-            <NotificationCard />
-          </div>
-          <div className="rotate-25 mt-15">
-            <Phone content="Profile" />
-          </div>
-
-        </div>
+        <Phones />
       </div>
     </div>
   );

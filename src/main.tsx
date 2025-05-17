@@ -12,27 +12,26 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 const queryClient = new QueryClient();
 
 
-keycloak.init({ onLoad: "login-required" })
-  .then((authenticated) => {
-    if (authenticated) {
-      localStorage.setItem("token", keycloak.token!);
-      localStorage.setItem("refreshToken", keycloak.refreshToken!);
+keycloak.init({
+  onLoad: 'check-sso', // ✅ تحقق من الجلسة فقط، بدون إجبار تسجيل الدخول
+  silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html', // ✅ (اختياري لكنه مفيد)
+}).then((authenticated) => {
+  if (authenticated) {
+    localStorage.setItem("token", keycloak.token!);
+    localStorage.setItem("refreshToken", keycloak.refreshToken!);
+  }
 
-      createRoot(document.getElementById('root')!).render(
-        <StrictMode>
-          <Router>
-            <QueryClientProvider client={queryClient}>
-              <AppRoutes />
-            </QueryClientProvider>
-          </Router>
-        </StrictMode>,
-      );
-    } else {
-      console.log('login failed');
-      keycloak.login();
-    }
-  })
-  .catch((err) => {
-    console.error("❌ Keycloak init failed:", err);
-  });
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <Router>
+        <QueryClientProvider client={queryClient}>
+          <AppRoutes />
+        </QueryClientProvider>
+      </Router>
+    </StrictMode>,
+  );
+}).catch((err) => {
+  console.error("❌ Keycloak init failed:", err);
+});
+
 
