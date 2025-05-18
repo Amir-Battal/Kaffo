@@ -1,154 +1,153 @@
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, DollarSign, Edit } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { z } from "zod"
+
 import ContributionCard from "./ContributionCard";
-import { useState } from "react";
 import DeleteDialog from "./DeleteDialog";
 
-
+import {
+  useGetMyContribution,
+  useCreateContribution,
+  useUpdateContribution,
+  useDeleteContribution,
+  useGetContributions,
+} from "../../hooks/use-Contribution";
+import { SolutionDTO } from "../../types";
 
 const formSchema = z.object({
-  contribution: z.string(),
-  budget: z.number(),
-})
+  contribution: z.string().min(1),
+  budget: z.coerce.number().min(1),
+});
 
-interface ContributionData {
-  contribution: string
-  budget: number
+interface Props {
+  problemId: number;
 }
 
-const contribution: ContributionData[] = [
-  {
-    contribution: "أستطيع حل المشكلة خلال أقل من 24 ساعة حيث أنني سوف اقوم بما يلي: - بالبداية سوف افحص مكان المشكلة. - ثم سوف اقوم بشراء المواد الأولية التي تلزمني - بعد ذلك سوف أقوم بإصلاح المشكلة:",
-    budget: 120
-  }
-]
-
-const Contributions = [
-  {
-    username: 'أمير بطال',
-    date: '23/3/2025',
-    contribution: "استطيع حل المشكلة من خلال عدة نقاط أهمها النقطة الأولى من خلال شراء المواد الأولية",
-    budget: 120
-  },
-  // {
-  //   username: 'أمير بطال',
-  //   date: '23/3/2025',
-  //   contribution: "يمكن حل المشكلة من خلال...",
-  //   budget: 120
-  // },
-  {
-    username: 'أمير بطال',
-    date: '23/3/2025',
-    contribution: "أستطيع حل المشكلة خلال أقل من 24 ساعة حيث أنني سوف اقوم بما يلي: - بالبداية سوف افحص مكان المشكلة. - ثم سوف اقوم بشراء المواد الأولية التي تلزمني - بعد ذلك سوف أقوم بإصلاح المشكلة:",
-    budget: 120
-  },
-]
-
-const ContributionForm = () => {
-
-  const [editable, setEditable] = useState(true);
+const ContributionForm = ({ problemId }: Props) => {
+  const [isEditing, setIsEditing] = useState(false);
+  
+  const { data: userContribution, isLoading } = useGetMyContribution(problemId);
+  const { contributions } = useGetContributions(problemId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      contribution: contribution[0].contribution,
-      budget: contribution[0].budget
+      contribution: "",
+      budget: 0,
     },
-  })
+  });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    setEditable(false);
-    console.log(values)
-  }
+  const createContribution = useCreateContribution(problemId);
+  const updateContribution = useUpdateContribution(problemId, userContribution?.id ?? 0);
+  const deleteContribution = useDeleteContribution(problemId, userContribution?.id ?? 0);
 
-  const handleEdit = () => {
-    setEditable(true);
-  }
+  useEffect(() => {
+    if (userContribution) {
+      form.setValue("contribution", userContribution.description || "");
+      form.setValue("budget", userContribution.estimatedCost || 0);
+    }
+  }, [userContribution]);
+
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    const mutation = userContribution ? updateContribution : createContribution;
+    mutation.mutate(values, {
+      onSuccess: () => setIsEditing(false),
+    });
+  };
+
+  const handleEdit = () => setIsEditing(true);
+
+  const handleDelete = () => {
+    deleteContribution.mutate(undefined, {
+      onSuccess: () => {
+        setIsEditing(false);
+        form.reset({ contribution: "", budget: 0 });
+      },
+    });
+  };
+
+  const renderForm = () => (
+    <form className="flex flex-col gap-5" onSubmit={form.handleSubmit(handleSubmit)}>
+      <FormField
+        control={form.control}
+        name="contribution"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>ساهم في حل المشكلة</FormLabel>
+            <FormControl>
+              <Textarea placeholder="استطيع حل المشكلة من خلال..." {...field} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      <div className="flex items-center justify-between">
+        <FormField
+          control={form.control}
+          name="budget"
+          render={({ field }) => (
+            <FormItem className="w-1/4">
+              <FormLabel>التكلفة المتوقعة</FormLabel>
+              <div className="flex items-center gap-1">
+                <DollarSign />
+                <FormControl>
+                  <Input placeholder="100" type="number" {...field} />
+                </FormControl>
+              </div>
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-[40%] h-[50px] bg-black text-white hover:bg-gray-800">
+          <span>تأكيد المساهمة</span>
+          <Check />
+        </Button>
+      </div>
+    </form>
+  );
+
+  const renderUserCard = () =>
+    userContribution && (
+      <ContributionCard
+        username={userContribution.username || "أنت"}
+        date={userContribution.createdAt || ""}
+        contribution={userContribution.description || ""}
+        budget={userContribution.estimatedCost || 0}
+        isMyContribution
+      >
+        <div className="flex flex-row-reverse">
+          <Button onClick={handleEdit} variant="ghost">
+            <h3>تعديل</h3>
+            <Edit />
+          </Button>
+          <DeleteDialog onConfirm={handleDelete} />
+        </div>
+      </ContributionCard>
+    );
+
+  const renderOtherContributions = () =>
+    contributions
+      ?.filter((contribution) => contribution.id !== userContribution?.id)
+      .map((contribution) => (
+        <ContributionCard
+          key={contribution.id}
+          username={`${contribution.user.firstName} ${contribution.user.lastName}`}
+          date={contribution.createdAt}
+          contribution={contribution.description}
+          budget={contribution.estimatedCost}
+        />
+      ));
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6" dir="rtl">
       <Form {...form}>
-        {editable
-        ?(
-          <form className="w-[100%] flex flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)}  dir="rtl">
-            <FormField
-              control={form.control}
-              name="contribution"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>ساهم في حل المشكلة</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="استطيع حل المشكلة من خلال..." {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <div className="flex flex-row w-full items-center justify-between">
-              <FormField
-                control={form.control}
-                name="budget"
-                render={({ field }) => (
-                  <FormItem className="w-[20%]">
-                    <FormLabel>التكلفة المتوقعة</FormLabel>
-                    <div className="flex flex-row items-center gap-1">
-                      <DollarSign />
-                      <FormControl>
-                        <Input placeholder="100" {...field} />
-                      </FormControl>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {/* // TODO on submit change style */}
-              <Button type="submit" className="mt-5 flex flex-row justify-around cursor-pointer w-[40%] h-[50px] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
-                <h3>تأكيد المساهمة</h3>
-                <Check />
-              </Button>
-            </div>
-          </form>
-        ):(
-          <div>
-            <ContributionCard 
-              username={Contributions[1].username}
-              date={Contributions[1].date}
-              contribution={Contributions[1].contribution}
-              budget={Contributions[1].budget}
-            >
-              <div className="flex flex-row-reverse">
-                <Button onClick={handleEdit} variant={"ghost"} className="m-1 cursor-pointer">
-                  <h3>تعديل</h3>
-                  <Edit />
-                </Button>
-                
-                <DeleteDialog />
-              </div>
-            </ContributionCard>
-          </div>
-        )}
+        {isEditing || !userContribution ? renderForm() : renderUserCard()}
       </Form>
-      
-      <div className="flex flex-col gap-5">
-        {Contributions.map((contribution) => (
-          <ContributionCard 
-            username={contribution.username}
-            date={contribution.date}
-            contribution={contribution.contribution}
-            budget={contribution.budget}
-          />
-        ))}
-      </div>
-
-
+      <div className="flex flex-col gap-4">{renderOtherContributions()}</div>
     </div>
   );
 };

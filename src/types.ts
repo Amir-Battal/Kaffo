@@ -42,3 +42,16 @@ export interface ProblemDTO {
 
   details?: string;
 }
+
+
+export interface SolutionDTO {
+  id: number;
+  description: string;
+  estimatedCost: number;
+  status: string;
+  startDate: string;
+  endDate: string;
+  rating: number;
+  problemId: number;
+  proposedByUserId: number;
+};

@@ -27,7 +27,7 @@ const DonationsPage = () => {
           <p>جاري التحميل...</p>
         ) : (
           problems.map((problem) => (
-            <ProblemCard key={problem.id} problem={problem} donation />
+            <ProblemCard key={problem.id} problem={problem} contribution />
           ))
         )}
       </div>

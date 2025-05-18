@@ -105,7 +105,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
         {prop.contribution ? (
           <div className="flex flex-col gap-10">
             <h1 className="text-2xl">شارك في حل المشكلة وقدم اقتراحًا لحلها</h1>
-            <ContributionForm />
+            <ContributionForm problemId={Number(problemId)}/>
             <PaginationComp />
           </div>
         ) : prop.donation ? (
