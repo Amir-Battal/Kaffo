@@ -188,7 +188,7 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                       <SidebarMenu className="gap-5 mr-10 mt-2">
                       {subUserItems.map((subItem) => (
-                      <SidebarMenuItem key={item.title}>
+                      <SidebarMenuItem key={subItem.title}>
                         <SidebarMenuButton asChild>
                           <a href={subItem.url}>
                             <subItem.icon />

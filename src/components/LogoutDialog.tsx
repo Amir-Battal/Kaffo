@@ -23,6 +23,7 @@ const LogoutDialog = () => {
 
   return (
     <div dir="ltr" className="w-full">
+      
       <Dialog>
         <DialogTrigger className="w-full items-center cursor-pointer">
           <Button className="w-full flex flex-row gap-10 cursor-pointer">

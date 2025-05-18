@@ -190,3 +190,28 @@ export const useDeleteUser = () => {
     isLoading,
   };
 };
+
+
+// ============= GET PHOTO Presigned URL =============
+export const useUploadUserPhoto = () => {
+  const getPresignedUrl = async (userId: number) => {
+    const accessToken = keycloak.token;
+
+    const res = await axios.post(
+      `${API_BASE_URL}/api/v1/users/${userId}/profile-photo?contentType=image/png`,
+      undefined,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const presignedUrl = res.data;
+    const accessUrl = presignedUrl.split('?')[0];
+
+    return { presignedUrl, accessUrl };
+  };
+
+  return useMutation(getPresignedUrl);
+};
