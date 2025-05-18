@@ -14,9 +14,10 @@ type ProblemHeaderProps = {
     categoryId: number | null;
   }) => void;
   myAucation?: boolean;
+  noNew?: boolean;
 };
 
-const ProblemHeader = ({ onFilterChange, myAucation }: ProblemHeaderProps) => {
+const ProblemHeader = ({ onFilterChange, myAucation, noNew }: ProblemHeaderProps) => {
   const [searchText, setSearchText] = useState("");
   const [city, setCity] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -57,7 +58,7 @@ const ProblemHeader = ({ onFilterChange, myAucation }: ProblemHeaderProps) => {
           onChange={(e) => setSearchText(e.target.value)}
         />
       </div>
-      {myAucation
+      {myAucation || noNew
         ?(
           <div></div>
         ):(

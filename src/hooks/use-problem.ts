@@ -25,6 +25,8 @@ type ProblemCriteria = {
   city?: string;
   status?: string;
   categoryId?: number;
+  forContribution?: boolean;
+  forDonation?: boolean;
 };
 
 // ============= GET ALL PROBLEMS =============
@@ -64,6 +66,86 @@ export const useGetAllProblems = (
   };
 };
 
+
+// ============= GET PROBLEMS FOR CONTRIBUTIONS =============
+
+export const useGetProblemsForDonation = (
+  { page, size = 6, sort = [] }: GetProblemsParams,
+  criteria: ProblemCriteria
+) => {
+  const accessToken = keycloak.token;
+
+  const fetchContributions = async (): Promise<ProblemPageResponse> => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/problems`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        page,
+        size,
+        sort,
+        forDonation: true, // أهم سطر
+        ...criteria,
+      },
+    });
+    return response.data;
+  };
+
+  const queryKey = ["contributions", page, size, sort, criteria];
+
+  const { data, isLoading, isError, error } = useQuery(queryKey, fetchContributions);
+
+  return {
+    problems: data?.content ?? [],
+    totalPages: data?.totalPages ?? 1,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+
+
+// ============= GET PROBLEMS FOR CONTRIBUTIONS =============
+
+export const useGetProblemsForContribution = (
+  { page, size = 6, sort = [] }: GetProblemsParams,
+  criteria: ProblemCriteria
+) => {
+  const accessToken = keycloak.token;
+
+  const fetchContributions = async (): Promise<ProblemPageResponse> => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/problems`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        page,
+        size,
+        sort,
+        forContribution: true, // أهم سطر
+        ...criteria,
+      },
+    });
+    return response.data;
+  };
+
+  const queryKey = ["contributions", page, size, sort, criteria];
+
+  const { data, isLoading, isError, error } = useQuery(queryKey, fetchContributions);
+
+  return {
+    problems: data?.content ?? [],
+    totalPages: data?.totalPages ?? 1,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+
 // ============= GET ONE PROBLEM BY ID =============
 export const useGetProblemById = (id: number) => {
   const fetchProblemById = async (): Promise<ProblemDTO> => {
@@ -92,6 +174,8 @@ export const useGetProblemById = (id: number) => {
   return { problem, isLoading };
 };
 
+
+// ============= GET PROBLEMS BY USER ID =============
 export const useGetProblemsByUser = (userId: number) => {
   const accessToken = keycloak.token;
 
@@ -121,6 +205,35 @@ export const useGetProblemsByUser = (userId: number) => {
     isError,
   };
 };
+
+
+// ============= GET PROBLEMS BY MY USER =============
+export const useGetMyProblems = () => {
+  const accessToken = keycloak.token;
+
+  const fetchMyProblems = async (): Promise<ProblemDTO[]> => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/problems/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  };
+
+  const { data, isLoading, isError, error } = useQuery("myProblems", fetchMyProblems);
+
+  if (error) {
+    toast.error((error as Error).message);
+  }
+
+  return {
+    problems: data ?? [],
+    isLoading,
+    isError,
+  };
+};
+
 
 
 // ============= CREATE PROBLEM =============

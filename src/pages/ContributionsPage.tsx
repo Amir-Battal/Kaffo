@@ -1,37 +1,40 @@
-import GovernorateSelect from "@/components/GovernorateSelect";
+import { useEffect, useState } from "react";
 import PaginationComp from "@/components/PaginationComp";
 import ProblemCard from "@/components/ProblemCard";
-import ProblemCategorySelect from "@/components/ProblemCategorySelect";
-import ProblemStatusSelect from "@/components/ProblemStatusSelect";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import ProblemHeader from "@/components/ProblemHeader";
+import { useGetProblemsForContribution } from "@/hooks/use-problem";
 
-const ContributionsPage = () => {
+const DonationsPage = () => {
+  const [page, setPage] = useState(0);
+  const [criteria, setCriteria] = useState({});
+
+  useEffect(() => {
+    setPage(0); // إعادة الصفحة للصفر عند تغيير الفلاتر
+  }, [criteria]);
+
+  const { problems, totalPages, isLoading } = useGetProblemsForContribution(
+    { page, size: 6 },
+    { ...criteria,
+      forContribution: true}
+  );
+
   return (
-    <div className="flex flex-col gap-10 pr-10">
-      <div className="flex flex-row-reverse justify-between gap-5 pl-10">
-        <div className="w-full flex flex-row gap-5">
-          <GovernorateSelect gov='حلب' />
-          <ProblemStatusSelect status='جاري المعالجة' />
-          <ProblemCategorySelect category='أرصفة' />
-        </div>
-        <div className="w-full flex flex-row items-center">
-          <Search />
-          <Input placeholder="تبحث عن مشكلة معينة ..."/>
-        </div>
-        {/* <NewProblemOverlay /> */}
-      </div>
+    <div className="flex flex-col gap-10 pr-10 mb-25">
+      <ProblemHeader onFilterChange={setCriteria} noNew />
+
       <div className="grid grid-cols-3 gap-5">
-        <ProblemCard num={1} contribution={true} />
-        <ProblemCard num={2} contribution={true} />
-        <ProblemCard num={3} contribution={true} />
-        <ProblemCard num={4} contribution={true} />
-        <ProblemCard num={5} contribution={true} />
-        <ProblemCard num={6} contribution={true} />
+        {isLoading ? (
+          <p>جاري التحميل...</p>
+        ) : (
+          problems.map((problem) => (
+            <ProblemCard key={problem.id} problem={problem} donation />
+          ))
+        )}
       </div>
-      <PaginationComp />
+
+      <PaginationComp page={page} setPage={setPage} totalPages={totalPages} />
     </div>
   );
 };
 
-export default ContributionsPage;
+export default DonationsPage;
