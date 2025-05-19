@@ -11,7 +11,7 @@ const UserPhoto = ({ photoUrl }: { photoUrl?: string }) => {
       <Avatar className="w-full h-full rounded-none">
         <AvatarImage src={photoUrl} className="w-full object-cover object-center"/>
         {/* <AvatarImage className="w-full object-cover object-center"/> */}
-        <AvatarFallback className="w-full h-[375px] rounded-none">CN</AvatarFallback>
+        <AvatarFallback className="w-full h-[375px] rounded-none">{currentUser?.firstName.split("")[0]}</AvatarFallback>
       </Avatar>
       <PhotoUpdateOverlay userId={Number(currentUser?.id)} />
     </div>

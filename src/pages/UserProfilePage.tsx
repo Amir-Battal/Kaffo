@@ -8,7 +8,7 @@ import { useGetMyUser } from "@/hooks/use-user";
 import { User } from "@/types";
 import UploadCvButton from "@/forms/user-profile-form/UploadCvButton";
 import { Check, FileText } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 
