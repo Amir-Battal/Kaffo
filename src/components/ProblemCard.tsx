@@ -27,9 +27,9 @@ type ProblemCardProp = {
 
 const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCardProp) => {
 
-
   const { photos, isLoading } = useGetProblemPhotos(problem.id);
-  const photoUrl = photos.length > 0 ? photos[0].photoUrl : null;
+
+  const photoUrl = photos.length > 0 ? photos[0].s3Key : null;
 
   const { data: address } = useAddress(problem.addressId);
   const { data: category } = useCategory(problem.categoryId);

@@ -17,6 +17,9 @@ import { useGetUserById } from "@/hooks/use-user";
 import keycloak from "@/lib/keycloak";
 // import * as jwt_decode from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
+import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
+import ImageGallery from "./ImageGallery";
+
 
 
 type MainDetailsProp = {
@@ -33,6 +36,8 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
 
   const { problem, isLoading: isProblemLoading } = useGetProblemById(Number(problemId));
+  const { photos, isLoading: isPhotosLoading } = useGetProblemPhotos(Number(problemId));
+
 
   const addressId = problem?.addressId;
   const categoryId = problem?.categoryId;
@@ -150,18 +155,17 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
       </div>
 
       <div className="w-[40%] flex flex-col gap-10">
-        <div className="w-full flex flex-row gap-5 justify-end">
-          <div className="flex justify-center items-center bg-gray-500 w-full h-[350px]">
-            <Image className="text-white" size={50} />
-          </div>
-          <div className="w-[80px] flex flex-col gap-5">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex justify-center items-center bg-gray-500 w-[100px] h-[100px]">
-                <Image className="text-white" size={50} />
-              </div>
-            ))}
-          </div>
-        </div>
+        {isPhotosLoading ? (
+            <div className="flex justify-center items-center bg-gray-100 w-full h-[350px]">جاري تحميل الصور...</div>
+          ) : photos.length > 0 ? (
+            <div className="w-full h-[350px]">
+              <ImageGallery images={photos.map(photo => photo.s3Key)} />
+            </div>
+          ) : (
+            <div className="flex justify-center items-center bg-gray-100 w-full h-[350px]">
+              لا توجد صور متاحة
+            </div>
+          )}
 
         <div className="w-[75%] flex flex-col gap-2 z-0">
           <>

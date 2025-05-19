@@ -22,6 +22,8 @@ import { useCreateProblem } from "@/hooks/use-problem"
 import { toast } from "sonner"
 import { useCreateAddress } from "@/hooks/use-Address"
 import { useCreateCategory } from "@/hooks/use-category"
+import { MultiImageUploader } from "./MultiImageUploader"
+import { usePresignedUpload } from "@/hooks/use-problem-photo"
 // import FileUploader from "@/components/FileUploader" // يمكن تفعيله لاحقًا
 
 const formSchema = z.object({
@@ -32,7 +34,9 @@ const formSchema = z.object({
   governorate: z.string(),
   lat: z.number(),
   lng: z.number(),
+  images: z.array(z.instanceof(File)).optional(),
 });
+
 
 
 interface problemData {
@@ -55,9 +59,14 @@ export function NewProblemForm() {
   })
   const [governorate, setGovernorate] = useState('')
   const [categoryId, setCategoryId] = useState('')
+  const [selectedImages, setSelectedImages] = useState<File[]>([])
+
 
   const { mutateAsync: createAddress } = useCreateAddress();
   const { mutateAsync: createCategory } = useCreateCategory();
+
+  const { getPresignedUrls, uploadFileToS3 } = usePresignedUpload();
+
   
 
   const handleLocationSelect = (lat: number, lng: number) => {
@@ -99,44 +108,67 @@ export function NewProblemForm() {
     },
   })
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
-    try {
-      let categoryId = data.categoryId;
-  
-      // إن لم يتم تحديد صنف، أنشئ صنفًا جديدًا
-      // TODO: إنشاء صنف بلا ربطه مع جهة معنية
-      if (!categoryId && data.categoryName) {
-        const newCategory = await createCategory({
-          name: data.categoryName,
-          govId: 1,
-        }); 
-        categoryId = newCategory.id;
-      }
-  
-      const newAddress = await createAddress({
-        city: data.governorate,
-        description: data.address,
-        latitude: data.lat,
-        longitude: data.lng,
+  // NewProblemForm.tsx (المهم فقط الدالة onSubmit و استدعاءات الصور)
+
+const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  try {
+    // 1. إنشاء/إحضار التصنيف
+    let catId = data.categoryId;
+    if (!catId && data.categoryName) {
+      const newCat = await createCategory({
+        name: data.categoryName,
+        govId: 1, // عدل حسب الحاجة
       });
-      await createProblem({
-        title: data.title,
-        description: data.description,
-        categoryId: data.categoryId,
-        addressId: newAddress.id,
-        isReal: true,
-        forContribution: false,
-        forDonation: false,
-        createdDate: new Date().toISOString(),
-      });
-      
-      
-      toast.success("تم إنشاء المشكلة بنجاح!");
-    } catch (err) {
-      toast.error("فشل في إنشاء المشكلة");
-      console.error(err);
+      catId = newCat.id;
     }
-  };
+
+    // 2. إنشاء العنوان
+    const newAddress = await createAddress({
+      city: data.governorate,
+      description: data.address,
+      latitude: data.lat,
+      longitude: data.lng,
+    });
+
+    // 3. إنشاء المشكلة بدون روابط الصور أولاً
+    const newProblem = await createProblem({
+      title: data.title,
+      description: data.description,
+      categoryId: catId,
+      addressId: newAddress.id,
+      isReal: true,
+      forContribution: false,
+      forDonation: false,
+      createdDate: new Date().toISOString(),
+      photoUrls: [], // فارغة الآن، نحدثها بعد رفع الصور
+    });
+
+    // 4. إذا هناك صور مرفوعة، نطلب روابط التحميل الموقعة
+    let photoUrls: string[] = [];
+    if (selectedImages.length > 0) {
+      const presignedData = await getPresignedUrls(newProblem.id, selectedImages.length);
+      await Promise.all(
+        selectedImages.map((file, i) =>
+          uploadFileToS3(presignedData[i].presignedUrl, file)
+        )
+      );
+      // نجمع مفاتيح الصور للربط في الـ problem لاحقاً
+      photoUrls = presignedData.map((item) => item.s3Key);
+
+      // 5. تحديث المشكلة مع روابط الصور (PATCH أو PUT حسب الـ API)
+      await createProblem({
+        ...newProblem,
+        photoUrls,
+      });
+    }
+
+    toast.success("تم إنشاء المشكلة بنجاح!");
+  } catch (err) {
+    toast.error("فشل في إنشاء المشكلة");
+    console.error(err);
+  }
+};
+
   
   
   
@@ -244,6 +276,11 @@ export function NewProblemForm() {
               <h3 className="text-sm">قم بالضغط على الموقع على الخريطة</h3>
             </div>
           </div>
+
+          <MultiImageUploader
+            onFilesSelected={(files) => setSelectedImages(files)}
+          />
+
         </div>
 
         <DialogPrimitive.Close>
