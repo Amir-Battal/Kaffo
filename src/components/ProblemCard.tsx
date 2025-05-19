@@ -17,6 +17,7 @@ import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
 import { useAddress, useCities } from "@/hooks/use-Address";
 import { useCategory } from "@/hooks/use-category";
 import { useGetUserById } from "@/hooks/use-user";
+import { useGetProblemProgress } from "@/hooks/use-progress";
 
 type ProblemCardProp = {
   problem: ProblemDTO;
@@ -27,8 +28,11 @@ type ProblemCardProp = {
 
 const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCardProp) => {
 
-  const { photos, isLoading } = useGetProblemPhotos(problem.id);
+  const { photos, isPhotoLoading } = useGetProblemPhotos(problem.id);
 
+  const { progressList, isProgressLoading } = useGetProblemProgress(problem.id);
+  console.log(progressList);
+  
   const photoUrl = photos.length > 0 ? photos[0].s3Key : null;
 
   const { data: address } = useAddress(problem.addressId);
@@ -40,7 +44,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
 
 
 
-  const percentage = 60; // يمكن استبداله لاحقًا بقيمة حقيقية من الـ problem
+  const percentage = progressList.length > 0 ? progressList[0].percentage : 0; // يمكن استبداله لاحقًا بقيمة حقيقية من الـ problem
 
   return (
     <Card className="w-[90%] h-[480px] m-0 p-0 rounded-none">
@@ -52,7 +56,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
               <ProblemOverlay isMyAucation status={"delete"} />
             </div>
           )}
-          {isLoading ? (
+          {isPhotoLoading ? (
             <div className="h-full flex justify-center items-center text-white">جارٍ التحميل...</div>
           ) : photoUrl ? (
             <img src={photoUrl} alt="صورة المشكلة" className="w-full h-full object-cover" />
