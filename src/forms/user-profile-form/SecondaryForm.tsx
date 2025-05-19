@@ -14,10 +14,11 @@ import GovernorateSelect from "@/components/GovernorateSelect"
 import { Textarea } from "@/components/ui/textarea"
 import DatePicker from "@/components/DatePicker"
 import { Button } from "@/components/ui/button"
-import { Check, Edit } from "lucide-react"
+import { Ban, Check, Edit, User } from "lucide-react"
 import { JSX, useEffect, useState } from "react"
 import { useAddress, useCreateAddress } from "@/hooks/use-Address"
 import { useUpdateUserBasicInfo } from "@/hooks/use-user"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   governorate: z.string(),
@@ -36,25 +37,6 @@ const birthDate = tDate.toLocaleDateString('en-US',
     day: 'numeric' 
   });
 
-// interface SecondaryData {
-//   governorate: string;
-//   address: string;
-//   birth: string;
-//   study: string;
-//   work: string;
-//   about: string;
-// }
-
-// const user: SecondaryData[] = [
-//   {
-//     governorate: 'حلب',
-//     address: 'حلب، الجميلية',
-//     birth: birthDate,
-//     study: 'الهندسة المعلوماتية',
-//     work: 'مهندس برمجيات',
-//     about: 'هذا النص تجريبي يصف وصف عن المستخدم حيث أن المستخدم يجب أن يملئ هذا الحقل من أجل وصف ما هي المهارات التي يملكها ويستطيع العمل بها لتعطي موثوقية لتسليمه العمل على الأنشطة التطوعية'
-//   },
-// ]
 
 export function SecondaryForm({...props}): JSX.Element {
 
@@ -107,6 +89,7 @@ export function SecondaryForm({...props}): JSX.Element {
     
     function onSubmit(values: z.infer<typeof formSchema>) {
       values.governorate = governorate;
+      console.log(governorate);
 
 
       // values.birth = nDate.toISOString();
@@ -139,6 +122,7 @@ export function SecondaryForm({...props}): JSX.Element {
         });
     
         console.log("تم استخدام العنوان الحالي، لم يتم إنشاؤه من جديد.");
+        sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح");
         setEditable(false);
         window.location.reload();
         return;
@@ -172,6 +156,7 @@ export function SecondaryForm({...props}): JSX.Element {
             });
     
             console.log("✅ تم إنشاء عنوان جديد وربطه:", addressId);
+            sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح");
             setEditable(false);
             window.location.reload();
           },
@@ -187,6 +172,24 @@ export function SecondaryForm({...props}): JSX.Element {
     const [editable, setEditable] = useState(false);
     
     const handleEdit = () => {
+      if (!props.user?.phone || props.user.phone.trim() === "") {
+        toast("يرجى كتابة رقم الهاتف أولاً قبل تعديل البيانات الثانوية",{
+          style:{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            background: '#cc1100',
+            color: '#fff',
+            direction: 'rtl',
+            border: 'none',
+          },
+          icon: <Ban/>,
+          closeButton: true
+        })
+        // toast.error("يرجى كتابة رقم الهاتف أولاً قبل تعديل البيانات الثانوية")
+        return;
+      }
+
       setEditable(true);
     }
     
@@ -206,17 +209,23 @@ export function SecondaryForm({...props}): JSX.Element {
             <div className="space-y-8 w-full flex flex-col gap-6 py-1">
               <div className="flex flex-row w-full justify-between gap-10">
                 <FormField
-                    control={form.control}
-                    name="governorate"
-                    render={({ field }) => (
-                      <FormItem className="w-full">
-                        <FormLabel>المحافظة</FormLabel>
-                        <FormControl>
-                          <GovernorateSelect setGov={setGovernorate} {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                  control={form.control}
+                  name="governorate"
+                  render={({ field }) => (
+                    <FormItem className="w-full">
+                      <FormLabel>المحافظة</FormLabel>
+                      <FormControl>
+                        <GovernorateSelect
+                          setGovernorate={setGovernorate}
+                          value={field.value}
+                          onChange={field.onChange}
+                          disabled={!editable}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="address"

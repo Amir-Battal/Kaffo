@@ -25,14 +25,6 @@ const formSchema = z.object({
   email: z.string().min(10).max(20),
 })
 
-// interface personMainData {
-//   firstName?: string;
-//   lastName?: string;
-//   phoneNumber: string;
-//   email?: string;
-// }
-
-
 
 export function MainProfileForm({...props}): JSX.Element {
 
@@ -47,7 +39,6 @@ export function MainProfileForm({...props}): JSX.Element {
     },
   });
   
-  // تحديث القيم الافتراضية بعد الحصول على بيانات المستخدم
   useEffect(() => {
     if (props.user) {
       form.reset({
@@ -63,14 +54,9 @@ export function MainProfileForm({...props}): JSX.Element {
   if (!props.user) return <p>لم يتم العثور على المستخدم</p>;
 
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-  }
-  
-
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full grid grid-cols-2 gap-6 py-10" dir="rtl">
+      <form className="space-y-8 w-full grid grid-cols-2 gap-6 py-10" dir="rtl">
       <FormField
           disabled
           control={form.control}
@@ -81,10 +67,6 @@ export function MainProfileForm({...props}): JSX.Element {
               <FormControl>
                 <Input placeholder="أحمد" {...field} />
               </FormControl>
-              {/* <FormDescription>
-                This is your public display name.
-              </FormDescription> */}
-              {/* <FormMessage /> */}
             </FormItem>
           )}
         />
@@ -127,7 +109,7 @@ export function MainProfileForm({...props}): JSX.Element {
             </FormItem>
           )}
         />
-        <Link to="http://localhost:9098/realms/kafu-realm/login-actions/reset-credentials?client_id=kafu-client" className="flex flex-row justify-around cursor-pointer w-[60%] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
+        <Link target="_blank" to="http://localhost:9098/realms/kafu-realm/account/account-security/signing-in" className="flex flex-row justify-around cursor-pointer w-[60%] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
           <h3>تغيير كلمة المرور</h3>
           <ChevronLeft />
         </Link>

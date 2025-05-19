@@ -4,56 +4,48 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { useCities } from "@/hooks/use-Address";
-import { useEffect, useState } from "react";
 
-
-// interface City {
-//   arabic: string;
-//   english: string;
-//   value: string;
-// }
-
-
-
-const GovernorateSelect = ({ gov, setGov, onChange, value, disabled }: any) : React.JSX.Element => {
+const GovernorateSelect = ({
+  value,
+  onChange,
+  disabled,
+  setGovernorate,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  setGovernorate?: (governorate: string) => void;
+}): React.JSX.Element => {
   const { data: cities, isLoading, isError } = useCities();
 
-  const [selected, setSelected] = useState(gov || "");
-
-  useEffect(() => {
-    if (gov) setSelected(gov);
-  }, [gov]);
-
   const handleChange = (value: string) => {
-    setSelected(value);
-    if (setGov) setGov(value);
-    if (onChange) onChange(value);
+    onChange(value);
+    if (setGovernorate) setGovernorate(value);
   };
 
-  if (isLoading) {
-    return <p>...جاري تحميل المحافظات</p>;
-  }
-
-  if (isError) {
-    return <p className="text-red-500">فشل في تحميل المحافظات</p>;
-  }
-
-  const selectValue = gov || selected;
+  if (isLoading) return <p>...جاري تحميل المحافظات</p>;
+  if (isError) return <p className="text-red-500">فشل في تحميل المحافظات</p>;
 
   return (
     <Select
       dir="rtl"
-      name="governorate"
-      value={selectValue}
+      value={value}
       onValueChange={handleChange}
       disabled={disabled}
     >
-      <SelectTrigger className={`w-full border-0 bg-none border-b-2 border-b-gray-300 rounded-none ${disabled ? "" : "cursor-pointer hover:bg-accent"}`}>
-        <SelectValue placeholder={
-          cities?.find((city) => city.english === selectValue)?.arabic || "اختر محافظة"
-        } />
+      <SelectTrigger
+        className={`w-full border-0 bg-none border-b-2 border-b-gray-300 disabled:border-b-zinc-500 disabled:opacity-100 disabled:text-zinc-600 rounded-none ${
+          disabled ? "" : "cursor-pointer hover:bg-accent"
+        }`}
+      >
+        <SelectValue
+          placeholder={
+            cities?.find((city) => city.value === value)?.arabic ||
+            "اختر محافظة"
+          }
+        />
       </SelectTrigger>
       <SelectContent>
         {cities?.map((city) => (
@@ -65,6 +57,5 @@ const GovernorateSelect = ({ gov, setGov, onChange, value, disabled }: any) : Re
     </Select>
   );
 };
-
 
 export default GovernorateSelect;

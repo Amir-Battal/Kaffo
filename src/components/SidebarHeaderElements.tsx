@@ -14,8 +14,8 @@ const SidebarHeaderElements = () => {
     <div>
       <Link to="/user-profile" className="w-[100%] flex flex-row gap-2 p-1">
         <Avatar>
-          <AvatarImage src={`${currentUser.photoUrl}`} />
-          <AvatarFallback>K</AvatarFallback>
+          <AvatarImage className="object-cover object-center" src={`${currentUser.photoUrl}`} />
+          <AvatarFallback>{currentUser?.firstName.split("")[0]}</AvatarFallback>
         </Avatar>
         <div className="pt-1">
           <h1 className="text-sm">{currentUser.firstName} {currentUser.lastName}</h1>
