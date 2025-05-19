@@ -2,8 +2,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import PhotoUpdateOverlay from "./PhotoUpdateOverlay";
 import { useGetMyUser } from "@/hooks/use-user";
 
-const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
-
 const UserPhoto = ({ photoUrl }: { photoUrl?: string }) => {
 
   const { currentUser } = useGetMyUser();
