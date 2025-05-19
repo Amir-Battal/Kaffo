@@ -75,7 +75,6 @@ const UserProfilePage = () => {
 
   // console.log(initFile.split('assets/')[1]);
 
-
   return (
       <div className="w-full flex flex-row justify-between px-10 gap-10">
         <div className="w-[60%] flex flex-col">

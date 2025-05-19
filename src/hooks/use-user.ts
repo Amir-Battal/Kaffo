@@ -25,14 +25,16 @@ export const useGetMyUser = () => {
     data: currentUser,
     isLoading,
     error,
-  } = useQuery("fetchCurrentUser", getMyUserRequest);
+    refetch, // <-- أضف هذا هنا
+  } = useQuery(["fetchCurrentUser"], getMyUserRequest);
 
   if (error) {
     toast.error((error as Error).message);
   }
 
-  return { currentUser, isLoading };
+  return { currentUser, isLoading, refetch }; // <-- وأضفها هنا أيضاً
 };
+
 
 // ============= GET USER BY ID =============
 export const useGetUserById = (userId: string, options = {}) => {
@@ -194,11 +196,11 @@ export const useDeleteUser = () => {
 
 // ============= GET PHOTO Presigned URL =============
 export const useUploadUserPhoto = () => {
-  const getPresignedUrl = async (userId: number) => {
+  const getPresignedUrl = async (userId: any) => {
     const accessToken = keycloak.token;
 
     const res = await axios.post(
-      `${API_BASE_URL}/api/v1/users/${userId}/profile-photo?contentType=image/png`,
+      `${API_BASE_URL}/api/v1/users/${userId.userId}/profile-photo?contentType=${userId.contentType}`,
       undefined,
       {
         headers: {
