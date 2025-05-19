@@ -1,9 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { JSX, useEffect } from "react"
-
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -11,27 +9,34 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { ChevronLeft } from "lucide-react"
+import { Check, ChevronLeft } from "lucide-react"
 import { useUpdateUserBasicInfo } from "@/hooks/use-user"
-// import { toast } from "sonner"
+import { toast } from "sonner"
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    message: "يجب أن يحتوي الاسم الأول على حرفين على الأقل.",
   }),
   lastName: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
+    message: "يجب أن تحتوي الكنية على حرفين على الأقل.",
   }),
-  phone: z.string(),
+  phone: z.string().min(1, {
+    message: "رقم الهاتف مطلوب.",
+  }),
   email: z.string(),
 })
 
-export function EditMainForm({...props}): JSX.Element {
+type EditMainFormProps = {
+  user: any
+  isLoading: boolean
+  onSuccess?: () => void
+}
 
-  console.log(props.user);
-  const { updateUserBasicInfo } = useUpdateUserBasicInfo();
+export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps): JSX.Element {
+  const { updateUserBasicInfo } = useUpdateUserBasicInfo()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,41 +49,46 @@ export function EditMainForm({...props}): JSX.Element {
   })
 
   useEffect(() => {
-    if (props.user) {
+    if (user) {
       form.reset({
-        firstName: props.user.firstName || "",
-        lastName: props.user.lastName || "",
-        phone: props.user.phone || "",
-        email: props.user.email || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        phone: user.phone || "",
+        email: user.email || "",
       })
     }
-  }, [props.user, form])
+  }, [user, form])
 
-  if (props.isLoading) return <p>جاري التحميل...</p>
-  if (!props.user) return <p>لم يتم العثور على المستخدم</p>
+  if (isLoading) return <p>جاري التحميل...</p>
+  if (!user) return <p>لم يتم العثور على المستخدم</p>
 
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // if (!currentUser?._id) {
-    //   toast.error("لا يمكن تعديل المستخدم: المعرف غير موجود");
-    //   return;
-    // }
-    
-    updateUserBasicInfo({
-      id: props.user?.id,
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  try {
+    await updateUserBasicInfo({
+      id: user?.id,
       firstName: values.firstName,
       lastName: values.lastName,
       phone: values.phone,
       email: values.email,
     });
 
-    // load page to render new data
+    sessionStorage.setItem("showToast", "تم تعديل البيانات الأساسية بنجاح");
+    onSuccess?.();
     window.location.reload();
+  } catch (error) {
+    toast.error("فشل التعديل");
+    console.error("فشل التعديل", error);
   }
+}
+
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full grid grid-cols-2 gap-6 pt-5" dir="rtl">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 w-full grid grid-cols-2 gap-6 pt-5"
+        dir="rtl"
+      >
         <FormField
           control={form.control}
           name="firstName"
@@ -88,9 +98,11 @@ export function EditMainForm({...props}): JSX.Element {
               <FormControl>
                 <Input placeholder="أحمد" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="lastName"
@@ -100,9 +112,11 @@ export function EditMainForm({...props}): JSX.Element {
               <FormControl>
                 <Input placeholder="محمد" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="phone"
@@ -112,9 +126,11 @@ export function EditMainForm({...props}): JSX.Element {
               <FormControl dir="ltr" className="text-end">
                 <Input placeholder="0999 999 999" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="email"
@@ -124,16 +140,17 @@ export function EditMainForm({...props}): JSX.Element {
               <FormControl>
                 <Input placeholder="email@example.com" {...field} />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
 
-        <DialogPrimitive.Close>
+        <div className="col-span-2 flex justify-center">
           <Button type="submit" className="w-[60%] cursor-pointer">
             <h3>تأكيد التعديل</h3>
             <ChevronLeft />
           </Button>
-        </DialogPrimitive.Close>
+        </div>
       </form>
     </Form>
   )

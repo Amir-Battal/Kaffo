@@ -3,16 +3,14 @@ import { Separator } from "@/components/ui/separator";
 import UserPhoto from "@/forms/user-profile-form/UserPhoto";
 import EditOverlay from "@/forms/user-profile-form/EditOverlay";
 import { SecondaryForm } from "@/forms/user-profile-form/SecondaryForm";
-// import { Label } from "@radix-ui/react-label";
-// import { Input } from "@/components/ui/input";
-// import { useState } from "react";
-// import { Button } from "@/components/ui/button";
-// import { Upload } from "lucide-react";
 import DeleteOverlay from "@/forms/user-profile-form/DeleteOverlay";
 import { useGetMyUser } from "@/hooks/use-user";
 import { User } from "@/types";
+import UploadCvButton from "@/forms/user-profile-form/UploadCvButton";
+import { Check, FileText } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-// import initFile from '../assets/Amir-Battal-Resume V3.4.0.pdf';
 
 const UserProfilePage = () => {
 
@@ -29,53 +27,29 @@ const UserProfilePage = () => {
         !!user.addressId // نتحقق فقط من وجود ID، لأن البيانات الكاملة تُجلب لاحقًا
       );
     };
-    
 
-  // const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-
-
-  // const handleCVUpload = async () => {
-  //   if (!selectedFile) {
-  //     // alert("يرجى اختيار ملف PDF أولاً.");
-  //     console.log("يرجى اختيار ملف PDF أولاً.");
-  //     return;
-  //   }
-  
-  //   if (selectedFile.type !== "application/pdf") {
-  //     // alert("الرجاء رفع ملف بصيغة PDF فقط.");
-  //     console.log("الرجاء رفع ملف بصيغة PDF فقط.");
-  //     return;
-  //   }
-  
-  //   const formData = new FormData();
-  //   formData.append('resume', selectedFile);
-  
-  //   try {
-  //     const response = await fetch('http://localhost:4000/upload-resume', {
-  //       method: 'POST',
-  //       body: formData,
-  //     });
-  
-  //     const data = await response.json();
-  //     console.log("✅ تم رفع السيرة الذاتية:", data.fileName);
-  //     // alert("تم رفع السيرة الذاتية بنجاح.");
-
-  //     setUploadedFileName(data.fileName);
-
-  //     // بإمكانك تخزين الرابط أو عرضه لاحقًا
-  //   } catch (err) {
-  //     console.error("❌ فشل رفع السيرة الذاتية", err);
-  //     // alert("حدث خطأ أثناء رفع الملف.");
-  //   }
-  // };
-  
-
-
-  // const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-  // console.log(initFile.split('assets/')[1]);
-
+    useEffect(() => {
+      const toastMessage = sessionStorage.getItem("showToast");
+      if (toastMessage) {
+        toast(toastMessage,{
+          style:{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '20px',
+            background: '#008c2f',
+            color: '#fff',
+            direction: 'rtl',
+            border: 'none',
+          },
+          icon: <Check />,
+          closeButton: true
+        })
+        sessionStorage.removeItem("showToast");
+      }
+    }, []);
+      
   return (
+    <div className="flex flex-col">
       <div className="w-full flex flex-row justify-between px-10 gap-10">
         <div className="w-[60%] flex flex-col">
           <div className="w-full">
@@ -101,33 +75,26 @@ const UserProfilePage = () => {
 
         <div className="w-[40%] h-full flex flex-col gap-30 justify-between items-center">
           <UserPhoto photoUrl={currentUser?.photoUrl} />
-          {/* <div className="w-full pr-20 flex flex-col gap-5">
-            <div className="grid w-full max-w-sm gap-1.5">
-              <Label htmlFor="picture">السيرة الذاتية</Label>
-              <Input id="picture" type="file" onChange={(e: any) => setSelectedFile(e.target.files[0])} /> */}
 
-              {/* // عرض السيرة الذاتية */}
-              {/* {uploadedFileName && (
-                <a
-                  href={`http://localhost:4000/resumes/${uploadedFileName}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 underline mt-2"
-                >
-                  عرض السيرة الذاتية
-                </a>
-              )} */}
+          <div className="flex flex-col gap-10 justify-center items-center pr-20">
+            {currentUser?.cvUrl && (
+              <a
+                href={currentUser.cvUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-black text-white w-full text-center px-4 py-2 rounded-lg hover:bg-zinc-800 underline flex flex-row justify-between"
+              >
+                <h3>عرض السيرة الذاتية</h3>
+                <FileText />
+              </a>
+            )}
+            <UploadCvButton userId={Number(currentUser?.id)} />
+          </div>
 
-            {/* </div> */}
-
-            {/* <Button className="cursor-pointer w-[50%]" type="button" onClick={handleCVUpload}>
-              <h3>رفع السيرة الذاتية</h3>
-              <Upload />
-            </Button> */}
-          {/* </div> */}
-          <DeleteOverlay userId={currentUser?.id} />
         </div>
       </div>
+      <DeleteOverlay userId={currentUser?.id} />
+    </div>
   );
 };
 

@@ -7,6 +7,7 @@ import AppRoutes from './AppRoutes'
 import keycloak from './lib/keycloak';
 
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { Toaster } from 'sonner';
 
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ keycloak.init({
     <StrictMode>
       <Router>
         <QueryClientProvider client={queryClient}>
+          <Toaster />
           <AppRoutes />
         </QueryClientProvider>
       </Router>

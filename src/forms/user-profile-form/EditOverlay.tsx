@@ -7,15 +7,14 @@ import {
 } from "@/components/ui/dialog"
 import { Edit } from "lucide-react";
 import { EditMainForm } from "./EditMainForm";
-import { JSX } from "react";
+import { JSX, useState } from "react";
 
-
-const EditOverlay = ({...props}): JSX.Element => {
-
+const EditOverlay = ({ ...props }): JSX.Element => {
+  const [open, setOpen] = useState(false); // التحكم بفتح/إغلاق الـ Dialog
 
   return (
     <div>
-      <Dialog>
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger className="flex flex-col items-center cursor-pointer">
           <Edit />
           <h3>تعديل</h3>
@@ -23,12 +22,14 @@ const EditOverlay = ({...props}): JSX.Element => {
         <DialogContent>
           <DialogHeader className="flex flex-row-reverse">
             <DialogTitle>تعديل البيانات الأساسية</DialogTitle>
-            {/* <DialogDescription>
-              This action cannot be undone. This will permanently delete your account
-              and remove your data from our servers.
-            </DialogDescription> */}
           </DialogHeader>
-          <EditMainForm user={props.user} isLoading={props.isLoading} />
+
+          {/* تمرير onSuccess لإغلاق الـ Dialog بعد النجاح */}
+          <EditMainForm
+            user={props.user}
+            isLoading={props.isLoading}
+            onSuccess={() => setOpen(false)}
+          />
         </DialogContent>
       </Dialog>
     </div>

@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import keycloak from "@/lib/keycloak";
 import { User } from "@/types";
+import { Check } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -147,7 +148,18 @@ export const  useUpdateUserBasicInfo = () => {
   } = useMutation(updateUserBasicInfoRequest);
 
   if (isSuccess) {
-    toast.success("تم تحديث البيانات الأساسية بنجاح!");
+    toast("تم تعديل البيانات الأساسية بنجاح",{
+      style:{
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        background: '#008c2f',
+        color: '#fff',
+        direction: 'rtl',
+        border: 'none',
+      },
+      closeButton: true
+    })
   }
 
   if (error) {
@@ -211,6 +223,32 @@ export const useUploadUserPhoto = () => {
 
     const presignedUrl = res.data;
     const accessUrl = presignedUrl.split('?')[0];
+
+    return { presignedUrl, accessUrl };
+  };
+
+  return useMutation(getPresignedUrl);
+};
+
+
+
+// ============= GET CV Presigned URL =============
+export const useUploadUserCv = () => {
+  const getPresignedUrl = async ({ userId, contentType }: { userId: number; contentType: string }) => {
+    const accessToken = keycloak.token;
+
+    const res = await axios.post(
+      `${API_BASE_URL}/api/v1/users/${userId}/cv?contentType=${contentType}`,
+      undefined,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    const presignedUrl = res.data;
+    const accessUrl = presignedUrl.split('?')[0]; // يمكن استخدامه لاحقًا لعرض الـ CV
 
     return { presignedUrl, accessUrl };
   };

@@ -55,9 +55,9 @@ export default function DatePicker({ ...props }): React.JSX.Element {
       <PopoverTrigger disabled={isDisabled}>
         <Button
           type="button"
-          className={`w-full ${isDisabled ? "text-gray-400 hover:bg-inherit" : "text-gray-600 hover:bg-accent"} bg-inherit border-0 border-b-2 border-b-gray-300 rounded-none flex flex-row justify-between`}
+          className={`w-full ${isDisabled ? "text-zinc-600 hover:bg-inherit" : "text-gray-600 hover:bg-accent"} bg-inherit border-0 border-b-2 border-b-zinc-500 rounded-none flex flex-row justify-between`}
         >
-          {date ? format(date, "PPP") : <span className="text-gray-400">{dateFormula}</span>}
+          {date ? format(date, "PPP") : <span className="disabled:text-zinc-600">{dateFormula}</span>}
           <CalendarIcon />
         </Button>
       </PopoverTrigger>

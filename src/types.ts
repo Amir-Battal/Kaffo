@@ -7,6 +7,7 @@ export type User = {
   phone?: string;
 
   photoUrl?: string;
+  cvUrl?: string;
 
   dateOfBirth?: Date;
   collegeDegree?: string;

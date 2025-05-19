@@ -212,7 +212,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
           : prop.name === "/user-profile" 
           ?(
             <BreadcrumbItem>
-              <BreadcrumbLink className="flex flex-row items-center gap-2" href="/user-profile">
+              <BreadcrumbLink className="flex flex-row items-center gap-2">
                 <User />
                 <h3>الملف الشخصي</h3>
               </BreadcrumbLink>

@@ -29,10 +29,10 @@ const DeleteOverlay = ({...props}): JSX.Element => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-row justify-end">
       <Dialog>
-        <DialogTrigger className="w-full items-center cursor-pointer pr-20">
-          <Button className="w-[80%] h-[40px] flex flex-row gap-10 cursor-pointer text-red-500">
+        <DialogTrigger className="w-full items-center cursor-pointer">
+          <Button className="w-full h-[40px] flex flex-row gap-10 cursor-pointer text-red-500 rounded-none">
             <h3>حذف الحساب</h3>
             <Delete />
           </Button>
