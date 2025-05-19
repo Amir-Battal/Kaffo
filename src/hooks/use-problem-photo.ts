@@ -10,7 +10,7 @@ type ProblemPhotoDTO = {
   id: number;
   problemId: number;
   photoUrl: string;
-  photoDate: string;
+  s3Key: string;
 };
 
 // ============= GET PHOTOS BY PROBLEM ID =============
@@ -18,13 +18,13 @@ export const useGetProblemPhotos = (problemId: number) => {
   const fetchPhotos = async (): Promise<ProblemPhotoDTO[]> => {
     const accessToken = keycloak.token;
 
-    const response = await axios.get(`${API_BASE_URL}/api/v1/problem-photos/by-problem/${problemId}`, {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/problem/${problemId}/photos`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     });
-
+    
     return response.data;
   };
 
@@ -37,106 +37,76 @@ export const useGetProblemPhotos = (problemId: number) => {
   return { photos: data ?? [], isLoading };
 };
 
-// ============= CREATE PHOTO (BY URL) =============
-type CreateProblemPhotoInput = {
-  problemId: number;
-  file: File;
-};
 
-export const useCreateProblemPhoto = () => {
-  const queryClient = useQueryClient();
-
-  const createPhoto = async ({ problemId, file }: CreateProblemPhotoInput) => {
+export const usePresignedUpload = () => {
+  const getPresignedUrls = async (
+    problemId: number,
+    count: number,
+    contentType: string = "image/jpeg"
+  ): Promise<{ presignedUrl: string; s3Key: string }[]> => {
     const accessToken = keycloak.token;
+    const response = await fetch(
+      `${API_BASE_URL}/api/v1/problem/${problemId}/photos?count=${count}&contentType=${contentType}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
-    // 1. طلب Presigned PUT URL
-    const presignRes = await fetch(`${API_BASE_URL}/api/v1/problem-photos/presign?problemId=${problemId}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    if (!response.ok) {
+      throw new Error("فشل في جلب روابط التحميل الموقعة");
+    }
 
-    if (!presignRes.ok) throw new Error("فشل في جلب presigned URL");
+    return response.json();
+  };
 
-    const { s3Key: presignedUrl } = await presignRes.json();
-
-    // 2. رفع الصورة إلى S3
-    const uploadRes = await fetch(presignedUrl, {
+  const uploadFileToS3 = async (url: string, file: File): Promise<void> => {
+    const res = await fetch(url, {
       method: "PUT",
+      body: file,
       headers: {
         "Content-Type": file.type,
       },
-      body: file,
     });
 
-    if (!uploadRes.ok) throw new Error("فشل في رفع الصورة إلى S3");
-
-    // 3. إنشاء سجل الصورة في قاعدة البيانات باستخدام نفس الـ presigned URL بدون query params (إن أمكن)
-    const photoUrl = presignedUrl.split("?")[0]; // لإزالة التواقيع المؤقتة
-
-    const createPhotoRes = await axios.post(`${API_BASE_URL}/api/v1/problem-photos`, {
-      problemId,
-      photoUrl,
-    }, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    return createPhotoRes.data;
+    if (!res.ok) {
+      throw new Error(`فشل رفع الصورة: ${file.name}`);
+    }
   };
 
-  const {
-    mutateAsync: createProblemPhoto,
-    isLoading,
-    error,
-  } = useMutation(createPhoto, {
-    onSuccess: () => {
-      toast.success("✅ تم رفع صورة المشكلة!");
-      queryClient.invalidateQueries("problemPhotos");
-    },
-    onError: () => {
-      toast.error("❌ فشل رفع صورة المشكلة");
-    },
-  });
-
-  return { createProblemPhoto, isLoading };
+  return { getPresignedUrls, uploadFileToS3 };
 };
 
 
-
-// ============= DELETE PHOTO =============
+// ============= DELETE SINGLE PHOTO =============
 export const useDeleteProblemPhoto = () => {
   const queryClient = useQueryClient();
 
-  const deletePhoto = async (photoId: number) => {
-    const accessToken = keycloak.token;
-
-    await axios.delete(`${API_BASE_URL}/api/v1/problem-photos/${photoId}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
-  };
-
-  const {
-    mutateAsync: deleteProblemPhoto,
-    isLoading,
-    error,
-  } = useMutation(deletePhoto, {
-    onSuccess: () => {
-      toast.success("تم حذف الصورة بنجاح!");
-      queryClient.invalidateQueries("problemPhotos");
+  const mutation = useMutation(
+    async ({ problemId, photoId }: { problemId: number; photoId: number }) => {
+      const accessToken = keycloak.token;
+      await axios.delete(
+        `${API_BASE_URL}/api/v1/problem/${problemId}/photos/${photoId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
     },
-  });
+    {
+      onSuccess: (_, { problemId }) => {
+        queryClient.invalidateQueries(["problemPhotos", problemId]);
+        toast.success("تم حذف الصورة بنجاح");
+      },
+      onError: () => {
+        toast.error("فشل في حذف الصورة");
+      },
+    }
+  );
 
-  if (error) {
-    toast.error("فشل في حذف الصورة");
-  }
-
-  return { deleteProblemPhoto, isLoading };
+  return mutation;
 };
+

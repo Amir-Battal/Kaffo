@@ -19,6 +19,7 @@ import MapPicker from "@/components/MapPicker"
 import { useGetProblemById, useUpdateProblem } from "@/hooks/use-problem"
 import { useAddress, useUpdateAddress } from "@/hooks/use-Address"
 import { useCategory, useUpdateCategory } from "@/hooks/use-category"
+import ProblemImageManager from "./ProblemImageManager"
 
 const formSchema = z.object({
   title: z.string(),
@@ -225,6 +226,11 @@ export function EditProblemForm({ problemId }: EditProp) {
             <p>📍 الموقع الحالي: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}</p>
           </div>
         </div>
+
+        {problemId && (
+          <ProblemImageManager problemId={problemId} />
+        )}
+
 
         {/* <DialogPrimitive.Close> */}
           <Button type="submit" className="cursor-pointer mt-5">
