@@ -208,31 +208,44 @@ export const useGetProblemsByUser = (userId: number) => {
 
 
 // ============= GET PROBLEMS BY MY USER =============
-export const useGetMyProblems = () => {
+export const useGetMyProblems = (
+  { page, size = 6, sort = [] }: GetProblemsParams,
+  criteria: ProblemCriteria
+) => {
   const accessToken = keycloak.token;
 
-  const fetchMyProblems = async (): Promise<ProblemDTO[]> => {
+  const fetchMyProblems = async (): Promise<ProblemPageResponse> => {
     const response = await axios.get(`${API_BASE_URL}/api/v1/problems/me`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
+      params: {
+        page,
+        size,
+        sort,
+        ...criteria,
+      },
     });
     return response.data;
   };
 
-  const { data, isLoading, isError, error } = useQuery("myProblems", fetchMyProblems);
+  const queryKey = ["myProblems", page, size, sort, criteria];
+
+  const { data, isLoading, isError, error } = useQuery(queryKey, fetchMyProblems);
 
   if (error) {
     toast.error((error as Error).message);
   }
 
   return {
-    problems: data ?? [],
+    problems: data?.content ?? [],
+    totalPages: data?.totalPages ?? 1,
     isLoading,
     isError,
   };
 };
+
 
 
 
