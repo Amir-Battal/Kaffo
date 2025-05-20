@@ -5,75 +5,79 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { toast } from "sonner";
-import {
-  useAllCategories,
-  useCategoriesByGovId,
-  useCreateCategory,
-} from "@/hooks/use-category";
+import { useAllCategories, useCategoriesByGovId } from "@/hooks/use-category";
 
-interface ProblemCategorySelectProps {
-  value?: number; // Make sure to pass category ID as a number
+type Category = {
+  id: number;
+  name: string;
+};
+
+type ProblemCategorySelectProps = {
+  value: number | null;
   onChange: (id: number) => void;
-  userGovId?: number; // لو عنده govId فهو جهة معنية
+  ministry?: number; // govId
   disabled?: boolean;
-  setCategory?: (category: string) => void;
+  setCategory?: (name: string) => void;
   category?: string;
-}
+};
 
 const ProblemCategorySelect = ({
   value,
   onChange,
-  userGovId,
+  ministry,
   disabled = false,
   setCategory,
-  category
+  category,
 }: ProblemCategorySelectProps) => {
-
+  // جلب التصنيفات حسب وجود الوزارة (الجهة المعنية)
   const {
     data: categories,
     isLoading,
-  } = userGovId ? useCategoriesByGovId(userGovId) : useAllCategories();
+  } = ministry ? useCategoriesByGovId(ministry) : useAllCategories();
 
-  const createCategory = useCreateCategory();
 
-  const handleSelectChange = (selected: string) => {
-    const selectedCategory = categories?.find((c) => c.name === selected);
-    if (setCategory && selectedCategory?.name) {
-      setCategory(selectedCategory.name); // Update the category name (optional)
-    }
+  const selected = Array.isArray(categories)
+    ? categories.find((c) => c.id === value)
+    : null;
+
+  const displayName = selected?.name || "اختر التصنيف";
+
+  const handleSelectChange = (selectedName: string) => {
+    const selectedCategory = Array.isArray(categories)
+      ? categories.find((c) => c.name === selectedName)
+      : null;
 
     if (selectedCategory) {
-      onChange(selectedCategory.id); // Send category ID to parent component
+      onChange(selectedCategory.id); // إرسال المعرف (ID)
+      setCategory?.(selectedCategory.name); // إرسال الاسم إذا توفر
     }
   };
 
-
-
-  const selectedCategoryName = categories?.find((c) => c.id === value)?.name || "";
-
   return (
-    <div className="flex flex-col gap-2">
-      <Select
-        value={category || selectedCategoryName} // Ensure value reflects category name
-        onValueChange={handleSelectChange}
-        disabled={disabled || isLoading}
-        dir="rtl"
-      >
-        <SelectTrigger className="w-full border-0 border-b-2 border-gray-300 rounded-none bg-white hover:bg-accent">
-          <SelectValue placeholder="اختر تصنيف المشكلة" />
-        </SelectTrigger>
-        <SelectContent>
-          {categories?.map((cat) => (
-            <SelectItem key={cat.id} value={cat.name}>
-              {cat.name}
+    <Select
+      dir="rtl"
+      onValueChange={handleSelectChange}
+      value={selected?.name || ""}
+      disabled={ministry ? disabled : true}
+    >
+      <SelectTrigger className="w-full border-0 border-b-2 border-b-gray-300 rounded-none cursor-pointer hover:bg-accent">
+        <SelectValue placeholder={displayName} />
+      </SelectTrigger>
+      <SelectContent>
+        {isLoading ? (
+          <SelectItem value="loading" disabled>
+            جاري التحميل...
+          </SelectItem>
+        ) : (
+          Array.isArray(categories) &&
+          categories.map((c: Category) => (
+            <SelectItem key={c.id} value={c.name}>
+              {c.name}
             </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+          ))
+        )}
+      </SelectContent>
+    </Select>
   );
 };
 

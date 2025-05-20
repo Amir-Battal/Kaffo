@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -12,7 +12,7 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Plus } from "lucide-react"
+import { Check, Plus } from "lucide-react"
 import ProblemCategorySelect from "@/components/ProblemCategorySelect"
 import GovernorateSelect from "@/components/GovernorateSelect"
 import MapPicker from "@/components/MapPicker"
@@ -22,8 +22,8 @@ import { useCreateProblem, useUpdateProblem } from "@/hooks/use-problem"
 import { useCreateAddress } from "@/hooks/use-Address"
 import { usePresignedUpload } from "@/hooks/use-problem-photo"
 import { toast } from "sonner"
+import MinistriesSelect from "@/components/MinistriesSelect"
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const formSchema = z.object({
   title: z.string().min(1, "العنوان مطلوب"),
@@ -35,6 +35,7 @@ const formSchema = z.object({
   lng: z.number(),
   images: z.array(z.instanceof(File)).optional(),
 })
+
 
 export function NewProblemForm() {
   const { createProblem, isLoading } = useCreateProblem()
@@ -48,6 +49,9 @@ export function NewProblemForm() {
   })
 
   const [selectedImages, setSelectedImages] = useState<File[]>([])
+
+  const [ministryId, setMinistryId] = useState<number | null>(null);
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,6 +87,7 @@ export function NewProblemForm() {
       alert("المتصفح لا يدعم ميزة الموقع الجغرافي.")
     }
   }
+
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
   try {
@@ -155,8 +160,7 @@ export function NewProblemForm() {
     }
 
     sessionStorage.setItem("showToastDone", "تم إنشاء المشكلة بنجاح");
-    // toast.success("تم إنشاء المشكلة بنجاح!");
-    // window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
+    window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
   } catch (err) {
     toast.error("فشل في إنشاء المشكلة");
     console.error(err);
@@ -192,6 +196,13 @@ export function NewProblemForm() {
                 </FormItem>
               )}
             />
+            
+            <div className="flex flex-col gap-2">
+              <h1>الوزارة</h1>
+              <MinistriesSelect setMinistry={(name, id) => setMinistryId(id)} />
+            </div>
+
+
             <FormField
               control={form.control}
               name="categoryId"
@@ -202,7 +213,9 @@ export function NewProblemForm() {
                     <ProblemCategorySelect
                       value={field.value}
                       onChange={field.onChange}
+                      ministry={ministryId}
                     />
+
                   </FormControl>
                 </FormItem>
               )}
