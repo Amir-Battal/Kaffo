@@ -28,7 +28,7 @@ export const useCreateCategory = () => {
     },
     {
       onSuccess: () => {
-        toast.success("تم إنشاء الصنف بنجاح!");
+        // toast.success("تم إنشاء الصنف بنجاح!");
         queryClient.invalidateQueries("categories");
       },
       onError: (error: any) => {
@@ -110,7 +110,7 @@ export const useUpdateCategory = () => {
     },
     {
       onSuccess: () => {
-        toast.success("تم تحديث الصنف بنجاح!");
+        // toast.success("تم تحديث الصنف بنجاح!");
         queryClient.invalidateQueries("categories");
       },
       onError: (error: any) => {

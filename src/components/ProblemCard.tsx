@@ -52,8 +52,8 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
       <div className="bg-gray-500 w-full h-[170px] relative">
           {myAucation && (
             <div className="flex flex-row gap-2 absolute m-2 z-10">
-              <ProblemOverlay isMyAucation status={"edit"} />
-              <ProblemOverlay isMyAucation status={"delete"} />
+              <ProblemOverlay isMyAucation problemId={problem.id} status={"edit"} />
+              <ProblemOverlay isMyAucation problemId={problem.id} status={"delete"} />
             </div>
           )}
           {isPhotoLoading ? (

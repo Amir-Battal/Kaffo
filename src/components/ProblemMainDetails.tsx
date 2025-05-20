@@ -6,7 +6,7 @@ import ContributionForm from "@/forms/contribution-form/ContributionForm";
 import DonationForm from "@/forms/donation-form/DonationForm";
 import ContributionCard from "@/forms/contribution-form/ContributionCard";
 import PaginationComp from "./PaginationComp";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import UserCard from "./UserCard";
 import SolveControl from "./SolveControl";
 import { useParams } from "react-router-dom";
@@ -19,6 +19,7 @@ import keycloak from "@/lib/keycloak";
 import { jwtDecode } from "jwt-decode";
 import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
 import ImageGallery from "./ImageGallery";
+import { toast } from "sonner";
 
 
 
@@ -64,6 +65,26 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   const roles = decoded?.resource_access?.["kafu-client"]?.roles ?? [];
   const isGov = roles.includes("ROLE_GOV");
 
+
+  useEffect(() => {
+      const toastMessage = sessionStorage.getItem("showToastDone");
+      if (toastMessage) {
+        toast(toastMessage,{
+          style:{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '20px',
+            background: '#008c2f',
+            color: '#fff',
+            direction: 'rtl',
+            border: 'none',
+          },
+          icon: <Check />,
+          closeButton: true
+        })
+        sessionStorage.removeItem("showToastDone");
+      }
+    }, []);
 
 
   if (isProblemLoading) return <div>جاري تحميل التفاصيل...</div>;
@@ -147,7 +168,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
             {isGov ? <SolveControl /> : (
               <div className="flex flex-row gap-5">
                 <ProblemOverlay problemId={prop.problemId} status="edit" />
-                <ProblemOverlay status="delete" />
+                <ProblemOverlay problemId={prop.problemId} status="delete" />
               </div>
             )}
           </div>

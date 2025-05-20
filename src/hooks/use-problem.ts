@@ -10,7 +10,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 type GetProblemsParams = {
   page: number;
   size?: number;
-  sort?: string[]; // مثل ["submissionDate,desc"]
+  sort?: string; // مثل ["submissionDate,desc"]
 };
 
 type ProblemPageResponse = {
@@ -276,7 +276,7 @@ export const useCreateProblem = () => {
     reset,
   } = useMutation(createProblemRequest, {
     onSuccess: () => {
-      toast.success("تم إنشاء المشكلة بنجاح!");
+      // toast.success("تم إنشاء المشكلة بنجاح!");
       queryClient.invalidateQueries("fetchProblems");
     },
   });
@@ -319,18 +319,17 @@ export const useUpdateProblem = () => {
     reset,
   } = useMutation(updateProblemRequest, {
     onSuccess: () => {
-      toast.success("تم تحديث المشكلة بنجاح!");
+      // toast.success("تم تحديث المشكلة بنجاح!");
       queryClient.invalidateQueries("fetchProblems");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message);
     },
   });
 
-  if (error) {
-    toast.error((error as Error).message);
-    reset();
-  }
-
-  return { updateProblem, isLoading };
+  return { updateProblem, isLoading, isSuccess, error, reset };
 };
+
 
 // ============= DELETE PROBLEM =============
 export const useDeleteProblem = () => {
@@ -354,7 +353,7 @@ export const useDeleteProblem = () => {
     error,
   } = useMutation(deleteProblemRequest, {
     onSuccess: () => {
-      toast.success("تم حذف المشكلة بنجاح");
+      // toast.success("تم حذف المشكلة بنجاح");
       queryClient.invalidateQueries("fetchProblems");
     },
   });

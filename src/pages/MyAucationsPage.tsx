@@ -3,6 +3,8 @@ import ProblemCard from "@/components/ProblemCard";
 import ProblemHeader from "@/components/ProblemHeader";
 import PaginationComp from "@/components/PaginationComp";
 import { useGetMyProblems } from "@/hooks/use-problem";
+import { toast } from "sonner";
+import { Check } from "lucide-react";
 
 const MyAucationsPage = () => {
   const [page, setPage] = useState(0);
@@ -11,6 +13,26 @@ const MyAucationsPage = () => {
   useEffect(() => {
     setPage(0); // كلما تغيّر الفلتر، نرجع لأول صفحة
   }, [criteria]);
+
+  useEffect(() => {
+      const toastMessage = sessionStorage.getItem("showToastDelete");
+      if (toastMessage) {
+        toast(toastMessage,{
+          style:{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '20px',
+            background: '#008c2f',
+            color: '#fff',
+            direction: 'rtl',
+            border: 'none',
+          },
+          icon: <Check />,
+          closeButton: true
+        })
+        sessionStorage.removeItem("showToastDelete");
+      }
+    }, []);
 
   const { problems, totalPages, isLoading } = useGetMyProblems(
     { page, size: 6 },

@@ -31,8 +31,6 @@ const ProblemCategorySelect = ({
   setCategory,
   category
 }: ProblemCategorySelectProps) => {
-  const [isCustom, setIsCustom] = useState(false);
-  const [customName, setCustomName] = useState("");
 
   const {
     data: categories,
@@ -42,45 +40,17 @@ const ProblemCategorySelect = ({
   const createCategory = useCreateCategory();
 
   const handleSelectChange = (selected: string) => {
-    if (selected === "__custom__") {
-      setIsCustom(true);
-      onChange(0); // Clear current selection when selecting "Add Custom"
-    } else {
-      setIsCustom(false);
-      const selectedCategory = categories?.find((c) => c.name === selected);
-      if (setCategory && selectedCategory?.name) {
-        setCategory(selectedCategory.name); // Update the category name (optional)
-      }
+    const selectedCategory = categories?.find((c) => c.name === selected);
+    if (setCategory && selectedCategory?.name) {
+      setCategory(selectedCategory.name); // Update the category name (optional)
+    }
 
-      if (selectedCategory) {
-        onChange(selectedCategory.id); // Send category ID to parent component
-      }
+    if (selectedCategory) {
+      onChange(selectedCategory.id); // Send category ID to parent component
     }
   };
 
 
-  const handleAddCustom = async () => {
-    if (!customName.trim()) {
-      toast.error("يرجى كتابة اسم التصنيف الجديد");
-      return;
-    }
-
-    try {
-      const newCategory = await createCategory.mutateAsync({
-        name: customName.trim(),
-        govId: 1, // دائماً 0، وسيقوم المشرف لاحقاً بإسناده
-      });
-
-      setCustomName("");
-      setIsCustom(false);
-      onChange(newCategory.id); // Return the new category's ID
-      toast.success("تم إنشاء التصنيف الجديد");
-
-      // Optionally, re-fetch categories or add the new category to the list
-    } catch (err) {
-      toast.error("فشل في إنشاء التصنيف");
-    }
-  };
 
   const selectedCategoryName = categories?.find((c) => c.id === value)?.name || "";
 
@@ -101,27 +71,8 @@ const ProblemCategorySelect = ({
               {cat.name}
             </SelectItem>
           ))}
-          <SelectItem value="__custom__">+ إضافة تصنيف جديد</SelectItem>
         </SelectContent>
       </Select>
-
-      {isCustom && (
-        <div className="flex gap-2 mt-2">
-          <Input
-            dir="rtl"
-            placeholder="اكتب اسم التصنيف الجديد"
-            value={customName}
-            onChange={(e) => setCustomName(e.target.value)}
-          />
-          <button
-            className="bg-primary text-white px-4 rounded"
-            onClick={handleAddCustom}
-            disabled={createCategory.isLoading}
-          >
-            إضافة
-          </button>
-        </div>
-      )}
     </div>
   );
 };

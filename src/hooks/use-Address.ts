@@ -69,7 +69,7 @@ export const useCreateAddress = () => {
     },
     {
       onSuccess: () => {
-        toast.success("تم إنشاء العنوان بنجاح!");
+        // toast.success("تم إنشاء العنوان بنجاح!");
         queryClient.invalidateQueries("addresses");
       },
       onError: (error: any) => {
@@ -95,7 +95,7 @@ export const useUpdateAddress = () => {
     },
     {
       onSuccess: () => {
-        toast.success("تم تحديث العنوان بنجاح!");
+        // toast.success("تم تحديث العنوان بنجاح!");
         queryClient.invalidateQueries("addresses");
       },
       onError: (error: any) => {
@@ -119,7 +119,7 @@ export const useDeleteAddress = () => {
     },
     {
       onSuccess: () => {
-        toast.success("تم حذف العنوان بنجاح!");
+        // toast.success("تم حذف العنوان بنجاح!");
         queryClient.invalidateQueries("addresses");
       },
       onError: (error: any) => {
