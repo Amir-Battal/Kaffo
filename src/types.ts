@@ -53,6 +53,6 @@ export interface SolutionDTO {
   startDate: string;
   endDate: string;
   rating: number;
-  problemId: number;
+  problemId?: number;
   proposedByUserId: number;
 };
