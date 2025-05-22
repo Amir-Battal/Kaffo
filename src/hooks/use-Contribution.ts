@@ -139,3 +139,25 @@ export const useDeleteContribution = (problemId: number, solutionId: number) => 
   });
 };
 
+
+
+export const useGetAcceptedContribution = (problemId: number) => {
+  const accessToken = keycloak.token;
+
+  return useQuery<SolutionDTO | null>({
+    queryKey: ["acceptedContribution", problemId],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const allSolutions: SolutionDTO[] = res.data;
+      const acceptedSolution = allSolutions.find((sol) => sol.status === "ACCEPTED") ?? null;
+
+      return acceptedSolution;
+    },
+    enabled: !!problemId,
+  });
+};

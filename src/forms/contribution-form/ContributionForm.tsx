@@ -74,6 +74,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
       description: data.contribution,
       estimatedCost: data.budget,
       problemId,
+      status: "PENDING_APPROVAL",
     };
     console.log(payload);
 

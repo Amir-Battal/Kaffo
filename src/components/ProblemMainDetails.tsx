@@ -20,6 +20,7 @@ import { jwtDecode } from "jwt-decode";
 import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
 import ImageGallery from "./ImageGallery";
 import { toast } from "sonner";
+import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
 
 
 
@@ -49,6 +50,10 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   const { data: category } = useCategory(categoryId ?? 0);
   const { data: user, isLoading: userLoading } = useGetUserById(submittedByUserId?.toString() ?? "");
   const { data: cities } = useCities();
+
+  const { data: acceptedContribution } = useGetAcceptedContribution(Number(problemId));
+  const { data: proposedUser } = useGetUserById(acceptedContribution?.proposedByUserId ?? "");
+
 
   const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 
@@ -138,12 +143,15 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
           <div className="flex flex-col gap-20">
             <div className="flex flex-col gap-5">
               <h1 className="text-2xl">شارك في حل المشكلة وقم بالتبرع</h1>
-              <ContributionCard
-                username={user?.firstName + " " + user?.lastName }
-                date={problem.createdDate}
-                contribution={problem.solutionProposal ?? ""}
-                budget={problem.requiredBudget ?? 0}
-              />
+              {acceptedContribution && proposedUser && (
+                <ContributionCard
+                  username={`${proposedUser.firstName} ${proposedUser.lastName}`}
+                  date={acceptedContribution.startDate}
+                  contribution={acceptedContribution.description}
+                  budget={acceptedContribution.estimatedCost}
+                />
+              )}
+
             </div>
             <div className="flex flex-col gap-10">
               <div className="flex flex-col gap-5">
@@ -154,13 +162,15 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                     <Check size={30} />
                   </div>
                 ) : null}
-                <h3>التبرع بجزء من المبلغ</h3>
+                <h3>التبرع بجزء من المبلغ</h3>  
               </div>
               <DonationForm
-                setDonation={setDonation}
-                setIsDonated={setIsDonated}
-                max={problem.requiredBudget ?? 0}
-              />
+                  max={acceptedContribution?.estimatedCost || 0}
+                  setDonation={setDonation}
+                  setIsDonated={setIsDonated}
+                  problemId={problemId}
+                />
+
             </div>
           </div>
         ) : (
