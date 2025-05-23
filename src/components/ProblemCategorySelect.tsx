@@ -19,6 +19,7 @@ type ProblemCategorySelectProps = {
   disabled?: boolean;
   setCategory?: (name: string) => void;
   category?: string;
+  header?: boolean;
 };
 
 const ProblemCategorySelect = ({
@@ -28,6 +29,7 @@ const ProblemCategorySelect = ({
   disabled = false,
   setCategory,
   category,
+  header,
 }: ProblemCategorySelectProps) => {
   // جلب التصنيفات حسب وجود الوزارة (الجهة المعنية)
   const {
@@ -58,7 +60,7 @@ const ProblemCategorySelect = ({
       dir="rtl"
       onValueChange={handleSelectChange}
       value={selected?.name || ""}
-      disabled={ministry ? disabled : true}
+      disabled={ministry || header ? disabled : true}
     >
       <SelectTrigger className="w-full border-0 border-b-2 border-b-gray-300 rounded-none cursor-pointer hover:bg-accent">
         <SelectValue placeholder={displayName} />
