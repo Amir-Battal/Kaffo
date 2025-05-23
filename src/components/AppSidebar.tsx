@@ -29,6 +29,7 @@ import {
 import SidebarHeaderElements from "./SidebarHeaderElements"
 import { Separator } from "./ui/separator"
 import LogoutDialog from "./LogoutDialog"
+import keycloak from "@/lib/keycloak"
 
 
 // Menu items.
@@ -158,6 +159,10 @@ const AdminItems = [
 ]
 
 export function AppSidebar() {
+
+    const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+    console.log(roles);
+
   return (
     <Sidebar side="right">
 
@@ -174,47 +179,94 @@ export function AppSidebar() {
           {/* <SidebarGroupLabel>Application</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu className="gap-5">
-              {UserItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  {/* {item.title === 'الأنشطة'  */}
-                  {item.title === 'مشاركاتي' 
-                  ?(
-                    <div>
-                      <SidebarMenuButton asChild>
-                        <a href={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </a>
-                      </SidebarMenuButton>
-                      <SidebarMenu className="gap-5 mr-10 mt-2">
-                      {subUserItems.map((subItem) => (
-                      <SidebarMenuItem key={subItem.title}>
+              {roles.includes("ROLE_GOV")
+                ?(
+                  GovItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      {/* {item.title === 'الأنشطة'  */}
+                      {item.title === 'الأنشطة' 
+                      ?(
+                        <div>
+                          <SidebarMenuButton asChild>
+                            <a href={item.url}>
+                              <item.icon />
+                              <span>{item.title}</span>
+                            </a>
+                          </SidebarMenuButton>
+                          <SidebarMenu className="gap-5 mr-10 mt-2">
+                            {subGovItems.map((subItem) => (
+                              <SidebarMenuItem key={subItem.title}>
+                                <SidebarMenuButton asChild>
+                                  <a href={subItem.url}>
+                                    <subItem.icon />
+                                    <span>{subItem.title}</span>
+                                  </a>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                        </div>
+                      ):item.title === 'تسجيل الخروج'
+                      ?(
                         <SidebarMenuButton asChild>
-                          <a href={subItem.url}>
-                            <subItem.icon />
-                            <span>{subItem.title}</span>
+                          <LogoutDialog />
+                        </SidebarMenuButton>
+                      ):(
+                        <SidebarMenuButton asChild>
+                          <a href={item.url}>
+                            <item.icon />
+                            <span>{item.title}</span>
                           </a>
                         </SidebarMenuButton>
-                      </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                    </div>
-                  ):item.title === 'تسجيل الخروج'
-                  ?(
-                    <SidebarMenuButton asChild>
-                      <LogoutDialog />
-                    </SidebarMenuButton>
-                  ):(
-                    <SidebarMenuButton asChild>
-                      <a href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </a>
-                    </SidebarMenuButton>
-                  )
-                  }
-                </SidebarMenuItem>
-              ))}
+                      )
+                      }
+                    </SidebarMenuItem>
+                  ))
+                ):(
+                  UserItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      {/* {item.title === 'الأنشطة'  */}
+                      {item.title === 'مشاركاتي' 
+                      ?(
+                        <div>
+                          <SidebarMenuButton asChild>
+                            <a href={item.url}>
+                              <item.icon />
+                              <span>{item.title}</span>
+                            </a>
+                          </SidebarMenuButton>
+                          <SidebarMenu className="gap-5 mr-10 mt-2">
+                          {subUserItems.map((subItem) => (
+                          <SidebarMenuItem key={subItem.title}>
+                            <SidebarMenuButton asChild>
+                              <a href={subItem.url}>
+                                <subItem.icon />
+                                <span>{subItem.title}</span>
+                              </a>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                        </div>
+                      ):item.title === 'تسجيل الخروج'
+                      ?(
+                        <SidebarMenuButton asChild>
+                          <LogoutDialog />
+                        </SidebarMenuButton>
+                      ):(
+                        <SidebarMenuButton asChild>
+                          <a href={item.url}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </a>
+                        </SidebarMenuButton>
+                      )
+                      }
+                    </SidebarMenuItem>
+                  ))
+
+                )
+              }
             </SidebarMenu>
           </SidebarGroupContent>
           
