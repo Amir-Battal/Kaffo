@@ -2,11 +2,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { Check, Delete, X } from "lucide-react";
+import { JSX } from "react";
 
-const DeleteDialog = () => {
+const DeleteDialog = ({...props}): JSX.Element => {
 
   const handleYes = () => {
     console.log("Contribution Deleted");
+    props.onConfirm();
+
   }
 
   return (

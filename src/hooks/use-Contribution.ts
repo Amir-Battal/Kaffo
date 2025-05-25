@@ -63,16 +63,17 @@ export const useGetMyContribution = (problemId: number) => {
   return useQuery<SolutionDTO | null>({
     queryKey: ["mySolution", problemId],
     queryFn: async () => {
-      const res = await axios.get(`${API_BASE_URL}/${problemId}/solutions/me`, {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions/me`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
       });
-      return res.data?.[0] || null;
+      return res.data?.find((solution: any) => solution.problemId === problemId) || null;
     },
   });
 };
+
 
 
 export const useCreateContribution = (problemId: number) => {
@@ -81,7 +82,7 @@ export const useCreateContribution = (problemId: number) => {
 
   return useMutation({
     mutationFn: async (data: Partial<SolutionDTO>) => {
-      const res = await axios.post(`${API_BASE_URL}/${problemId}/solutions`, data, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, data, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
@@ -102,7 +103,7 @@ export const useUpdateContribution = (problemId: number, solutionId: number) => 
 
   return useMutation({
     mutationFn: async (data: Partial<SolutionDTO>) => {
-      const res = await axios.put(`${API_BASE_URL}/${problemId}/solutions/${solutionId}`, data, {
+      const res = await axios.put(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${solutionId}`, data, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
@@ -124,7 +125,7 @@ export const useDeleteContribution = (problemId: number, solutionId: number) => 
 
   return useMutation({
     mutationFn: async () => {
-      await axios.delete(`${API_BASE_URL}/${problemId}/solutions/${solutionId}`, {
+      await axios.delete(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${solutionId}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
@@ -138,3 +139,25 @@ export const useDeleteContribution = (problemId: number, solutionId: number) => 
   });
 };
 
+
+
+export const useGetAcceptedContribution = (problemId: number) => {
+  const accessToken = keycloak.token;
+
+  return useQuery<SolutionDTO | null>({
+    queryKey: ["acceptedContribution", problemId],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const allSolutions: SolutionDTO[] = res.data;
+      const acceptedSolution = allSolutions.find((sol) => sol.status === "ACCEPTED") ?? null;
+
+      return acceptedSolution;
+    },
+    enabled: !!problemId,
+  });
+};

@@ -1,5 +1,6 @@
 import { MainChart } from "@/components/MainChart";
 import { StatisticsChart } from "@/components/StatisticsChart";
+import keycloak from "@/lib/keycloak";
 import { JSX, useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -127,6 +128,9 @@ const AdminStatisticsData = [
 
 const StatisticsPage = ({...props}): JSX.Element => {
 
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
+
   const [isGov, setIsGov] = useState<Boolean>(false);
   const [isAdmin, setIsAdmin] = useState<Boolean>(false);
 
@@ -174,7 +178,7 @@ const StatisticsPage = ({...props}): JSX.Element => {
               <StatisticsChart data={AdminStatisticsData} isAdmin isTotal />
             </div>
           </div>
-        ):isGov
+        ):roles.includes("ROLE_GOV")
         ?(
           <div className="px-10 flex flex-col gap-10">
             <div className="flex flex-row justify-between">

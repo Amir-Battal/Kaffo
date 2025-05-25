@@ -31,7 +31,7 @@ const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
 
   try {
     setUploading(true);
-    const presigned = await getPresignedUrls(problemId, files.length);
+    const presigned = await getPresignedUrls(problemId, files.length, files[0].type);
 
     await Promise.all(
       Array.from(files).map((file, i) =>

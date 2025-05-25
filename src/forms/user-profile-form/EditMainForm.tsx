@@ -72,7 +72,7 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
       email: values.email,
     });
 
-    sessionStorage.setItem("showToast", "تم تعديل البيانات الأساسية بنجاح");
+    sessionStorage.setItem("showToastDelete", "تم تعديل البيانات الأساسية بنجاح");
     onSuccess?.();
     window.location.reload();
   } catch (error) {
