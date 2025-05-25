@@ -38,6 +38,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
   
     const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 
+    console.log(problem)
 
 
   const percentage = 60; // يمكن استبداله لاحقًا بقيمة حقيقية من الـ problem

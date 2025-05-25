@@ -17,6 +17,7 @@ const MyAucationsPage = () => {
     criteria
   );
 
+
   return (
     <div className="flex flex-col gap-10 pr-10 mb-25">
       <ProblemHeader myAucation onFilterChange={setCriteria} />

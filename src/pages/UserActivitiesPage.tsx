@@ -1,4 +1,4 @@
-import { Copy, Folder, HandHeart, Heart } from "lucide-react";
+import { Copy, Folder, HandHeart } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const UserActivitiesPage = () => {
