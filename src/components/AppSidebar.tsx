@@ -161,7 +161,7 @@ const AdminItems = [
 export function AppSidebar() {
 
     const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
-    console.log(roles);
+    // console.log(roles);
 
   return (
     <Sidebar side="right">

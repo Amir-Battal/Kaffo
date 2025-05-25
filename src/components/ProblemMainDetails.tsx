@@ -19,7 +19,7 @@ import SolveControl from "./SolveControl";
 import { useGetProblemById } from "@/hooks/use-problem";
 import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
 import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
-import { useGetProblemDonations } from "@/hooks/use-donation";
+import { useGetProblemDonations, useGetPublicDonors } from "@/hooks/use-donation";
 import { useGetUserById } from "@/hooks/use-user";
 import { useAddress, useCities } from "@/hooks/use-Address";
 import { useCategory } from "@/hooks/use-category";
@@ -58,16 +58,22 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
   const successfulDonations = donations.filter(d => d.status === "SUCCESS");
   const donorIds = successfulDonations.filter(d => !d.isAnonymous).map(d => d.donorId);
-  const { data: donors = [] } = useGetUserById(donorIds.join(","), { enabled: !!donorIds.length });
+  
+  const { data: publicDonors } = useGetPublicDonors(numericProblemId);
+  console.log(publicDonors?.content);
+
 
 
   const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 
-  const token = keycloak.token;
-  type DecodedToken = { resource_access?: { [key: string]: { roles?: string[] } } };
-  const decoded = token ? jwtDecode<DecodedToken>(token) : null;
-  const roles = decoded?.resource_access?.["kafu-client"]?.roles ?? [];
-  const isGov = roles.includes("ROLE_GOV");
+  // const token = keycloak.token;
+  // type DecodedToken = { resource_access?: { [key: string]: { roles?: string[] } } };
+  // const decoded = token ? jwtDecode<DecodedToken>(token) : null;
+  // const roles = decoded?.resource_access?.["kafu-client"]?.roles ?? [];
+  // const isGov = roles.includes("ROLE_GOV");
+
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
 
   const totalDonated = successfulDonations.reduce((sum, d) => sum + d.amount, 0);
   const remainingAmount = (acceptedContribution?.estimatedCost || 0) - totalDonated;
@@ -115,7 +121,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
             <Badge className="rounded-none" variant="secondary">{address?.description}</Badge>
           </div>
 
-          {isGov ? (
+          {roles.includes("ROLE_GOV") ? (
             <div className="flex flex-col gap-5">
               <h3>تاريخ إنشاء الشكوى: {new Date(problem.submissionDate).toLocaleDateString()}</h3>
               {user && (
@@ -179,7 +185,17 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                     {successfulDonations.map((donation: any) => (
                         <li key={donation.id} className="bg-gray-100 p-3 rounded-md">
                           <div className="flex justify-between">
-                            <span>{donation.isAnonymous ? "متبرع مجهول" : `ID ${donation.donorId}`}</span>
+                            <span>
+                              {/* {donation.isAnonymous ? "متبرع مجهول" : `ID ${donation.donorId}`} */}
+                              {donation.isAnonymous
+                                ? "متبرع مجهول"
+                                : publicDonors?.content.map((donor) => (<h1>{donor.firstName}  {donor.lastName}</h1>))
+                                // : (() => {
+                                //     const donor = publicDonors?.content.find((d) => d.id === donation.donorId);
+                                //     return donor ? `${donor.firstName} ${donor.lastName}` : `ID ${donation.donorId}`;
+                                //   })()}
+                              }
+                            </span>
                             <span>{donation.amount} {donation.currency}</span>
                           </div>
                           <div className="text-sm text-gray-600">
@@ -200,7 +216,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
           </div>
         ) : (
           <div>
-            {isGov ? <SolveControl /> : (
+            {roles.includes("ROLE_GOV") ? <SolveControl problemId={prop.problemId} /> : (
               <div className="flex flex-row gap-5">
                 <ProblemOverlay problemId={prop.problemId} status="edit" />
                 <ProblemOverlay problemId={prop.problemId} status="delete" />

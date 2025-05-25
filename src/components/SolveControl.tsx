@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { JSX, useState } from "react";
 import IsReal from "./IsReal";
 import IsForContribution from "./IsForContribution";
 import ContributionCard from "@/forms/contribution-form/ContributionCard";
@@ -20,7 +20,7 @@ type ContributionCard = {
   budget: number,
 }
 
-const SolveControl = () => {
+const SolveControl = ({...props}): JSX.Element => {
 
   const [isReal, setIsReal] = useState<Boolean>();
   const [isForContribution, setIsForContribution] = useState<Boolean>();
@@ -71,12 +71,13 @@ const SolveControl = () => {
     setIsSelected(false);
   }
 
+
   return (
     <div className="flex flex-col gap-10">
       <div className="flex flex-col gap-8">
         <h1 className="text-xl">وضع الشكوى</h1>
 
-        <IsReal setIsReal={setIsReal} isReal={isReal}/>
+        <IsReal setIsReal={setIsReal} isReal={isReal} problemId={props.problemId}/>
         {isReal
           ?(
             <div className="flex flex-col gap-8">
@@ -137,7 +138,8 @@ const SolveControl = () => {
                   ):isSelfSolve
                     ?(
                       <div>
-                        <SolutionForm 
+                        <SolutionForm
+                          problemId={props.problemId}
                           setSolutionSet={setSolutionSet}
                           setSelfBudget={setSelfBudget}
                         />
@@ -161,7 +163,7 @@ const SolveControl = () => {
                     />
                     {isForDonation
                       ?(
-                        <div className="flex flex-col gap-5">
+                        <div className="flex flex-col gap-5">ق
                           <Donations 
                             setDonationDone={setDonationDone} 
                             donationDone={donationDone} 

@@ -8,6 +8,7 @@ import { Check } from "lucide-react";
 
 const AuctionsPage = () => {
   const [page, setPage] = useState(0); // يبدأ من 0
+  // TODO: get all problems using gov Id
   const [criteria, setCriteria] = useState({
     status: "جاري المعالجة",       // فلترة على حالة المشكلة
     categoryId: null,              // يمكن تغييره حسب الحاجة

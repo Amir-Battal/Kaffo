@@ -20,23 +20,36 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
 
   const donationMutation = useCreateDonation(problemId);
 
+
   const handleSubmit = async (amount: number) => {
     if (amount <= 0) {
       toast.error("الرجاء اختيار مبلغ صحيح للتبرع");
       return;
     }
 
+    console.log("donation payload", {
+      amount,
+      currency: "USD",
+      paymentMethod: 'STRIPE',
+      isAnonymous,
+      successUrl: window.location.href,
+      cancelUrl: window.location.href,
+      idempotencyKey: uuidv4(),
+    });
+
+
     setIsLoading(true);
     try {
       const response = await donationMutation.mutateAsync({
         amount,
         currency: "USD",
-        paymentMethod: "STRIPE",
+        paymentMethod: 'STRIPE',
         isAnonymous, // استخدم قيمة المجهولية
         successUrl: window.location.href,
         cancelUrl: window.location.href,
         idempotencyKey: uuidv4(),
       });
+
 
       if (response.sessionUrl) {
         window.location.href = response.sessionUrl;

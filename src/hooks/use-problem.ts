@@ -4,6 +4,7 @@ import axios from "axios";
 import keycloak from "@/lib/keycloak";
 import { toast } from "sonner";
 import { ProblemDTO } from "@/types";
+import { useGetMyUser } from "./use-user";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -28,6 +29,15 @@ type ProblemCriteria = {
   forContribution?: boolean;
   forDonation?: boolean;
 };
+
+export enum ProblemStatus {
+  PENDING_APPROVAL = "PENDING_APPROVAL",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+  IN_PROGRESS = "IN_PROGRESS",
+  RESOLVED = "RESOLVED",
+}
+
 
 // ============= GET ALL PROBLEMS =============
 
@@ -366,3 +376,57 @@ export const useDeleteProblem = () => {
 };
 
 
+
+// ============= APPROVE OR REJECT PROBLEM =============
+type ApproveProblemParams = {
+  problemId: number;
+  isReal: boolean;
+  rejectionReason?: string;
+};
+
+export const useApproveOrRejectProblem = () => {
+  const queryClient = useQueryClient();
+  const { currentUser } = useGetMyUser();
+
+  return useMutation(
+    async ({ problemId, isReal, rejectionReason }: ApproveProblemParams) => {
+      const accessToken = keycloak.token;
+
+      const userId = currentUser?.id;
+
+
+      const payload: any = {
+        isReal,
+        approvedByUser: userId
+      };
+
+      console.log(payload);
+
+      if (!isReal && rejectionReason) {
+        payload.rejectionReason = rejectionReason;
+      }
+
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/v1/problems/${problemId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("problems");
+        toast.success("تم تحديث حالة الشكوى بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error("حدث خطأ أثناء تحديث حالة الشكوى: " + error.message);
+      },
+    }
+  );
+};

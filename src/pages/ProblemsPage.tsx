@@ -8,6 +8,8 @@ import { Check } from "lucide-react";
 
 const ProblemsPage = () => {
   const [page, setPage] = useState(0); // ⚠️ backend يبدأ من 0
+
+  // TODO: get all problems using gov Id & completed status
   const [criteria, setCriteria] = useState({});
 
   useEffect(() => {

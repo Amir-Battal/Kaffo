@@ -1,7 +1,7 @@
 // src/hooks/use-donation.ts
 import axios from "axios";
-import { useMutation, useQuery } from "react-query";
 import keycloak from "@/lib/keycloak";
+import { useMutation, useQuery } from "react-query";
 import { toast } from "sonner";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -9,7 +9,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 type DonationRequest = {
   amount: number;
   currency: string;
-  paymentMethod: "STRIPE";
+  paymentMethod: string;
   isAnonymous: boolean;
   successUrl: string;
   cancelUrl: string;
@@ -19,6 +19,7 @@ type DonationRequest = {
 type DonationResponse = {
   sessionUrl: string;
 };
+
 
 export type Donation = {
   id: number;
@@ -132,3 +133,40 @@ export const useGetMyDonations = ({
   });
 };
 
+
+
+// src/hooks/use-donation.ts (أضف هذا الجزء)
+
+type PublicDonor = {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email?: string;
+};
+
+export const useGetPublicDonors = (problemId: number) => {
+
+  const accessToken = keycloak.token;
+
+  return useQuery<PublicDonor[], Error>({
+    queryKey: ["public-donors", problemId],
+    queryFn: async () => {
+      try {
+        const response = await axios.get<PublicDonor[]>(
+          `${API_BASE_URL}/api/v1/problems/${problemId}/donations/public`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        return response.data;
+      } catch (error: any) {
+        const message = error?.response?.data?.message || error.message || "فشل تحميل أسماء المتبرعين";
+        toast.error(`خطأ: ${message}`);
+        throw new Error(message);
+      }
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+};
