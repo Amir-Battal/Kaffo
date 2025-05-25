@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, use, useEffect, useState } from "react";
 import IsReal from "./IsReal";
 import IsForContribution from "./IsForContribution";
 import ContributionCard from "@/forms/contribution-form/ContributionCard";
@@ -11,6 +11,8 @@ import Donations from "./Donations";
 import ProblemProgress from "@/forms/problem-form/ProblemProgress";
 import GovPerson from "@/forms/problem-form/GovPerson";
 import EndProject from "./EndProject";
+import { useGetContributions } from "@/hooks/use-Contribution";
+import { useGetProblemById } from "@/hooks/use-problem";
 
 
 type ContributionCard = {
@@ -39,28 +41,40 @@ const SolveControl = ({...props}): JSX.Element => {
 
   const [isEndProject, setIsEndProject] = useState<Boolean>();
 
+  const { contributions } = useGetContributions(props.problemId);
+  console.log(contributions);
+  const { problem } = useGetProblemById(props.problemId);
+  
+  useEffect(() => {
+    if (contributions && contributions.length > 0) {
+      const selfSolveExists = contributions.some(
+        (contribution) => contribution.proposedByUserId === contribution.acceptedByUserId
+      );
+      setIsSelfSolve(selfSolveExists);
+    }
+  }, [contributions]);
   
 
-  const Contributions = [
-    {
-      username: 'أمير بطال',
-      date: '23/3/2025',
-      contribution: "استطيع حل المشكلة من خلال عدة نقاط أهمها النقطة الأولى من خلال شراء المواد الأولية",
-      budget: 120
-    },
-    {
-      username: 'أمير بطال',
-      date: '23/3/2025',
-      contribution: "يمكن حل المشكلة من خلال...",
-      budget: 120
-    },
-    {
-      username: 'أمير بطال',
-      date: '23/3/2025',
-      contribution: "أستطيع حل المشكلة خلال أقل من 24 ساعة حيث أنني سوف اقوم بما يلي: - بالبداية سوف افحص مكان المشكلة. - ثم سوف اقوم بشراء المواد الأولية التي تلزمني - بعد ذلك سوف أقوم بإصلاح المشكلة:",
-      budget: 120
-    },
-  ]
+  // const Contributions = [
+  //   {
+  //     username: 'أمير بطال',
+  //     date: '23/3/2025',
+  //     contribution: "استطيع حل المشكلة من خلال عدة نقاط أهمها النقطة الأولى من خلال شراء المواد الأولية",
+  //     budget: 120
+  //   },
+  //   {
+  //     username: 'أمير بطال',
+  //     date: '23/3/2025',
+  //     contribution: "يمكن حل المشكلة من خلال...",
+  //     budget: 120
+  //   },
+  //   {
+  //     username: 'أمير بطال',
+  //     date: '23/3/2025',
+  //     contribution: "أستطيع حل المشكلة خلال أقل من 24 ساعة حيث أنني سوف اقوم بما يلي: - بالبداية سوف افحص مكان المشكلة. - ثم سوف اقوم بشراء المواد الأولية التي تلزمني - بعد ذلك سوف أقوم بإصلاح المشكلة:",
+  //     budget: 120
+  //   },
+  // ]
 
   const handleSelect = (contribution: ContributionCard) => {
     setIsSelected(true);
@@ -70,7 +84,6 @@ const SolveControl = ({...props}): JSX.Element => {
   const handleUnSelect = () => {
     setIsSelected(false);
   }
-
 
   return (
     <div className="flex flex-col gap-10">
@@ -87,12 +100,14 @@ const SolveControl = ({...props}): JSX.Element => {
                   isForContribution={isForContribution} 
                   isSelected={isSelected} 
                   setIsSelfSolve={setIsSelfSolve} 
+                  isSelfSolve={isSelfSolve}
                   setIsSelected={setIsSelected}
                   setSolutionSet={setSolutionSet}
                   setIsForDonation={setIsForDonation}
                   setSelfFounded={setSelfFounded}
+                  problemId={props.problemId}
                 />
-                {isForContribution
+                {isForContribution || problem?.forContribution
                   ?(
                     // TODO: Make in a isolated component
                     <div className="flex flex-col gap-5">
@@ -114,12 +129,12 @@ const SolveControl = ({...props}): JSX.Element => {
                         ):(
                           <div className="flex flex-col gap-2">
                             <div className="flex flex-col gap-5">
-                              {Contributions.map((contribution) => (
+                              {contributions.map((contribution) => (
                                 <ContributionCard 
-                                  username={contribution.username}
-                                  date={contribution.date}
-                                  contribution={contribution.contribution}
-                                  budget={contribution.budget}
+                                  username={contribution.user.firstName + " " + contribution.user.lastName}
+                                  date={contribution.startDate}
+                                  contribution={contribution.description}
+                                  budget={contribution.estimatedCost}
                                 >
                                   <div className="flex flex-row-reverse">
                                     <Button type="button" onClick={() => handleSelect(contribution)} variant={"ghost"} className="m-1 cursor-pointer">

@@ -49,7 +49,7 @@ export interface SolutionDTO {
   id?: number;
   description?: string;
   estimatedCost?: number;
-  status?: "PENDING_APPROVAL" | "ACCEPTED" | "REJECTED" | "WORKINPROGRESS";
+  status?: string;
   startDate?: string;
   endDate?: string;
   rating?: number;
