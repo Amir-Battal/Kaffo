@@ -47,6 +47,8 @@ const ProblemHeader = ({ onFilterChange, myAucation, noNew }: ProblemHeaderProps
           onChange={(id) => setCategoryId(id)}
           category={categoryName ?? ""}
           setCategory={(name) => setCategoryName(name)} // تأكد أن هذا name وليس object
+          value={categoryId}
+          header
         />
 
       </div>

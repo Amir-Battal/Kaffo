@@ -46,13 +46,14 @@ export interface ProblemDTO {
 
 
 export interface SolutionDTO {
-  id: number;
-  description: string;
-  estimatedCost: number;
-  status: string;
-  startDate: string;
-  endDate: string;
-  rating: number;
-  problemId: number;
-  proposedByUserId: number;
+  id?: number;
+  description?: string;
+  estimatedCost?: number;
+  status?: "PENDING_APPROVAL" | "ACCEPTED" | "REJECTED" | "WORKINPROGRESS";
+  startDate?: string;
+  endDate?: string;
+  rating?: number;
+  problemId?: number;
+  proposedByUserId?: number;
+  forContribution?: boolean;
 };

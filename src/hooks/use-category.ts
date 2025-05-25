@@ -28,7 +28,7 @@ export const useCreateCategory = () => {
     },
     {
       onSuccess: () => {
-        toast.success("تم إنشاء الصنف بنجاح!");
+        // toast.success("تم إنشاء الصنف بنجاح!");
         queryClient.invalidateQueries("categories");
       },
       onError: (error: any) => {
@@ -57,23 +57,23 @@ export const useCategory = (id: number, options = {}) => {
   );
 };
 
-// جلب جميع التصنيفات حسب معرف المحافظة
-export const useCategoriesByGovId = (govId: number) => {
+
+export const useCategoriesByGovId = (govId?: number) => {
   return useQuery(
     ["categories", govId],
     async () => {
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/problem-categories/by-gov/${govId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${keycloak.token}`,
-          },
-        }
-      );
-      return response.data;
+      const response = await axios.get(`${API_BASE_URL}/api/v1/problem-categories`, {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+        params: {
+          govId,
+        },
+      });
+      return response.data || [];
     },
     {
-      enabled: !!govId, // فقط عندما يكون govId موجود
+      enabled: !!govId, // لا يتم التفعيل إلا إذا كان govId موجوداً
     }
   );
 };
@@ -110,7 +110,7 @@ export const useUpdateCategory = () => {
     },
     {
       onSuccess: () => {
-        toast.success("تم تحديث الصنف بنجاح!");
+        // toast.success("تم تحديث الصنف بنجاح!");
         queryClient.invalidateQueries("categories");
       },
       onError: (error: any) => {

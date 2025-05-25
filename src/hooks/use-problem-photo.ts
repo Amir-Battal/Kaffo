@@ -42,18 +42,22 @@ export const usePresignedUpload = () => {
   const getPresignedUrls = async (
     problemId: number,
     count: number,
-    contentType: string = "image/jpeg"
+    contentType?: string // أصبح اختياريًا
   ): Promise<{ presignedUrl: string; s3Key: string }[]> => {
     const accessToken = keycloak.token;
-    const response = await fetch(
-      `${API_BASE_URL}/api/v1/problem/${problemId}/photos?count=${count}&contentType=${contentType}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+
+    const url = new URL(`${API_BASE_URL}/api/v1/problem/${problemId}/photos`);
+    url.searchParams.append("count", count.toString());
+    if (contentType) {
+      url.searchParams.append("contentType", contentType);
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error("فشل في جلب روابط التحميل الموقعة");
@@ -110,3 +114,24 @@ export const useDeleteProblemPhoto = () => {
   return mutation;
 };
 
+
+// ============= DELETE ALL PHOTOS FOR A PROBLEM =============
+export const useDeleteAllProblemPhotos = () => {
+  const mutation = useMutation(
+    async (problemId: number) => {
+      const accessToken = keycloak.token;
+      await axios.delete(`${API_BASE_URL}/api/v1/problem/${problemId}/photos`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+    },
+    {
+      onError: () => {
+        toast.error("فشل في حذف صور المشكلة");
+      },
+    }
+  );
+
+  return mutation;
+};

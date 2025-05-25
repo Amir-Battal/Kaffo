@@ -1,22 +1,21 @@
 import { useState } from "react";
 import DonationCard from "@/forms/contribution-form/DonationCard";
 import PaginationComp from "@/components/PaginationComp";
-import { useGetMyDonations } from "@/hooks/use-donation";
 import { useGetMyUser } from "@/hooks/use-user";
+import { useGetMyDonations } from "@/hooks/use-donation";
 
 const MyDonationsPage = () => {
   const [page, setPage] = useState(0);
-
   const { currentUser } = useGetMyUser();
 
-//   const donorId = currentUser?.id;
-
-  const { donations, totalPages, isLoading } = useGetMyDonations({
+  const { data, isLoading } = useGetMyDonations({
     donorId: Number(currentUser?.id),
     page,
     size: 6,
   });
-  
+
+  const donations = data?.content || [];
+  const totalPages = data?.totalPages || 0;
 
   return (
     <div className="flex flex-col gap-10 px-10">

@@ -1,38 +1,66 @@
-import GovernorateSelect from "@/components/GovernorateSelect";
+import { useEffect, useState } from "react";
 import PaginationComp from "@/components/PaginationComp";
 import ProblemCard from "@/components/ProblemCard";
-import ProblemCategorySelect from "@/components/ProblemCategorySelect";
-import ProblemStatusSelect from "@/components/ProblemStatusSelect";
-import { Input } from "@/components/ui/input";
-import NewProblemOverlay from "@/forms/problem-form/NewProblemOverlay";
-import { Search } from "lucide-react";
-
+import { useGetAllProblems } from "@/hooks/use-problem";
+import ProblemHeader from "@/components/ProblemHeader";
+import { toast } from "sonner";
+import { Check } from "lucide-react";
 
 const AuctionsPage = () => {
+  const [page, setPage] = useState(0); // يبدأ من 0
+  // TODO: get all problems using gov Id
+  const [criteria, setCriteria] = useState({
+    status: "جاري المعالجة",       // فلترة على حالة المشكلة
+    categoryId: null,              // يمكن تغييره حسب الحاجة
+  });
+
+  useEffect(() => {
+    setPage(0);
+  }, [criteria]);
+
+  useEffect(() => {
+    const toastMessage = sessionStorage.getItem("showToastDelete");
+    if (toastMessage) {
+      toast(toastMessage, {
+        style: {
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '20px',
+          background: '#008c2f',
+          color: '#fff',
+          direction: 'rtl',
+          border: 'none',
+        },
+        icon: <Check />,
+        closeButton: true
+      });
+      sessionStorage.removeItem("showToastDelete");
+    }
+  }, []);
+
+  const { problems, totalPages, isLoading } = useGetAllProblems({
+    page,
+    size: 6,
+    sort: "submissionDate,desc",
+  }, criteria);
+
   return (
-    <div className="flex flex-col gap-10 pr-10">
-      <div className="flex flex-row-reverse justify-between gap-5 pl-10">
-        <div className="w-full flex flex-row gap-5">
-          {/* <GovernorateSelect gov='حلب' /> */}
-          <ProblemStatusSelect status='جاري المعالجة' />
-          <ProblemCategorySelect category='أرصفة' />
-        </div>
-        <div className="w-full flex flex-row items-center">
-          <Search />
-          <Input placeholder="تبحث عن مشكلة معينة ..."/>
-        </div>
-        {/* // TODO: in Gov status hide this button */}
-        <NewProblemOverlay />
-      </div>
+    <div className="flex flex-col gap-10 pr-10 mb-25">
+      <ProblemHeader
+        onFilterChange={setCriteria}
+      />
+
       <div className="grid grid-cols-3 gap-5">
-        <ProblemCard num={1} />
-        <ProblemCard num={2} />
-        <ProblemCard num={3} />
-        {/* <ProblemCard num={4} />
-        <ProblemCard num={5} />
-        <ProblemCard num={6} /> */}
+        {isLoading ? (
+          <p>جاري التحميل...</p>
+        ) : (
+          problems.map((problem) => (
+            <ProblemCard key={problem.id} problem={problem} />
+          ))
+        )}
       </div>
-      {/* <PaginationComp /> */}
+
+      <PaginationComp page={page} setPage={setPage} totalPages={totalPages} />
     </div>
   );
 };

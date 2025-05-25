@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -12,81 +12,74 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Plus } from "lucide-react"
+import { Check, Plus } from "lucide-react"
 import ProblemCategorySelect from "@/components/ProblemCategorySelect"
 import GovernorateSelect from "@/components/GovernorateSelect"
-
-import { useState } from "react"
 import MapPicker from "@/components/MapPicker"
-import { useCreateProblem } from "@/hooks/use-problem"
-import { toast } from "sonner"
-import { useCreateAddress } from "@/hooks/use-Address"
-import { useCreateCategory } from "@/hooks/use-category"
 import { MultiImageUploader } from "./MultiImageUploader"
+
+import { useCreateProblem, useUpdateProblem } from "@/hooks/use-problem"
+import { useCreateAddress } from "@/hooks/use-Address"
 import { usePresignedUpload } from "@/hooks/use-problem-photo"
-// import FileUploader from "@/components/FileUploader" // يمكن تفعيله لاحقًا
+import { toast } from "sonner"
+import MinistriesSelect from "@/components/MinistriesSelect"
+
 
 const formSchema = z.object({
-  title: z.string(),
-  address: z.string(),
-  description: z.string(),
-  categoryId: z.number(),
-  governorate: z.string(),
+  title: z.string().min(1, "العنوان مطلوب"),
+  address: z.string().min(1, "العنوان التفصيلي مطلوب"),
+  description: z.string().min(1, "الوصف مطلوب"),
+  categoryId: z.number().min(1, "صنف المشكلة مطلوب"),
+  governorate: z.string().min(1, "المحافظة مطلوبة"),
   lat: z.number(),
   lng: z.number(),
   images: z.array(z.instanceof(File)).optional(),
-});
+})
 
-
-
-interface problemData {
-  title: string;
-  address: string;
-  details: string;
-  categoryId: number;
-  governorate: string;
-  lat: number;
-  lng: number;
-}
 
 export function NewProblemForm() {
-
-  const { createProblem, isLoading } = useCreateProblem();
+  const { createProblem, isLoading } = useCreateProblem()
+  const { updateProblem } = useUpdateProblem()
+  const { mutateAsync: createAddress } = useCreateAddress()
+  const { getPresignedUrls, uploadFileToS3 } = usePresignedUpload()
 
   const [location, setLocation] = useState<{ lat: number; lng: number }>({
     lat: 36.2021,
     lng: 37.1343,
   })
-  const [governorate, setGovernorate] = useState('')
-  const [categoryId, setCategoryId] = useState('')
+
   const [selectedImages, setSelectedImages] = useState<File[]>([])
 
+  const [ministryId, setMinistryId] = useState<number | null>(null);
 
-  const { mutateAsync: createAddress } = useCreateAddress();
-  const { mutateAsync: createCategory } = useCreateCategory();
 
-  const { getPresignedUrls, uploadFileToS3 } = usePresignedUpload();
-
-  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      address: "",
+      description: "",
+      categoryId: 0,
+      governorate: "",
+      lat: 0,
+      lng: 0,
+    },
+  })
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setLocation({ lat, lng })
+    form.setValue("lat", lat)
+    form.setValue("lng", lng)
   }
-  
 
   const requestUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          })
-          form.setValue('lat', position.coords.latitude);
-          form.setValue('lng', position.coords.longitude);
+        (pos) => {
+          handleLocationSelect(pos.coords.latitude, pos.coords.longitude)
         },
-        (error) => {
-          console.warn("الموقع غير متاح أو تم رفض الإذن:", error.message)
+        (err) => {
+          console.warn("الموقع غير متاح أو تم رفض الإذن:", err.message)
           alert("لم يتم منح إذن الموقع. سيتم عرض الموقع الافتراضي.")
         }
       )
@@ -95,34 +88,10 @@ export function NewProblemForm() {
     }
   }
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: '',
-      address: '',
-      description: '',
-      categoryId: 0,
-      governorate: '',
-      lat: 0,
-      lng: 0,
-    },
-  })
 
-  // NewProblemForm.tsx (المهم فقط الدالة onSubmit و استدعاءات الصور)
-
-const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
   try {
-    // 1. إنشاء/إحضار التصنيف
-    let catId = data.categoryId;
-    if (!catId && data.categoryName) {
-      const newCat = await createCategory({
-        name: data.categoryName,
-        govId: 1, // عدل حسب الحاجة
-      });
-      catId = newCat.id;
-    }
-
-    // 2. إنشاء العنوان
+    // 1. إنشاء العنوان أولًا
     const newAddress = await createAddress({
       city: data.governorate,
       description: data.address,
@@ -130,54 +99,79 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
       longitude: data.lng,
     });
 
-    // 3. إنشاء المشكلة بدون روابط الصور أولاً
+    if (!newAddress?.id) {
+      toast.error("فشل في إنشاء العنوان");
+      return;
+    }
+
+    // 2. إنشاء المشكلة بدون صور في البداية للحصول على problemId
     const newProblem = await createProblem({
       title: data.title,
       description: data.description,
-      categoryId: catId,
+      categoryId: data.categoryId,
       addressId: newAddress.id,
       isReal: true,
       forContribution: false,
       forDonation: false,
       createdDate: new Date().toISOString(),
-      photoUrls: [], // فارغة الآن، نحدثها بعد رفع الصور
+      photoUrls: [],
     });
 
-    // 4. إذا هناك صور مرفوعة، نطلب روابط التحميل الموقعة
-    let photoUrls: string[] = [];
+    if (!newProblem?.id) {
+      toast.error("فشل في إنشاء المشكلة");
+      return;
+    }
+
+    // 3. إذا كانت هناك صور، رفعها وتحديث خاصية الصور
     if (selectedImages.length > 0) {
-      const presignedData = await getPresignedUrls(newProblem.id, selectedImages.length);
+      // الحصول على روابط التحميل الموقعة باستخدام problemId الفعلي
+      const presignedData = await getPresignedUrls(
+        newProblem.id,
+        selectedImages.length,
+        selectedImages[0].type
+      );
+
+      // رفع الصور إلى S3
       await Promise.all(
         selectedImages.map((file, i) =>
           uploadFileToS3(presignedData[i].presignedUrl, file)
         )
       );
-      // نجمع مفاتيح الصور للربط في الـ problem لاحقاً
-      photoUrls = presignedData.map((item) => item.s3Key);
 
-      // 5. تحديث المشكلة مع روابط الصور (PATCH أو PUT حسب الـ API)
-      await createProblem({
-        ...newProblem,
-        photoUrls,
+      // استخراج مفاتيح الصور لتحديث المشكلة
+      const photoUrls = presignedData.map((item) => item.s3Key);
+
+      // تحديث الصور فقط في المشكلة
+      await updateProblem({
+        id: newProblem.id,
+        data: {
+          title: data.title,
+          description: data.description,
+          categoryId: data.categoryId,
+          addressId: newAddress.id,
+          isReal: true,
+          forContribution: false,
+          forDonation: false,
+          createdDate: newProblem.createdDate, // أو أي تاريخ تراه مناسبًا
+          photoUrls,
+        },
       });
+
     }
 
-    toast.success("تم إنشاء المشكلة بنجاح!");
+    sessionStorage.setItem("showToastDone", "تم إنشاء المشكلة بنجاح");
+    window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
   } catch (err) {
     toast.error("فشل في إنشاء المشكلة");
     console.error(err);
   }
 };
 
-  
-  
-  
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="px-5 gap-2 m-0" dir="rtl">
         <div className="w-full grid grid-cols-1 gap-10">
-          <div className="w-full h-full flex flex-col gap-7">
+          <div className="flex flex-col gap-7">
             <FormField
               control={form.control}
               name="title"
@@ -202,6 +196,12 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
                 </FormItem>
               )}
             />
+            
+            <div className="flex flex-col gap-2">
+              <h1>الوزارة</h1>
+              <MinistriesSelect setMinistry={(name, id) => setMinistryId(id)} />
+            </div>
+
 
             <FormField
               control={form.control}
@@ -213,12 +213,13 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
                     <ProblemCategorySelect
                       value={field.value}
                       onChange={field.onChange}
+                      ministry={ministryId}
                     />
+
                   </FormControl>
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="governorate"
@@ -226,7 +227,7 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
                 <FormItem className="gap-2">
                   <FormLabel className="font-semibold">المحافظة</FormLabel>
                   <FormControl>
-                    <GovernorateSelect setGov={setGovernorate} {...field} />
+                    <GovernorateSelect {...field} />
                   </FormControl>
                 </FormItem>
               )}
@@ -253,7 +254,6 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
               name="lng"
               render={({ field }) => <input type="hidden" {...field} />}
             />
-
           </div>
 
           <div className="flex flex-row-reverse justify-between gap-5">
@@ -263,24 +263,21 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
                 📍 استخدام موقعي الحالي
               </Button>
               <MapPicker
-                key={`${location.lat}-${location.lng}`} // هذا يجبر React على إعادة بناء المكون عند تغير الموقع
+                key={`${location.lat}-${location.lng}`} 
                 onLocationSelect={handleLocationSelect}
                 isNew={true}
                 lat={location.lat}
                 lng={location.lng}
                 isEdit={false}
               />
-              <p>📍 الموقع الحالي: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}</p>
-
-
+              <p>
+                📍 الموقع الحالي: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+              </p>
               <h3 className="text-sm">قم بالضغط على الموقع على الخريطة</h3>
             </div>
           </div>
 
-          <MultiImageUploader
-            onFilesSelected={(files) => setSelectedImages(files)}
-          />
-
+          <MultiImageUploader onFilesSelected={setSelectedImages} />
         </div>
 
         <DialogPrimitive.Close>
@@ -293,7 +290,6 @@ const onSubmit = async (data: z.infer<typeof formSchema>) => {
             )}
           </Button>
         </DialogPrimitive.Close>
-
       </form>
     </Form>
   )

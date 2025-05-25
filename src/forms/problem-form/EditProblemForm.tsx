@@ -20,6 +20,10 @@ import { useGetProblemById, useUpdateProblem } from "@/hooks/use-problem"
 import { useAddress, useUpdateAddress } from "@/hooks/use-Address"
 import { useCategory, useUpdateCategory } from "@/hooks/use-category"
 import ProblemImageManager from "./ProblemImageManager"
+import MinistriesSelect from "@/components/MinistriesSelect"
+import { useMinistryById } from "@/hooks/use-gov"
+import { toast } from "sonner"
+import { Check } from "lucide-react"
 
 const formSchema = z.object({
   title: z.string(),
@@ -38,7 +42,12 @@ type EditProp = {
 export function EditProblemForm({ problemId }: EditProp) {
   const { problem, isLoading: loadingProblem } = useGetProblemById(problemId)
   const { data: address, isLoading: loadingAddress } = useAddress(problem?.addressId ?? 0)
-  const { data:speCategory, isLoading: loadingCategory } = useCategory(problem?.categoryId ?? 0)
+  const { data: speCategory, isLoading: loadingCategory } = useCategory(problem?.categoryId ?? 0)
+  const { data: speMinistry } = useMinistryById(speCategory?.govId ?? null);
+
+
+
+
 
   const [governorate, setGovernorate] = useState(null);
   const [category, setCategory] = useState();
@@ -63,6 +72,10 @@ export function EditProblemForm({ problemId }: EditProp) {
   });
 
   const [location, setLocation] = useState({ lat: 0, lng: 0 })
+  const [ministryName, setMinistryName] = useState("");
+  const [ministryId, setMinistryId] = useState<number | null>(null);
+
+
 
   // عند تحميل البيانات
   useEffect(() => {
@@ -84,6 +97,26 @@ export function EditProblemForm({ problemId }: EditProp) {
   }
 }, [address, problem, speCategory]);
 
+useEffect(() => {
+      const toastMessage = sessionStorage.getItem("showToastEdit");
+      if (toastMessage) {
+        toast(toastMessage,{
+          style:{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '20px',
+            background: '#008c2f',
+            color: '#fff',
+            direction: 'rtl',
+            border: 'none',
+          },
+          icon: <Check />,
+          closeButton: true
+        })
+        sessionStorage.removeItem("showToastEdit");
+      }
+    }, []);
+
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setLocation({ lat, lng })
@@ -95,6 +128,7 @@ export function EditProblemForm({ problemId }: EditProp) {
   if (!problem || !address || !speCategory) return;
 
   try {
+    console.log(values);
     // تحديث العنوان
     await updateAddress({
       ...address,
@@ -114,6 +148,8 @@ export function EditProblemForm({ problemId }: EditProp) {
         addressId: problem.addressId,
       },
     });
+    sessionStorage.setItem("showToastEdit", "تم تعديل المشكلة بنجاح");
+    window.location.reload();
     // toast.success("تم حفظ التعديلات");
   } catch (error) {
     console.error("فشل تحديث المشكلة:", error);
@@ -122,7 +158,7 @@ export function EditProblemForm({ problemId }: EditProp) {
 };
 
 
-  if (loadingProblem || loadingAddress || loadingCategory) {
+  if (loadingProblem || loadingAddress || loadingCategory || !speMinistry) {
     return <p className="text-center">جارٍ تحميل البيانات...</p>
   }
 
@@ -155,6 +191,22 @@ export function EditProblemForm({ problemId }: EditProp) {
                 </FormItem>
               )}
             />
+
+            <div className="flex flex-col gap-2">
+              <h1>الوزارة</h1>
+              <MinistriesSelect
+              edit
+              value={ministryName || speMinistry?.name}
+              setMinistry={(name, id) => {
+                setMinistryName(name);
+                setMinistryId(id);
+                form.setValue("category", 0); // تصفير التصنيف عند تغيير الوزارة
+                setCategory(""); // تصفير اسم التصنيف
+              }}
+            />
+
+            </div>
+
             <FormField
               control={form.control}
               name="category"
@@ -166,7 +218,8 @@ export function EditProblemForm({ problemId }: EditProp) {
                       value={field.value}
                       onChange={field.onChange} // Update category ID
                       category={category}
-                      setCategory={setCategory} // Optional, to update category name
+                      setCategory={setCategory}
+                      ministry={ministryId ?? speMinistry?.id}
                     />
                   </FormControl>
                 </FormItem>
@@ -232,11 +285,11 @@ export function EditProblemForm({ problemId }: EditProp) {
         )}
 
 
-        {/* <DialogPrimitive.Close> */}
+        <DialogPrimitive.Close>
           <Button type="submit" className="cursor-pointer mt-5">
             {isUpdating ? "جارٍ الحفظ..." : "حفظ التعديلات"}
           </Button>
-        {/* </DialogPrimitive.Close> */}
+        </DialogPrimitive.Close>
       </form>
     </Form>
   )
