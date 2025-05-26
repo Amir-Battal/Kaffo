@@ -1,6 +1,6 @@
-import { Check, ChevronLeft, X } from "lucide-react";
+import { Check, ChevronLeft, Edit, X } from "lucide-react";
 import { Button } from "./ui/button";
-import { JSX, useEffect } from "react";
+import { JSX, useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -30,6 +30,8 @@ interface IsRealProps {
 const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
   const { mutate: approveOrRejectProblem } = useApproveOrRejectProblem();
   const { problem } = useGetProblemById(problemId);
+
+  const [edit, setEdit] = useState<boolean>();
 
   // Sync local state with backend state when component mounts
   useEffect(() => {
@@ -80,7 +82,13 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
         onSuccess: () => setIsReal(false),
       }
     );
+    setEdit(false);
   };
+
+
+  const handleRejectEdit = () => {
+    setEdit(true);
+  }
 
   return (
     <div className="flex flex-col gap-5">
@@ -128,8 +136,9 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
             </Button>
           </div>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
+            <form className="flex flex-col gap-5" onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
+                disabled={problem?.rejectionReason && !edit ? true : false}
                 control={form.control}
                 name="comment"
                 render={({ field }) => (
@@ -144,13 +153,24 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
                   </FormItem>
                 )}
               />
-              <Button
-                type="submit"
-                className="mt-5 flex flex-row justify-around cursor-pointer w-[40%] h-[50px] text-white bg-black p-2 rounded-[10px] hover:bg-gray-800"
-              >
-                <h3>تأكيد السبب</h3>
-                <ChevronLeft />
-              </Button>
+              <div className="flex flex-row justify-between">
+                {!problem?.rejectionReason || edit && (
+                  <Button
+                    type="submit"
+                    className="flex flex-row justify-around cursor-pointer w-[40%] h-[50px] text-white bg-black p-2 rounded-[10px] hover:bg-gray-800"
+                  >
+                    <h3>تأكيد السبب</h3>
+                    <ChevronLeft />
+                  </Button>
+                  
+                )}
+                {!edit && (
+                  <button className="flex flex-row gap-2 justify-end cursor-pointer" type="button" onClick={handleRejectEdit}>
+                    <h3>تعديل</h3>
+                    <Edit />
+                  </button>
+                )}
+              </div>
             </form>
           </Form>
         </div>

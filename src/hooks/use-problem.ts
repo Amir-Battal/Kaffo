@@ -397,14 +397,15 @@ export const useApproveOrRejectProblem = () => {
 
       const payload: any = {
         isReal,
-        approvedByUser: userId
+        approvedByUser: userId,
+        rejectionReason,
       };
 
       console.log(payload);
 
-      if (!isReal && rejectionReason) {
-        payload.rejectionReason = rejectionReason;
-      }
+      // if (!isReal && rejectionReason) {
+      //   payload.rejectionReason = rejectionReason;
+      // }
 
       const response = await axios.patch(
         `${API_BASE_URL}/api/v1/problems/${problemId}`,
@@ -426,6 +427,50 @@ export const useApproveOrRejectProblem = () => {
       },
       onError: (error: any) => {
         toast.error("حدث خطأ أثناء تحديث حالة الشكوى: " + error.message);
+      },
+    }
+  );
+};
+
+
+type UpdateForContributionParams = {
+  problemId: number;
+  forContribution: boolean; // عادةً هنا نرسل القيمة الجديدة (true)
+  isReal: boolean;
+};
+
+export const useUpdateProblemForContribution = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async ({ problemId, forContribution, isReal }: UpdateForContributionParams) => {
+      const accessToken = keycloak.token;
+
+      const payload = {
+        forContribution,
+        isReal,
+      };
+
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/v1/problems/${problemId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("problems");
+        toast.success("تم تفويض الحل للتبرعات");
+      },
+      onError: (error: any) => {
+        toast.error("حدث خطأ أثناء تحديث 'forContribution': " + error.message);
       },
     }
   );

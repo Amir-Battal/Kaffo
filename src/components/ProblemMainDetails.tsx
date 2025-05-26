@@ -59,8 +59,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   const successfulDonations = donations.filter(d => d.status === "SUCCESS");
   const donorIds = successfulDonations.filter(d => !d.isAnonymous).map(d => d.donorId);
   
-  const { data: publicDonors } = useGetPublicDonors(numericProblemId);
-  console.log(publicDonors?.content);
+  const { data: publicDonors = [] } = useGetPublicDonors(numericProblemId);
 
 
 
@@ -182,20 +181,10 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                 <div className="flex flex-col gap-4 mt-4">
                   <h2 className="text-xl font-bold">المتبرعون:</h2>
                   <ul className="flex flex-col gap-2">
-                    {successfulDonations.map((donation: any) => (
+                    {publicDonors?.content.map((donation: any) => (
                         <li key={donation.id} className="bg-gray-100 p-3 rounded-md">
                           <div className="flex justify-between">
-                            <span>
-                              {/* {donation.isAnonymous ? "متبرع مجهول" : `ID ${donation.donorId}`} */}
-                              {donation.isAnonymous
-                                ? "متبرع مجهول"
-                                : publicDonors?.content.map((donor) => (<h1>{donor.firstName}  {donor.lastName}</h1>))
-                                // : (() => {
-                                //     const donor = publicDonors?.content.find((d) => d.id === donation.donorId);
-                                //     return donor ? `${donor.firstName} ${donor.lastName}` : `ID ${donation.donorId}`;
-                                //   })()}
-                              }
-                            </span>
+                            <span>{donation.isAnonymous ? "متبرع مجهول" : `${donation.firstName} ${donation.lastName}`}</span>
                             <span>{donation.amount} {donation.currency}</span>
                           </div>
                           <div className="text-sm text-gray-600">

@@ -24,6 +24,15 @@ import {
   useUpdateContribution,
   useDeleteContribution,
 } from "@/hooks/use-Contribution";
+import { SolutionDTO } from "@/types";
+import keycloak from "@/lib/keycloak";
+
+import axios from "axios";
+import { useGetMyUser } from "@/hooks/use-user";
+
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const schema = z.object({
   contribution: z.string().min(10, "يرجى كتابة تفاصيل كافية"),
@@ -47,6 +56,7 @@ const SolutionForm: React.FC<Props> = ({
 
   // جلب مساهمة المستخدم الحالي
   const { data: userContribution, isLoading } = useGetMyContribution(problemId);
+  const { currentUser } = useGetMyUser();
 
   // تهيئة الفورم
   const methods = useForm<FormData>({
@@ -83,34 +93,61 @@ const SolutionForm: React.FC<Props> = ({
 
   // إرسال النموذج (إنشاء أو تحديث)
   const onSubmit = (data: FormData) => {
-    const payload = {
+    const payload: Partial<SolutionDTO> = {
       description: data.contribution,
       estimatedCost: data.budget,
       problemId,
       forContribution: false,
-      status: userContribution?.status ?? "ACCEPTED",
     };
 
     if (userContribution && isEditing) {
-      console.log(payload);
-      updateMutation.mutate(payload, {
-        onSuccess: () => {
-          setIsEditing(false);
-          setSolutionSet(true);
-          setSelfBudget(data.budget);
+      updateMutation.mutate(
+        {
+          ...payload,
+          status: "ACCEPTED",
         },
-      });
+        {
+          onSuccess: () => {
+            setIsEditing(false);
+            setSolutionSet(true);
+            setSelfBudget(data.budget);
+          },
+        }
+      );
     } else {
       createMutation.mutate(payload, {
-        onSuccess: () => {
-          methods.reset();
-          setSolutionSet(true);
-          setSelfBudget(data.budget);
-          setIsEditing(false);
+        onSuccess: async (created) => {
+          try {
+            // استدعاء مباشر لتحديث الحل الذي تم إنشاؤه
+            const accessToken = keycloak.token;
+            await axios.put(
+              `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${created.id}`,
+              { 
+                ...payload,
+                status: "ACCEPTED",
+                acceptedReason: 'التكلف بالحل من قبل الجهة المعنية',
+                acceptedByUserId: currentUser?.id
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            methods.reset();
+            setSolutionSet(true);
+            setSelfBudget(data.budget);
+            setIsEditing(false);
+          } catch (error) {
+            console.error("فشل تحديث الحالة إلى ACCEPTED", error);
+          }
         },
       });
     }
   };
+
 
   // حذف المساهمة
   const onDelete = () => {
