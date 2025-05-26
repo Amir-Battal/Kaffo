@@ -99,23 +99,15 @@ export const useGetProblemDonations = (problemId: number) => {
 
 
 
-export const useGetMyDonations = ({
-  problemId,
-  page = 0,
-  size = 10,
-}: {
-  problemId: number;
-  page?: number;
-  size?: number;
-}) => {
+export const useGetMyDonations = () => {
   const accessToken = keycloak.token;
 
-  return useQuery<PaginatedDonations, Error>({
-    queryKey: ["my-donations", problemId, page, size],
+  return useQuery<Donation[], Error>({
+    queryKey: ["my-donations"],
     queryFn: async () => {
       try {
-        const response = await axios.get<PaginatedDonations>(
-          `${API_BASE_URL}/api/v1/problems/${problemId}/donations/me?page=${page}&size=${size}`,
+        const response = await axios.get<Donation[]>(
+          `${API_BASE_URL}/api/v1/users/me/donations`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -132,6 +124,8 @@ export const useGetMyDonations = ({
     staleTime: 1000 * 60 * 5,
   });
 };
+
+
 
 
 
