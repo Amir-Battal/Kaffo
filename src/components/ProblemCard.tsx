@@ -30,8 +30,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
 
   const { photos, isPhotoLoading } = useGetProblemPhotos(problem.id);
 
-  const { progressList, isProgressLoading } = useGetProblemProgress(problem.id);
-  console.log(progressList);
+  const { data: progress } = useGetProblemProgress(problem.id); // جلب التقدم السابق
   
   const photoUrl = photos.length > 0 ? photos[0].s3Key : null;
 
@@ -44,7 +43,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
 
 
 
-  const percentage = progressList.length > 0 ? progressList[0].percentage : 0; // يمكن استبداله لاحقًا بقيمة حقيقية من الـ problem
+  const percentage = progress ? progress.percentage : 0; // يمكن استبداله لاحقًا بقيمة حقيقية من الـ problem
 
   return (
     <Card className="w-[90%] h-[480px] m-0 p-0 rounded-none">

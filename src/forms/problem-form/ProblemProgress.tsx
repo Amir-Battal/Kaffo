@@ -48,9 +48,7 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
       setValue(lastProgress.percentage);  // مهم: تعيين القيمة الحالية للـ slider مع النسبة الأخيرة
     }
   }, [lastProgress]);
-
   
-  console.log(lastPercentage);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     values.progress = value;
