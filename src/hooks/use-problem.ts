@@ -401,12 +401,6 @@ export const useApproveOrRejectProblem = () => {
         rejectionReason,
       };
 
-      console.log(payload);
-
-      // if (!isReal && rejectionReason) {
-      //   payload.rejectionReason = rejectionReason;
-      // }
-
       const response = await axios.patch(
         `${API_BASE_URL}/api/v1/problems/${problemId}`,
         payload,
@@ -467,7 +461,7 @@ export const useUpdateProblemForContribution = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("problems");
-        toast.success("تم تفويض الحل للتبرعات");
+        toast.success("تم إسناد نوع الحل");
       },
       onError: (error: any) => {
         toast.error("حدث خطأ أثناء تحديث 'forContribution': " + error.message);
@@ -475,3 +469,58 @@ export const useUpdateProblemForContribution = () => {
     }
   );
 };
+
+
+
+export const rejectAllProblems = async (contributions: any, problemId: number) => {
+  const accessToken = keycloak.token;
+  try {
+    const rejectPromises = contributions.map((c: any) =>
+      c.status !== "ACCEPTED" &&
+      axios.put(
+        `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${c.id}`,
+        {
+          ...c,
+          status: "REJECTED",
+          acceptedByUserId: null,
+          acceptedReason: "تم رفض المساهمة بسبب التكفل الذاتي بحل المشكلة",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          }
+        }
+      )
+    );
+    await Promise.all(rejectPromises);
+  } catch (err) {
+    console.error("فشل في رفض المساهمات بعد اختيار الحل الذاتي:", err);
+  }
+}
+export const pendingAllProblems = async (contributions: any, problemId: number) => {
+  const accessToken = keycloak.token;
+  try {
+    const rejectPromises = contributions.map((c: any) =>
+      c.status !== "ACCEPTED" &&
+      axios.put(
+        `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${c.id}`,
+        {
+          ...c,
+          status: "PENDING_APPROVAL",
+          acceptedByUserId: null,
+          acceptedReason: "تم رفض المساهمة بسبب التكفل الذاتي بحل المشكلة",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          }
+        }
+      )
+    );
+    await Promise.all(rejectPromises);
+  } catch (err) {
+    console.error("فشل في رفض المساهمات بعد اختيار الحل الذاتي:", err);
+  }
+}

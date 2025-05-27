@@ -56,4 +56,5 @@ export interface SolutionDTO {
   problemId?: number;
   proposedByUserId?: number;
   forContribution?: boolean;
+  acceptedByUserId?: number;
 };

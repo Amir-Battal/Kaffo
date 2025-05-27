@@ -54,6 +54,7 @@ const SolutionForm: React.FC<Props> = ({
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
+
   // جلب مساهمة المستخدم الحالي
   const { data: userContribution, isLoading } = useGetMyContribution(problemId);
   const { currentUser } = useGetMyUser();
@@ -66,6 +67,7 @@ const SolutionForm: React.FC<Props> = ({
       budget: 0,
     },
   });
+
 
   // إعادة تعيين القيم عند تحميل المساهمة أو الدخول في وضع التعديل
   useEffect(() => {

@@ -5,17 +5,10 @@ import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "./ui/form";
-import {
-  useApproveOrRejectProblem,
-  useGetProblemById,
-} from "@/hooks/use-problem";
+import { Form, FormControl, FormField, FormItem, FormLabel, } from "./ui/form";
+import { useApproveOrRejectProblem, useGetProblemById, useUpdateProblemForContribution, } from "@/hooks/use-problem";
+import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
+
 
 const formSchema = z.object({
   comment: z.string().min(5, "سبب الرفض يجب أن لا يقل عن 5 أحرف"),
@@ -28,12 +21,23 @@ interface IsRealProps {
 }
 
 const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
+
   const { mutate: approveOrRejectProblem } = useApproveOrRejectProblem();
+  const { mutateAsync: updateForContribution } = useUpdateProblemForContribution();
+  const {data: acceptedContribution} = useGetAcceptedContribution(problemId);
+  console.log("acceptedContribution", acceptedContribution);
+  
   const { problem } = useGetProblemById(problemId);
 
   const [edit, setEdit] = useState<boolean>();
 
-  // Sync local state with backend state when component mounts
+
+  useEffect(() => {
+    if(!problem?.rejectionReason){
+      setEdit(true);
+    }
+  }, [problem?.rejectionReason])
+
   useEffect(() => {
     if (problem?.isReal !== undefined && problem?.isReal !== isReal) {
       setIsReal(problem.isReal);
@@ -48,15 +52,20 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
   });
 
   const handleReal = () => {
-    approveOrRejectProblem(
-      {
-        problemId,
-        isReal: true,
-      },
-      {
-        onSuccess: () => setIsReal(true),
-      }
-    );
+    if(acceptedContribution){
+      updateForContribution({ problemId: problemId, forContribution: true, isReal: true });
+      setIsReal(true);
+    } else{
+      approveOrRejectProblem(
+        {
+          problemId,
+          isReal: true,
+        },
+        {
+          onSuccess: () => setIsReal(true),
+        }
+      );
+    }
   };
 
   const handleNotReal = () => {
@@ -94,7 +103,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
     <div className="flex flex-col gap-5">
       <h3>بعد التحقق من الشكوى من الشخص المعني وأرض الواقع</h3>
 
-      {isReal === true && (
+      {isReal && (
         <div className="w-[45%] flex flex-row gap-5">
           <Button
             className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800"
@@ -115,7 +124,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
         </div>
       )}
 
-      {isReal === false && (
+      {!isReal && (
         <div className="flex flex-col gap-5">
           <div className="w-[45%] flex flex-row gap-5">
             <Button
@@ -154,7 +163,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
                 )}
               />
               <div className="flex flex-row justify-between">
-                {!problem?.rejectionReason || edit && (
+                { edit && (
                   <Button
                     type="submit"
                     className="flex flex-row justify-around cursor-pointer w-[40%] h-[50px] text-white bg-black p-2 rounded-[10px] hover:bg-gray-800"

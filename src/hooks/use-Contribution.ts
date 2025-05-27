@@ -154,10 +154,201 @@ export const useGetAcceptedContribution = (problemId: number) => {
       });
 
       const allSolutions: SolutionDTO[] = res.data;
-      const acceptedSolution = allSolutions.find((sol) => sol.status === "ACCEPTED") ?? null;
+      const acceptedSolution = allSolutions.find((sol) => sol.status === "ACCEPTED" && sol.proposedByUserId !== sol.acceptedByUserId) ?? null;
 
       return acceptedSolution;
     },
     enabled: !!problemId,
+  });
+};
+
+
+export const useGetPendingContributions = (problemId: number) => {
+  const accessToken = keycloak.token;
+
+  return useQuery<SolutionDTO[]>({
+    queryKey: ["pendingContributions", problemId],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const allSolutions: SolutionDTO[] = res.data;
+      const pendingSolutions = allSolutions.filter((sol) => sol.status === 'PENDING_APPROVAL');
+
+      return pendingSolutions;
+    },
+    enabled: !!problemId,
+  });
+};
+
+
+export const useGetAllProblemsContribution = (problemId: number) => {
+  const accessToken = keycloak.token;
+
+  return useQuery<SolutionDTO[]>({
+    queryKey: ["elseContributions", problemId],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const allSolutions: SolutionDTO[] = res.data;
+      const elseSolutions = allSolutions.filter((sol) => sol.acceptedByUserId !== sol.proposedByUserId);
+
+      return elseSolutions;
+    },
+    enabled: !!problemId,
+  });
+};
+
+
+
+export const useGetGovSolution = (problemId: number) => {
+  const accessToken = keycloak.token;
+
+  return useQuery<SolutionDTO | null>({
+    queryKey: ["govSolution", problemId],
+    queryFn: async () => {
+      const res = await axios.get(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const allSolutions: SolutionDTO[] = res.data;
+      const govSolution = allSolutions.find(
+        (sol) =>
+          sol.status === "ACCEPTED" &&
+          sol.proposedByUserId === sol.acceptedByUserId
+      ) ?? null;
+
+
+      return govSolution;
+    },
+    enabled: !!problemId,
+  });
+};
+
+
+
+
+interface SelectParams {
+  problemId: number;
+  currentUser: any;
+  contributions: SolutionDTO[];
+  onSuccess?: (selected: SolutionDTO) => void;
+}
+export const useSelectContribution = ({
+  problemId,
+  currentUser,
+  contributions,
+  onSuccess,
+}: SelectParams) => {
+  const accessToken = keycloak.token;
+
+  return useMutation({
+    mutationFn: async (contribution: SolutionDTO) => {
+      const acceptedId = contribution.id;
+
+      // Accept selected contribution
+      await axios.put(
+        `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${acceptedId}`,
+        {
+          ...contribution,
+          status: "ACCEPTED",
+          acceptedByUserId: currentUser?.id,
+          acceptedReason: `تم اختيار الحل من قبل ${currentUser?.firstName} ${currentUser?.lastName}`,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Reject others
+      const rejectPromises = contributions
+        .filter((c) => c.id !== acceptedId)
+        .map((c) =>
+          axios.put(
+            `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${c.id}`,
+            {
+              ...c,
+              status: "REJECTED",
+              acceptedByUserId: null,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          )
+        );
+
+      await Promise.all(rejectPromises);
+
+      return contribution;
+    },
+    onSuccess: (data) => {
+      if (onSuccess) {
+        onSuccess(data);
+      }
+    },
+    onError: (error) => {
+      console.error("فشل في تحديث حالة المساهمات:", error);
+    },
+  });
+};
+
+
+
+
+interface UnSelectParams {
+  problemId: number;
+  contributions: SolutionDTO[];
+  onSuccess?: () => void;
+}
+
+
+export const useUnselectContribution = ({ problemId, contributions, onSuccess }: UnSelectParams) => {
+  const accessToken = keycloak.token;
+
+  return useMutation({
+    mutationFn: async () => {
+      const updatePromises = contributions.map((c) =>
+        axios.put(
+          `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${c.id}`,
+          {
+            ...c,
+            status: "PENDING_APPROVAL",
+            acceptedByUserId: null,
+            acceptedReason: null,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+      );
+
+      await Promise.all(updatePromises);
+    },
+    onSuccess: () => {
+      if (onSuccess) {
+        onSuccess();
+      }
+    },
+    onError: (error) => {
+      console.error("فشل في إعادة تعيين حالة المساهمات:", error);
+    },
   });
 };
