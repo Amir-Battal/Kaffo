@@ -266,7 +266,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                     {govSelected && (
                       <div>
                         <EndProject setIsEndProject={setIsEndProject} />
-                        {isEndProject && <ProblemProgress />}
+                        {isEndProject && <ProblemProgress problemId={problemId} solutionId={acceptedContribution?.id} />}
                       </div>
                     )}
                   </div>
@@ -281,7 +281,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                       startDate={acceptedContribution?.startDate}
                       endDate={acceptedContribution?.endDate}
                     />
-                    {isEndProject && <ProblemProgress />}
+                    {isEndProject && <ProblemProgress problemId={problemId} solutionId={acceptedContribution?.id} />}
                   </div>
                 ) : null}
               </div>

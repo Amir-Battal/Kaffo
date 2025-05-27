@@ -5,89 +5,118 @@ import { toast } from "sonner";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-type ProblemProgressDTO = {
-  id: number;
-  percentage: number;
-  comment: string;
-  createdAt: string;
-};
-
-type CreateProblemProgressRequest = {
-  percentage: number;
-  comment: string;
-};
-
-// ============= GET PROGRESS FOR PROBLEM =============
+// ✅ GET All Progress of a Problem
 export const useGetProblemProgress = (problemId: number) => {
-  const accessToken = keycloak.token;
-
-  const fetchProgress = async (): Promise<ProblemProgressDTO[]> => {
-    const response = await axios.get(
-      `${API_BASE_URL}/api/v1/problem/${problemId}/progress`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    return response.data;
+  const fetchProgress = async (): Promise<any> => {
+    const accessToken = keycloak.token;
+    const res = await axios.get(`${API_BASE_URL}/api/v1/problem/${problemId}/progress`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    // إذا كانت البيانات مصفوفة، ارجع آخر عنصر، وإلا ارجع البيانات كما هي
+    if (Array.isArray(res.data)) {
+      return res.data.length > 0 ? res.data[res.data.length - 1] : null;
+    }
+    return res.data;
   };
 
-  const { data, isLoading, isError, error } = useQuery(
-    ["problemProgress", problemId],
-    fetchProgress,
-    { enabled: !!problemId }
-  );
-
-  if (error) {
-    toast.error((error as Error).message);
-  }
-
-  return {
-    progressList: data ?? [],
-    isLoading,
-    isError,
-  };
-};
-
-// ============= ADD NEW PROGRESS ENTRY =============
-export const useAddProblemProgress = (problemId: number) => {
-  const queryClient = useQueryClient();
-
-  const accessToken = keycloak.token;
-
-  const addProgress = async (progressData: CreateProblemProgressRequest) => {
-    const response = await axios.post(
-      `${API_BASE_URL}/api/v11/problem/${problemId}/progress`,
-      progressData,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    return response.data;
-  };
-
-  const {
-    mutateAsync: submitProgress,
-    isLoading,
-    isSuccess,
-    error,
-    reset,
-  } = useMutation(addProgress, {
-    onSuccess: () => {
-      toast.success("تم إضافة تقدم جديد بنجاح!");
-      queryClient.invalidateQueries(["problemProgress", problemId]);
-    },
+  const { data, isLoading, error } = useQuery(["problemProgress", problemId], fetchProgress, {
+    enabled: !!problemId,
   });
 
-  if (error) {
-    toast.error((error as Error).message);
-    reset();
-  }
+  if (error) toast.error("فشل في تحميل التقدم");
 
-  return { submitProgress, isLoading, isSuccess };
+  return { data, isLoading };
+};
+
+
+// ✅ POST Create Progress
+export const useCreateProblemProgress = (problemId: number) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation(
+    async (progressData: Omit<ProblemProgressDTO, "id">) => {
+      const accessToken = keycloak.token;
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/problem/${problemId}/progress`,
+        progressData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["problemProgress", problemId]);
+        toast.success("تم إضافة تقدم جديد");
+      },
+      onError: () => {
+        toast.error("فشل في إضافة التقدم");
+      },
+    }
+  );
+
+  return mutation;
+};
+
+// ✅ GET Single Progress
+export const useGetSingleProgress = (problemId: number, progressId: number) => {
+  const fetchOne = async (): Promise<ProblemProgressDTO> => {
+    const accessToken = keycloak.token;
+    const res = await axios.get(
+      `${API_BASE_URL}/api/v1/problem/${problemId}/progress/${progressId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+    return res.data;
+  };
+
+  const { data, isLoading, error } = useQuery(
+    ["singleProblemProgress", problemId, progressId],
+    fetchOne,
+    {
+      enabled: !!problemId && !!progressId,
+    }
+  );
+
+  if (error) toast.error("فشل في جلب التقدم المحدد");
+
+  return { progress: data, isLoading };
+};
+
+// ✅ DELETE Progress
+export const useDeleteProblemProgress = (problemId: number) => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation(
+    async (progressId: number) => {
+      const accessToken = keycloak.token;
+      await axios.delete(`${API_BASE_URL}/api/v1/problem/${problemId}/progress/${progressId}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries(["problemProgress", problemId]);
+        toast.success("تم حذف التقدم بنجاح");
+      },
+      onError: () => {
+        toast.error("فشل في حذف التقدم");
+      },
+    }
+  );
+
+  return mutation;
 };
