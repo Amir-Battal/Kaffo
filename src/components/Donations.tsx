@@ -1,13 +1,21 @@
 import { Check, ChevronLeft, Timer } from "lucide-react";
 import DateRangePicker from "./DateRangePicker";
 import { Button } from "./ui/button";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
+import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
 
 const Donations = ({...props}): JSX.Element => {
 
   const [date, setDate] = useState();
   const [donationProceed, setDonationProceed] = useState<Boolean>();
   const [donationDone, setDonationDone] = useState<Boolean>();
+
+  const [isDateSet, setIsDateSet] = useState<Boolean>();
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+
+  const { data: acceptedContribution } = useGetAcceptedContribution(props.problemId);
+  
 
   const handleSubmitDate = () => {
     // props.setDonationDone(true);
@@ -20,6 +28,12 @@ const Donations = ({...props}): JSX.Element => {
     }
     console.log(date);
   }
+
+  // useEffect(() => {
+  //   if(date){
+
+  //   }
+  // }, [])
 
   const Donations = [
     {
@@ -48,7 +62,14 @@ const Donations = ({...props}): JSX.Element => {
           <h1 className="text-xl">الوقت المتوقع لإيقاف التبرعات</h1>
           <h3>قم بتحديد المدة المتوقعة من الحقل التالي</h3>
         </div>
-        <DateRangePicker setDate={setDate} date={date} />
+        <DateRangePicker
+            setDate={setDate} 
+            isDateSet={!isEditing && isDateSet}
+            date={date} 
+    
+            startDate={props.startDate}
+            endDate={props.endDate}
+          />
 
         {donationDone
           ?(

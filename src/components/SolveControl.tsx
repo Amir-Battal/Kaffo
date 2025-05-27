@@ -46,6 +46,9 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
 
   const [pendContributions, setPendContributions] = useState<any>();
 
+  const [isDateSet, setIsDateSet] = useState<Boolean>();
+
+
 
 
   //[/]|[\] Get All Contributions by ProblemId [/]|[\]
@@ -61,12 +64,9 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const { data: pendingContribution } = useGetPendingContributions(problemId);
   //[/]|[\] Get All Pending Contributions [/]|[\]
   const { data: elseContribution } = useGetAllProblemsContribution(problemId);
-  console.log("elseContribution",elseContribution);
   //[/]|[\] Get Accepted Contribution [/]|[\]
   const { data: acceptedContribution } = useGetAcceptedContribution(problemId);
 
-  console.log("acceptedContribution", acceptedContribution);
-  console.log("selectedContribution", selectedContribution);
 
   //[/]|[\] Get Gov Solution [/]|[\]
   const { data: govSolution } = useGetGovSolution(problemId);
@@ -128,10 +128,17 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     if(pendingContribution?.length === 0){
       setPendContributions(elseContribution);
     }
+    if(problem?.forDonation){
+      setIsForDonation(true);
+    }
+    if(!problem?.forDonation){
+      setSelfFounded(true);
+    }
+    if(acceptedContribution?.startDate && acceptedContribution.endDate){
+      setIsDateSet(true);
+    }
   }, [])
 
-  console.log("isReal", isReal);
-  console.log("isSelected", isSelected);
 
   useEffect(() => {
     if(pendingContribution){
@@ -141,6 +148,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
       setPendContributions(elseContribution);
     }
   }, [pendingContribution])
+
 
 
   //[/]|[\] while acceptedContribution changed, Check if there is acceptedContribution and compare between contributions and find the match [/]|[\]
@@ -157,11 +165,8 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
 
 
   //[/]|[\]  [/]|[\]
-  // console.log(acceptedContribution);
-
-  console.log("isSelfSolve:", isSelfSolve);
-  console.log("isSelected:", isSelected);
-  // console.log(isSelfSolve);
+  console.log("isForDonation", isForDonation);
+  console.log("selfFounded", selfFounded);
 
 
 
@@ -235,15 +240,25 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                   setIsForDonation={setIsForDonation}
                   isForDonation={isForDonation}
                   setSelfFounded={setSelfFounded}
+                  isDateSet={isDateSet}
                   donationDone={donationDone}
+
+                  problemId={problemId}
+                  acceptedContribution={acceptedContribution}
                 />
 
+                {/* {isForDonation || problem?.forDonation ? ( */}
                 {isForDonation ? (
                   <div className="flex flex-col gap-5">
                     <Donations
                       setDonationDone={setDonationDone}
                       donationDone={donationDone}
                       expectedDonate={selectedContribution?.budget || selfBudget}
+
+                      solutionId={acceptedContribution?.id}
+
+                      startDate={acceptedContribution?.startDate}
+                      endDate={acceptedContribution?.endDate}
                     />
                     {(donationDone && (isSelected || isSelfSolve)) && (
                       <GovPerson setGovSelected={setGovSelected} />
@@ -255,9 +270,17 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                       </div>
                     )}
                   </div>
+                // ) : selfFounded || !problem?.forDonation ? (
                 ) : selfFounded ? (
                   <div className="flex flex-col gap-10">
-                    <EndProject setIsEndProject={setIsEndProject} />
+                    <EndProject 
+                      setIsEndProject={setIsEndProject} 
+                      contributionId={acceptedContribution?.id!}  
+                      problemId={problemId}
+
+                      startDate={acceptedContribution?.startDate}
+                      endDate={acceptedContribution?.endDate}
+                    />
                     {isEndProject && <ProblemProgress />}
                   </div>
                 ) : null}

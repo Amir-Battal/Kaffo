@@ -1,28 +1,62 @@
 import { Check, ChevronLeft, Timer } from "lucide-react";
 import { Button } from "./ui/button";
-import { JSX } from "react";
+import { JSX, useEffect, useState } from "react";
+import { useGetProblemById, useUpdateProblemForDonation } from "@/hooks/use-problem";
 
 const IsForDonation = ({...prop}): JSX.Element => {
 
+  const [isForDonation, setIsForDonation] = useState<boolean>();
+
+  const { mutate: updateForDonation } = useUpdateProblemForDonation();
+  const { problem } = useGetProblemById(prop.problemId);
+
   
   const handleForDonation = () => {
+    updateForDonation({
+      problemId: prop.problemId,
+      forDonation: true,
+      isReal: problem?.isReal,
+      forContribution: problem?.forContribution
+    });
     prop.setIsForDonation(true);
-    prop.setSelfFounded(true);
-    console.log("Cost is For Donation");
+    setIsForDonation(true);
+    prop.setSelfFounded(false);
+    // console.log("Cost is For Donation");
   }
 
   const handleSelfFounded = () => {
+    updateForDonation({
+      problemId: prop.problemId,
+      forDonation: false,
+      isReal: problem?.isReal,
+      forContribution: problem?.forContribution
+    });
     prop.setIsForDonation(false);
+    setIsForDonation(false);
     prop.setSelfFounded(true);
-    console.log("Cost is Self Founded");
+    // console.log("Cost is Self Founded");
   }
+
+  useEffect(() => {
+    if(problem?.forDonation){
+      setIsForDonation(true);
+    } else{
+      setIsForDonation(false);
+    }
+  }, [])
+
+  // console.log("forDonation", prop.isForDonation);
+  // console.log("selfFounded", prop.selfFounded);
+
+  console.log("isForDonation", isForDonation);
 
   return (
 
     <div className="flex flex-col gap-5">
       <h3>تغطية التكاليف</h3>
 
-      {prop.isForDonation && !prop.donationDone
+      {/* {(prop.isForDonation && !prop.donationDone) || (problem?.forDonation && !prop.donationDone) || isForDonation */}
+      {isForDonation
         ?(
           <div className="w-[45%] flex flex-row gap-5">
             <Button className="w-full h-[40px] cursor-pointer" type="button" onClick={handleSelfFounded}>
@@ -46,7 +80,8 @@ const IsForDonation = ({...prop}): JSX.Element => {
               <Check />
             </Button>
           </div>
-        ):prop.isForDonation === false
+        // ):(prop.selfFounded) || (!problem?.forDonation) || !isForDonation
+        ):!isForDonation
         ?(
           <div className="w-[45%] flex flex-row gap-5">
             <Button className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleSelfFounded}>

@@ -25,7 +25,6 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
   const { mutate: approveOrRejectProblem } = useApproveOrRejectProblem();
   const { mutateAsync: updateForContribution } = useUpdateProblemForContribution();
   const {data: acceptedContribution} = useGetAcceptedContribution(problemId);
-  console.log("acceptedContribution", acceptedContribution);
   
   const { problem } = useGetProblemById(problemId);
 

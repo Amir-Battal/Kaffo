@@ -1,25 +1,76 @@
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import DateRangePicker from "./DateRangePicker";
 import { Button } from "./ui/button";
-import { Check } from "lucide-react";
+import { Check, Edit } from "lucide-react";
+import { useUpdateContributionDates } from "@/hooks/use-Contribution";
 
 
+interface EndProjectProps {
+  contributionId?: number;
+  problemId?: number;
+  setIsEndProject: (val: boolean) => void;
+  startDate?: string;
+  endDate?: string;
+}
 
-const EndProject = ({...props}): JSX.Element => {
+
+const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, endDate }: EndProjectProps): JSX.Element => {
 
   const [date, setDate] = useState<any>();
   const [isDateSet, setIsDateSet] = useState<Boolean>();
-  const handleSubmitDate = () => {
-    if (isDateSet && date) {
-      setIsDateSet(false)
-      props.setIsEndProject(false);
-    }else if(!isDateSet && date){
-      setIsDateSet(true)
-      props.setIsEndProject(true);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+
+
+  const { mutate: updateDates } = useUpdateContributionDates({
+    problemId,
+    onSuccess: (updated) => {
+      console.log("تم التحديث بنجاح:", updated);
+    },
+  });
+
+
+  const formatLocalDate = (date: Date): string => {
+    return date.toLocaleDateString("en-CA", { timeZone: "Asia/Riyadh" }); // "YYYY-MM-DD"
+  };
+
+
+  // useEffect(() => {
+    console.log("problemId", problemId);
+    console.log("contributionId", contributionId);
+  // }, [])
+
+  useEffect(() => {
+    if(startDate && endDate){
+      setDate({
+        from: startDate,
+        to: endDate
+      })
+      
+      setIsDateSet(true);
+      setIsEndProject(true);
     }
-    // setIsDateSet(true);
-    console.log(date);
-  }
+  } ,[])
+
+
+  const handleSubmitDate = () => {
+    if (!date?.from || !date?.to || !contributionId || !problemId) return;
+
+    updateDates({
+      contributionId,
+      startDate: formatLocalDate(date.from),
+      endDate: formatLocalDate(date.to),
+    });
+
+    setIsDateSet(true);
+    setIsEndProject(true);
+    setIsEditing(false); 
+  };
+
+  const handleEditDate = () => {
+    setIsEditing(true);
+    setIsDateSet(false);
+  };
+
 
   return (
     <div className="flex flex-col gap-5">
@@ -27,35 +78,43 @@ const EndProject = ({...props}): JSX.Element => {
         <h1 className="text-xl">الوقت المتوقع لإنهاء المشروع</h1>
         <h3>قم بتحديد المدة المتوقعة من الحقل التالي</h3>
       </div>
-      <DateRangePicker setDate={setDate} isDateSet={isDateSet} date={date} />
-      {isDateSet && date
-        ?(
-          <div className="flex flex-col gap-5">
+
+      <DateRangePicker
+        setDate={setDate} 
+        isDateSet={!isEditing && isDateSet}
+        date={date} 
+
+        startDate={startDate}
+        endDate={endDate}
+      />
+
+      {isDateSet && date ? (
+        <div className="flex flex-col gap-5">
+          {!isEditing ? (
+            <Button type="button" onClick={handleEditDate} className="w-[45%] h-[40px] flex flex-row gap-5 cursor-pointer">
+              <h3>تعديل التاريخ</h3>
+              <Edit />
+            </Button>
+          ) : (
             <Button onClick={handleSubmitDate} className="w-[45%] h-[40px] cursor-pointer bg-green-600 hover:bg-green-800">
-              <h3>تم تحديد التاريخ</h3>
+              <h3>تأكيد التعديل</h3>
               <Check />
             </Button>
-            <div>
-              {date 
-                ?(
-                  <h3>
-                    تم تحديد التاريخ
-                    <span> من <span className="font-bold">{date.from.toString().split(' ', 4).join(' ')}</span></span>
-                    <span> إلى <span className="font-bold">{date.to.toString().split(' ', 4).join(' ')}</span></span>
-                  </h3>
-                ):(
-                  <h3>لم يتم تحديد التاريخ</h3>
-                )
-              }
-            </div>
+          )}
+          <div>
+            <h3>
+              تم تحديد التاريخ
+              <span> من <span className="font-bold">{date.from.toString().split(' ', 4).join(' ')}</span></span>
+              <span> إلى <span className="font-bold">{date.to.toString().split(' ', 4).join(' ')}</span></span>
+            </h3>
           </div>
-        ):(
-          <Button onClick={handleSubmitDate} className="w-[45%] h-[40px] cursor-pointer ">
-            <h3>تأكيد التاريخ</h3>
-            <Check />
-          </Button>
-        )
-      }
+        </div>
+      ) : (
+        <Button onClick={handleSubmitDate} className="w-[45%] h-[40px] cursor-pointer ">
+          <h3>تأكيد التاريخ</h3>
+          <Check />
+        </Button>
+      )}
     </div>
   );
 };

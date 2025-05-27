@@ -352,3 +352,69 @@ export const useUnselectContribution = ({ problemId, contributions, onSuccess }:
     },
   });
 };
+
+
+
+
+interface UpdateDatesParams {
+  problemId?: number;
+  onSuccess?: (updated: SolutionDTO) => void;
+}
+
+interface UpdateDatesPayload {
+  contributionId: number;
+  startDate: string;
+  endDate: string;
+}
+
+export const useUpdateContributionDates = ({ problemId, onSuccess }: UpdateDatesParams) => {
+  const accessToken = keycloak.token;
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ contributionId, startDate, endDate }: UpdateDatesPayload) => {
+      if (!problemId) throw new Error("problemId غير موجود");
+
+      // 1. جلب البيانات الحالية للمساهمة
+      const { data: existing } = await axios.get<SolutionDTO>(
+        `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${contributionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // 2. إرسال البيانات بعد تعديل التاريخ فقط
+      const updated = {
+        ...existing,
+        startDate,
+        endDate,
+      };
+
+      const { data: updatedSolution } = await axios.put(
+        `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${contributionId}`,
+        updated,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return updatedSolution;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["solutions", problemId]);
+      queryClient.invalidateQueries(["mySolution", problemId]);
+      if (onSuccess) {
+        onSuccess(data);
+      }
+    },
+    onError: (err) => {
+      console.error("خطأ في تحديث التواريخ:", err);
+    },
+  });
+};

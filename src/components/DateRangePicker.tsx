@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { addDays, format } from "date-fns"
+import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { DateRange } from "react-day-picker"
 
@@ -14,10 +14,21 @@ import {
 } from "@/components/ui/popover"
 
 export default function DateRangePicker({...props}): React.JSX.Element {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
-  })
+  // const [date, setDate] = React.useState<DateRange | undefined>({
+  //   from: new Date(2022, 0, 20),
+  //   to: addDays(new Date(2022, 0, 20), 20),
+  // })
+  const [date, setDate] = React.useState<DateRange | undefined>();
+
+  React.useEffect(() => {
+    if(props.startDate && props.endDate){
+      setDate({
+        from: props.startDate,
+        to: props.endDate
+      })
+    }
+  }, [])
+
 
   const handleSelect = (value: any) => {
     setDate(value);
@@ -47,7 +58,7 @@ export default function DateRangePicker({...props}): React.JSX.Element {
                     format(date.from, "LLL dd, y")
                   )
                 ) : (
-                  <span>Pick a date</span>
+                  <span>حدد الوقت</span>
                 )}
               </Button>
             </PopoverTrigger>
@@ -71,7 +82,7 @@ export default function DateRangePicker({...props}): React.JSX.Element {
                     format(date.from, "LLL dd, y")
                   )
                 ) : (
-                  <span>Pick a date</span>
+                  <span>حدد الوقت</span>
                 )}
               </Button>
             </PopoverTrigger>

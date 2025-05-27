@@ -524,3 +524,52 @@ export const pendingAllProblems = async (contributions: any, problemId: number) 
     console.error("فشل في رفض المساهمات بعد اختيار الحل الذاتي:", err);
   }
 }
+
+
+
+
+
+interface UpdateForDonationParams {
+  problemId: number;
+  forDonation: boolean;
+  forContribution: boolean;
+  isReal: boolean;
+}
+
+export const useUpdateProblemForDonation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async ({ problemId, forDonation, isReal, forContribution }: UpdateForDonationParams) => {
+      const accessToken = keycloak.token;
+
+      const payload: Partial<ProblemDTO> = {
+        forContribution,
+        forDonation,
+        isReal,
+      };
+
+      const response = await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/problems/${problemId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("problems");
+        toast.success("تم تعديل خاصية التبرع بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error("حدث خطأ أثناء تعديل 'forDonation': " + error.message);
+      },
+    }
+  );
+};

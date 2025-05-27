@@ -9,7 +9,7 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   const [select, setSelect] = useState<boolean>();
   const [solution, setSolution] = useState<SolutionDTO>(); 
 
-  console.log("pendContributions" ,props.pendContributions);
+  // console.log("pendContributions" ,props.pendContributions);
 
 
   const handleSelect = (contribution: SolutionDTO) => {
@@ -46,8 +46,8 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   //   }
   // }, [props.isSelected]);
 
-  console.log("select", select);
-  console.log("solution", solution);
+  // console.log("select", select);
+  // console.log("solution", solution);
 
 
   return (
