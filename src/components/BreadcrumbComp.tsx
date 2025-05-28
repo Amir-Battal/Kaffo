@@ -31,7 +31,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
           : prop.name === "/problems"
           ?(
             <BreadcrumbItem>
-              <BreadcrumbLink className="flex flex-row items-center gap-2" href="/problems">
+              <BreadcrumbLink className="flex flex-row items-center gap-2">
                 <Inbox />
                 <h3>المشكلات (100)</h3>
               </BreadcrumbLink>
