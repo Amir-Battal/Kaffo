@@ -215,7 +215,7 @@ export function NewProblemForm() {
                       onChange={field.onChange}
                       ministry={ministryId}
                     />
-i
+
                   </FormControl>
                 </FormItem>
               )}

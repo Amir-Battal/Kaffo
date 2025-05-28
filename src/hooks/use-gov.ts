@@ -23,8 +23,7 @@ export const useMinistryById = (id: number | null) => {
     async () => {
       const response = await axios.get(`${API_BASE_URL}/api/v1/govs/${id}`, {
         headers: { Authorization: `Bearer ${keycloak.token}` },
-      });
-      console.log(response.data);
+      }); 
       return response.data;
     },
     {

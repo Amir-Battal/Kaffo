@@ -11,15 +11,18 @@ const ConcernedPartySelect = ({
   ministryId,
   value,
   setConcernedParty,
+  disabled,
 }: {
   ministryId: number;
   value?: string;
   setConcernedParty: (name: string, id: number) => void;
+  disabled?: boolean;
 }): React.JSX.Element => {
   const { data: parties, isLoading } = useConcernedParties(ministryId);
 
   return (
     <Select
+      disabled={disabled ? true : false} 
       dir="rtl"
       name="party"
       value={value}

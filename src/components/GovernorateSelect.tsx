@@ -14,7 +14,7 @@ const GovernorateSelect = ({
   setGovernorate,
   returnArabicName = false,
 }: {
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
   disabled?: boolean;
   setGovernorate?: (governorate: string) => void;

@@ -58,7 +58,7 @@ export function EditMainGovProfileForm() {
   });
 
   useEffect(() => {
-    if (currentUser && parties) {
+    if (currentUser && parties && cities && ministries) {
       const matchedGovernorate = cities.find(
         (gov) => gov.arabic === currentUser.lastName
       );
@@ -74,7 +74,7 @@ export function EditMainGovProfileForm() {
       if (currentUser.govId) {
         const party = parties.find((p) => p.id === currentUser.govId);
         const ministry = ministries.find((m) => m.id === party?.parentGovId);
-        if (party) {
+        if (party && ministry) {
           setMinistryId(party.parentGovId);
           setConcernedPartyId(party.id);
           setMinistryName(ministry.name);
@@ -82,7 +82,8 @@ export function EditMainGovProfileForm() {
         }
       }
     }
-  }, [currentUser, parties, cities, form]);
+  }, [currentUser, parties, cities, ministries, form]);
+
 
 
 
@@ -102,6 +103,8 @@ export function EditMainGovProfileForm() {
       email: values.email,
       govId: concernedPartyId,
     });
+
+    window.location.reload();
 
     console.log("✅ تم تعديل البيانات الاساسية بنجاح", values);
   };
