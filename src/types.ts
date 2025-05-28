@@ -15,6 +15,7 @@ export type User = {
   description?: string;
 
   addressId?: number;
+  govId?: number;
 };
 
 // types/problem.ts

@@ -20,7 +20,7 @@ import { useGetProblemById } from "@/hooks/use-problem";
 import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
 import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
 import { useGetProblemDonations, useGetPublicDonors } from "@/hooks/use-donation";
-import { useGetUserById } from "@/hooks/use-user";
+import { useGetMyUser, useGetUserById } from "@/hooks/use-user";
 import { useAddress, useCities } from "@/hooks/use-Address";
 import { useCategory } from "@/hooks/use-category";
 
@@ -52,6 +52,8 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   const { data: category } = useCategory(categoryId);
   const { data: user, isLoading: userLoading } = useGetUserById(submittedByUserId);
   const { data: cities } = useCities();
+
+  const { currentUser } = useGetMyUser();
 
   const proposedUserId = acceptedContribution?.proposedByUserId ?? "";
   const { data: proposedUser } = useGetUserById(proposedUserId, { enabled: !!proposedUserId });
@@ -205,12 +207,22 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
           </div>
         ) : (
           <div>
-            {roles.includes("ROLE_GOV") ? <SolveControl problemId={prop.problemId} /> : (
+            {roles.includes("ROLE_GOV") 
+              ? (
+                <div>
+                  <div className="flex flex-row gap-5">
+                    <ProblemOverlay problemId={prop.problemId} status="edit" />
+                    <ProblemOverlay problemId={prop.problemId} status="delete" />
+                  </div>  
+                  <SolveControl problemId={prop.problemId} />
+                </div>
+              ) 
+              : (currentUser?.id === problem?.submittedByUserId) ? (
               <div className="flex flex-row gap-5">
                 <ProblemOverlay problemId={prop.problemId} status="edit" />
                 <ProblemOverlay problemId={prop.problemId} status="delete" />
               </div>
-            )}
+              ):(<div></div>)}
           </div>
         )}
       </div>

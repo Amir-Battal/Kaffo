@@ -18,6 +18,7 @@ import MinistriesSelect from "@/components/MinistriesSelect"
 import ConcernedPartySelect from "@/components/ConcernedPartySelect"
 
 const formSchema = z.object({
+  name: z.string(),
   phoneNumber: z.string().min(10).max(10),
   email: z.string().min(10).max(20),
   ministry: z.string(),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 })
 
 interface govMainData {
+  name: string;
   phoneNumber: string;
   email: string;
   ministry: string,
@@ -35,6 +37,7 @@ interface govMainData {
 
 const gov: govMainData[] = [
   {
+    name: 'شركة كهرباء حلب',
     phoneNumber: '0999999999',
     email: 'email@example.com',
     ministry: 'وزارة الإدارة المحلية والبيئة',
@@ -52,6 +55,7 @@ export function MainGovProfileForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: gov[0].name,
       phoneNumber: gov[0].phoneNumber,
       email: gov[0].email,
       ministry: gov[0].ministry,
@@ -70,6 +74,19 @@ export function MainGovProfileForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-10 py-10" dir="rtl">
+        <FormField
+            disabled
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>الاسم</FormLabel>
+                <FormControl>
+                  <Input placeholder="شركة كهرباء حلب" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
         <div className="grid grid-cols-2 gap-5">
           <FormField
               disabled

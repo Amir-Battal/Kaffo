@@ -30,6 +30,7 @@ export function MainProfileForm({...props}): JSX.Element {
 
   
   const form = useForm<z.infer<typeof formSchema>>({
+    
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "",

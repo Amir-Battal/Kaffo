@@ -15,17 +15,17 @@ const ProblemPage = (prop: ProblemPageProp) => {
     <div className="mb-[500px]">
       {prop.contribution ? (
         <div>
-          <div>Contribution {problemId}</div>
+          {/* <div>Contribution {problemId}</div> */}
           <ProblemMainDetails contribution />
         </div>
       ) : prop.donation ? (
         <div>
-          <div>Donation {problemId}</div>
+          {/* <div>Donation {problemId}</div> */}
           <ProblemMainDetails donation />
         </div>
       ) : (
         <div>
-          <div>Problem {problemId}</div>
+          {/* <div>Problem {problemId}</div> */}
           <ProblemMainDetails problemId={Number(problemId)} />
         </div>
       )}

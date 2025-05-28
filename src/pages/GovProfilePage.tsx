@@ -4,9 +4,12 @@ import DeleteOverlay from "@/forms/user-profile-form/DeleteOverlay";
 import { SecondaryGovForm } from "@/forms/gov-profile-form/SecondaryGovForm";
 import { MainGovProfileForm } from "@/forms/gov-profile-form/MainGovProfileForm";
 import EditGovOverlay from "@/forms/gov-profile-form/EditGovOverlay";
+import { useGetMyUser } from "@/hooks/use-user";
 
 
 const GovProfilePage = () => {
+
+  const { currentUser } = useGetMyUser();
 
   return (
       <div className="w-full flex flex-row justify-between px-10 gap-10">
@@ -23,7 +26,7 @@ const GovProfilePage = () => {
           
           <div className="w-full">
             <h3 className="text-gray-400 my-5">يفضل إكمال البيانات لتعزيز المصداقية</h3>
-            <SecondaryGovForm />
+            <SecondaryGovForm userId={currentUser?.id} />
           </div>
         </div>
 

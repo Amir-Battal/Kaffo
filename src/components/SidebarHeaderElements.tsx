@@ -1,8 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useGetMyUser } from "@/hooks/use-user";
+import { JSX } from "react";
 import { Link } from "react-router-dom";
 
-const SidebarHeaderElements = () => {
+const SidebarHeaderElements = ({...props}): JSX.Element => {
 
   const { currentUser, isLoading } = useGetMyUser();
 
@@ -12,7 +13,7 @@ const SidebarHeaderElements = () => {
 
   return (
     <div>
-      <Link to="/user-profile" className="w-[100%] flex flex-row gap-2 p-1">
+      <Link to={`${props.roles.includes("ROLE_GOV") ? "/gov-profile" :  "/user-profile" }`} className="w-[100%] flex flex-row gap-2 p-1">
         <Avatar>
           <AvatarImage className="object-cover object-center" src={`${currentUser.photoUrl}`} />
           <AvatarFallback>{currentUser?.firstName.split("")[0]}</AvatarFallback>

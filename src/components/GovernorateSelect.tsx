@@ -12,17 +12,23 @@ const GovernorateSelect = ({
   onChange,
   disabled,
   setGovernorate,
+  returnArabicName = false,
 }: {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
   setGovernorate?: (governorate: string) => void;
+  returnArabicName?: boolean;
 }): React.JSX.Element => {
   const { data: cities, isLoading, isError } = useCities();
 
   const handleChange = (value: string) => {
-    onChange(value);
-    if (setGovernorate) setGovernorate(value);
+    const selectedCity = cities?.find((city) => city.value === value);
+    if (!selectedCity) return;
+
+    const result = returnArabicName ? selectedCity.arabic : selectedCity.value;
+    onChange(result);
+    if (setGovernorate) setGovernorate(result);
   };
 
   if (isLoading) return <p>...جاري تحميل المحافظات</p>;

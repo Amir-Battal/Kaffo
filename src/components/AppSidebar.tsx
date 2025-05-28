@@ -169,7 +169,7 @@ export function AppSidebar() {
       <SidebarContent className="overflow-x-hidden">
 
         <SidebarHeader className="hover:bg-gray-100 rounded-[10px]">
-          <SidebarHeaderElements />
+          <SidebarHeaderElements roles={roles}/>
         </SidebarHeader>
         
         <Separator />

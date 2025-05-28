@@ -104,6 +104,7 @@ type UpdateUserBasicInfoRequest = {
   email: string;
 
   addressId?: number; // ✅ عدّل الاسم هنا ليتوافق أيضًا
+  govId?: number; 
 
   dateOfBirth?: Date;
   collegeDegree?: string;
@@ -122,7 +123,7 @@ export const  useUpdateUserBasicInfo = () => {
       phone: data.phone,
       email: data.email,
 
-      addressId: data.addressId,
+      govId: data.govId,
 
       dateOfBirth: data.dateOfBirth,
       collegeDegree: data.collegeDegree,  
@@ -254,4 +255,55 @@ export const useUploadUserCv = () => {
   };
 
   return useMutation(getPresignedUrl);
+};
+
+
+
+
+export const useGovUserInfo = (userId: string) => {
+  const fetchGovUser = async (): Promise<User> => {
+    const accessToken = keycloak.token;
+
+    const response = await axios.get(`${API_BASE_URL}/api/v1/users/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data as User;
+  };
+
+  return useQuery(["govUser", userId], fetchGovUser, {
+    enabled: !!userId,
+    onError: (error: any) => {
+      toast.error(error.message || "فشل في جلب بيانات المستخدم الحكومي");
+    },
+  });
+};
+
+
+
+type UpdateGovUserInfoRequest = {
+  id: string;
+  address: string;
+  description: string;
+};
+
+export const useUpdateGovUserInfo = () => {
+  const updateRequest = async (data: UpdateGovUserInfoRequest) => {
+    const accessToken = keycloak.token;
+
+    await axios.put(`${API_BASE_URL}/api/v1/users/${data.id}`, {
+      address: data.address,
+      description: data.description,
+    }, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+  };
+
+  return useMutation(updateRequest);
 };

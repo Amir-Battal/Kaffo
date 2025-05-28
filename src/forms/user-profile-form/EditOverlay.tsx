@@ -17,6 +17,7 @@ const EditOverlay = ({ ...props }): JSX.Element => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger className="flex flex-col items-center cursor-pointer">
           <Edit />
+          
           <h3>تعديل</h3>
         </DialogTrigger>
         <DialogContent>

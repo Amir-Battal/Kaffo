@@ -97,15 +97,17 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
       </CardContent> */}
       <CardContent className="flex flex-col gap-5">
         <p className="text-sm">{problem.description}</p>
-        <div className="flex flex-row gap-2">
-          <Badge className="rounded-none" variant="default">
+        <div className="flex flex-row justify-between gap-2">
+          <Badge className="rounded-none w-[24%]" variant="default">
             {cityArabicName ?? "غير معروف"}
           </Badge>
-          <Badge className="rounded-none" variant="secondary">
+          <Badge className="rounded-none w-[28%]" variant="secondary">
             {category?.name ?? "غير معروف"}
           </Badge>
-          <Badge className="rounded-none" variant="secondary">
-            {address?.description ?? "غير معروف"}
+          <Badge className="rounded-none w-[45%] flex flex-row justify-start" variant="secondary">
+            <h3>
+              {String(address?.description.slice(0, 20) + "...") ?? "غير معروف"}
+            </h3>
           </Badge>
         </div>
       </CardContent>
@@ -113,7 +115,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
         {contribution ? (
           <Link
             to={`/volunteering/contributions/${problem.id}`}
-            className="w-[80%] flex flex-row justify-around cursor-pointer text-white bg-black p-2  rounded-[10px] hover:bg-gray-800"
+            className="w-[80%] flex flex-row justify-around cursor-pointer text-white bg-black p-2 mt-10 rounded-[10px] hover:bg-gray-800"
           >
             <h3>المساهمة في حل المشكلة</h3>
             <ChevronLeft />
@@ -121,7 +123,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
         ) : donation ? (
           <Link
             to={`/volunteering/donations/${problem.id}`}
-            className="w-[80%] flex flex-row justify-around cursor-pointer text-white bg-black p-2  rounded-[10px] hover:bg-gray-800"
+            className="w-[80%] flex flex-row justify-around cursor-pointer text-white bg-black p-2 mt-10 rounded-[10px] hover:bg-gray-800"
           >
             <h3>التبرع لحل المشكلة</h3>
             <ChevronLeft />

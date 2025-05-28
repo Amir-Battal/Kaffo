@@ -12,128 +12,154 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import { Check, Edit } from "lucide-react"
-import { useState } from "react"
+import { Check, Edit, Ban } from "lucide-react"
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { useGovUserInfo, useUpdateGovUserInfo } from "@/hooks/use-user"
 
 const formSchema = z.object({
-  address: z.string(),
-  about: z.string(),
+  address: z.string().min(1, "العنوان مطلوب"),
+  about: z.string().min(1, "الوصف مطلوب"),
 })
 
+export function SecondaryGovForm({ userId }: { userId: string }) {
+  const { data: user, isLoading, isError } = useGovUserInfo(userId)
+  const { updateGovUserInfo } = useUpdateGovUserInfo()
 
-interface SecondaryData {
-  address: string;
-  about: string;
-}
-
-const user: SecondaryData[] = [
-  {
-    address: 'حلب، الجميلية',
-    about: 'هذا النص تجريبي يصف وصف عن المستخدم حيث أن المستخدم يجب أن يملئ هذا الحقل من أجل وصف ما هي المهارات التي يملكها ويستطيع العمل بها لتعطي موثوقية لتسليمه العمل على الأنشطة التطوعية'
-  },
-]
-
-export function SecondaryGovForm() {
+  const [editable, setEditable] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      address: user[0].address,
-      about: user[0].about,
+      address: "",
+      about: "",
     },
   })
-  
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-    setEditable(false);
-  }
 
-  const [editable, setEditable] = useState(false);
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        address: user.address || "",
+        about: user.description || "",
+      })
+    }
+  }, [user, form])
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    updateGovUserInfo(
+      {
+        id: userId,
+        address: values.address,
+        description: values.about,
+      },
+      {
+        onSuccess: () => {
+          sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح")
+          setEditable(false)
+          window.location.reload()
+        },
+        onError: (err) => {
+          console.error("فشل التحديث:", err)
+          toast("حدث خطأ أثناء التحديث", {
+            style: {
+              background: '#cc1100',
+              color: '#fff',
+              direction: 'rtl',
+              border: 'none',
+            },
+            icon: <Ban />,
+            closeButton: true
+          })
+        }
+      }
+    )
+  }
 
   const handleEdit = () => {
-    setEditable(true);
+    if (!user?.phone || user.phone.trim() === "") {
+      toast("يرجى كتابة رقم الهاتف أولاً قبل تعديل البيانات الثانوية", {
+        style: {
+          background: '#cc1100',
+          color: '#fff',
+          direction: 'rtl',
+          border: 'none',
+        },
+        icon: <Ban />,
+        closeButton: true
+      })
+      return
+    }
+    setEditable(true)
   }
 
+  if (isLoading) return <div>جاري تحميل بيانات المستخدم...</div>
+  if (isError) return <div>حدث خطأ أثناء جلب البيانات.</div>
 
   return (
     <Form {...form}>
-          {editable
-          ? (
-            <form className="w-[100%]" onSubmit={form.handleSubmit(onSubmit)}  dir="rtl">
-            <div className="space-y-8 w-full flex flex-col gap-6 py-1">
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>العنوان</FormLabel>
-                      <FormControl>
-                        <Input placeholder="حلب، العزيزية" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-
-              <FormField
-                control={form.control}
-                name="about"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>وصف عنك</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="قم بكتابة وصف عنك" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <Button type="submit" className=" flex flex-row justify-around cursor-pointer w-[40%] h-[50px] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
-                <h3>تأكيد التعديل</h3>
-                <Check />
-              </Button>
-            </div>
-            </form>
-          ):(
-            <div  dir="rtl">
-            <div className="space-y-8 w-full flex flex-col gap-6 py-1">
-                <FormField
-                  disabled
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>العنوان</FormLabel>
-                      <FormControl>
-                        <Input className="text-gray-400" placeholder="حلب، العزيزية" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-              <FormField
-                disabled
-                control={form.control}
-                name="about"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>وصف عنك</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="قم بكتابة وصف عنك" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <Button type="button" onClick={handleEdit} className="flex flex-row justify-around cursor-pointer w-[40%] h-[50px] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
-                <h3>تعديل البيانات الثانوية</h3>
-                <Edit />
-              </Button>
-            </div>
-            </div>
-          )}
+      {editable ? (
+        <form onSubmit={form.handleSubmit(onSubmit)} dir="rtl" className="w-full space-y-6">
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>العنوان</FormLabel>
+                <FormControl>
+                  <Input placeholder="حلب، العزيزية" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="about"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>وصف عنك</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="قم بكتابة وصف عنك" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-[40%] flex justify-around h-[50px] text-white bg-black hover:bg-gray-800 rounded-[10px]">
+            <h3>تأكيد التعديل</h3>
+            <Check />
+          </Button>
+        </form>
+      ) : (
+        <div dir="rtl" className="w-full space-y-6">
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>العنوان</FormLabel>
+                <FormControl>
+                  <Input disabled className="text-gray-400" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="about"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>وصف عنك</FormLabel>
+                <FormControl>
+                  <Textarea disabled className="text-gray-400" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button type="button" onClick={handleEdit} className="w-[40%] flex justify-around h-[50px] text-white bg-black hover:bg-gray-800 rounded-[10px]">
+            <h3>تعديل البيانات الثانوية</h3>
+            <Edit />
+          </Button>
+        </div>
+      )}
     </Form>
   )
 }

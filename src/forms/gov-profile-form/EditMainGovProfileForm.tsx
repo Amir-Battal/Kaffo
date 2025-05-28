@@ -1,6 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import {
   Form,
@@ -8,132 +8,194 @@ import {
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { ChevronLeft } from "lucide-react"
-import { useState } from "react"
-import GovernorateSelect from "@/components/GovernorateSelect"
-import ConcernedPartySelect from "@/components/ConcernedPartySelect"
-import MinistriesSelect from "@/components/MinistriesSelect"
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import MinistriesSelect from "@/components/MinistriesSelect";
+import ConcernedPartySelect from "@/components/ConcernedPartySelect";
+import { Button } from "@/components/ui/button";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import GovernorateSelect from "@/components/GovernorateSelect";
+import { useGetMyUser, useUpdateUserBasicInfo } from "@/hooks/use-user";
+import { useAllMinistries, useAllParties } from "@/hooks/use-gov";
+import { useCities } from "@/hooks/use-Address";
 
-
+// النموذج الأساسي
 const formSchema = z.object({
-  phoneNumber: z.string().min(10).max(10),
-  email: z.string().min(10).max(20),
-  ministry: z.string(),
-  concernedParty: z.string(),
+  firstName: z.string(),
   governorate: z.string(),
-})
-
-interface govMainData {
-  phoneNumber: string;
-  email: string;
-  ministry: string,
-  concernedParty: string,
-  governorate: string
-}
-
-const gov: govMainData[] = [
-  {
-    phoneNumber: '0999999999',
-    email: 'email@example.com',
-    ministry: 'وزارة الإدارة المحلية والبيئة',
-    concernedParty: 'بلدية حلب',
-    governorate: 'حلب'
-  },
-]
-
+  email: z.string().email(),
+  phoneNumber: z.string().min(10).max(10),
+  concernedPartyId: z.number(), // المعرف فقط
+});
 
 export function EditMainGovProfileForm() {
+  const [ministryId, setMinistryId] = useState<number | null>(null);
+  const [concernedPartyId, setConcernedPartyId] = useState<number | null>(null);
 
-  const [governorate, setGovernorate] = useState(gov[0].governorate);
-  const [ministry, setMinistry] = useState(gov[0].ministry);
-  const [concernedParty, setConcernedParty] = useState(gov[0].concernedParty);
-  
+  const [ministryName, setMinistryName] = useState("");
+  const [concernedPartyName, setConcernedPartyName] = useState("");
+
+
+  const { currentUser } = useGetMyUser();
+  const { updateUserBasicInfo } = useUpdateUserBasicInfo();
+  const { data: parties } = useAllParties();
+  const { data: ministries } = useAllMinistries();
+
+  const { data: cities} = useCities();
+
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      phoneNumber: gov[0].phoneNumber,
-      email: gov[0].email,
-      ministry: gov[0].ministry,
-      concernedParty: gov[0].concernedParty,
-      governorate: gov[0].governorate
+      firstName: "",
+      governorate: "",
+      email: "",
+      phoneNumber: "",
+      concernedPartyId: 0,
     },
-  })
+  });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    values.governorate = governorate;
-    values.ministry = ministry;
-    values.concernedParty = concernedParty;
-    console.log(values);
-  }
+  useEffect(() => {
+    if (currentUser && parties) {
+      const matchedGovernorate = cities.find(
+        (gov) => gov.arabic === currentUser.lastName
+      );
+
+      form.reset({
+        firstName: currentUser.firstName || "",
+        governorate: matchedGovernorate ? matchedGovernorate.value : "",
+        email: currentUser.email || "",
+        phoneNumber: currentUser.phone || "",
+        concernedPartyId: currentUser.govId || 0,
+      });
+
+      if (currentUser.govId) {
+        const party = parties.find((p) => p.id === currentUser.govId);
+        const ministry = ministries.find((m) => m.id === party?.parentGovId);
+        if (party) {
+          setMinistryId(party.parentGovId);
+          setConcernedPartyId(party.id);
+          setMinistryName(ministry.name);
+          setConcernedPartyName(party.parentGovName);
+        }
+      }
+    }
+  }, [currentUser, parties, cities, form]);
+
+
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!currentUser || !concernedPartyId) {
+      alert("حدث خطأ في تحديد المستخدم أو الجهة المعنية");
+      return;
+    }
+
+    const selectedCity = cities.find(city => city.value === values.governorate);
+
+    await updateUserBasicInfo({
+      id: currentUser.id,
+      firstName: values.firstName,
+      lastName: selectedCity?.arabic || "", // هنا نستخدم الاسم العربي
+      phone: values.phoneNumber,
+      email: values.email,
+      govId: concernedPartyId,
+    });
+
+    console.log("✅ تم تعديل البيانات الاساسية بنجاح", values);
+  };
+
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-10 py-10" dir="rtl">
+
         <div className="grid grid-cols-2 gap-5">
           <FormField
-              control={form.control}
-              name="phoneNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>رقم الهاتف</FormLabel>
-                  <FormControl>
-                    <Input placeholder="0999999999" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
+            control={form.control}
+            name="firstName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>الاسم الأول</FormLabel>
+                <FormControl>
+                  <Input placeholder="الاسم الكامل" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="governorate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>المحافظة</FormLabel>
+                <GovernorateSelect
+                  value={field.value}
+                  onChange={field.onChange}
+                />
+
+              </FormItem>
+            )}
+          />
+
+
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>رقم الهاتف</FormLabel>
+                <FormControl>
+                  <Input placeholder="0999999999" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>البريد الإلكتروني</FormLabel>
+                <FormControl>
+                  <Input placeholder="email@example.com" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>  
+
+        <div className="grid grid-cols-2 gap-5">
+          <div className="flex flex-col gap-2">
+            <FormLabel>الوزارة</FormLabel>
+            <MinistriesSelect
+              value={ministryName}
+              setMinistry={(name, id) => {
+                setMinistryId(id);
+                setConcernedPartyId(null); // إعادة التهيئة عند تغيير الوزارة
+              }}
             />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>البريد الإلكتروني</FormLabel>
-                  <FormControl>
-                    <Input placeholder="email@example.com" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="ministry"
-              render={({ field }) => (
-                <FormItem className="mt-10">
-                  <FormLabel>الوزارة</FormLabel>
-                  <FormControl>
-                    <MinistriesSelect setMinistry={setMinistry}  {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="governorate"
-              render={({ field }) => (
-                <FormItem className="mt-10">
-                  <FormLabel>المحافظة</FormLabel>
-                  <FormControl>
-                    <GovernorateSelect setGov={setGovernorate} {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="concernedParty"
-              render={({ field }) => (
-                <FormItem className="mt-10">
-                  <FormLabel>الجهة المعنية</FormLabel>
-                  <FormControl>
-                    <ConcernedPartySelect setParty={setConcernedParty} ministry={ministry} gov={governorate}  {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+          </div>
+
+          {ministryId !== null && (
+            <div className="flex flex-col gap-2">
+              <FormLabel>الجهة المعنية</FormLabel>
+              <ConcernedPartySelect
+                key={ministryId}
+                ministryId={ministryId}
+                value={concernedPartyId?.toString()} // 🟢 تمرير القيمة الحالية
+                setConcernedParty={(name, id) => {
+                  setConcernedPartyName(name);
+                  setConcernedPartyId(id);
+                  form.setValue("concernedPartyId", id);
+                }}
+              />
+
+            </div>
+          )}
+
         </div>
 
         <DialogPrimitive.Close>
@@ -144,5 +206,5 @@ export function EditMainGovProfileForm() {
         </DialogPrimitive.Close>
       </form>
     </Form>
-  )
+  );
 }

@@ -19,8 +19,12 @@ import NewAccount from "./pages/NewAccount";
 import MyContributionsPage from "./pages/MyContributionsPage";
 import MyDonationsPage from "./pages/MyDonationsPage";
 import PrivateRoute from "./PrivateRoute";
+import keycloak from "./lib/keycloak";
 
 const AppRoutes = () => {
+
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -67,12 +71,18 @@ const AppRoutes = () => {
       <Route path="/manage/new-account" element={
         <PrivateRoute><Layout><NewAccount /></Layout></PrivateRoute>
       } />
-      <Route path="/user-profile" element={
-        <PrivateRoute><Layout><UserProfilePage /></Layout></PrivateRoute>
-      } />
-      <Route path="/gov-profile" element={
-        <PrivateRoute><Layout><GovProfilePage /></Layout></PrivateRoute>
-      } />
+      
+      {roles.includes("ROLE_GOV") 
+        ?(
+          <Route path="/gov-profile" element={
+            <PrivateRoute><Layout><GovProfilePage /></Layout></PrivateRoute>
+          } />
+        ):(
+          <Route path="/user-profile" element={
+            <PrivateRoute><Layout><UserProfilePage /></Layout></PrivateRoute>
+          } />
+        )
+      }
       <Route path="/user-activities" element={
         <PrivateRoute><Layout><UserActivitiesPage /></Layout></PrivateRoute>
       } />

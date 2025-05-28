@@ -171,7 +171,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
 
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 mt-10">
       <div className="flex flex-col gap-8">
         <h1 className="text-xl">وضع الشكوى</h1>
 
