@@ -12,6 +12,7 @@ const GovProfilePage = () => {
   const { currentUser } = useGetMyUser();
 
   return (
+    <div className="flex flex-col">
       <div className="w-full flex flex-row justify-between px-10 gap-10">
         <div className="w-[60%] flex flex-col">
           <div className="w-full">
@@ -24,17 +25,18 @@ const GovProfilePage = () => {
 
           <Separator/>
           
-          <div className="w-full">
+          <div className="w-full my-5 py-5">
             <h3 className="text-gray-400 my-5">يفضل إكمال البيانات لتعزيز المصداقية</h3>
             <SecondaryGovForm userId={currentUser?.id} />
           </div>
         </div>
 
         <div className="w-[40%] h-full flex flex-col gap-30 justify-between items-center">
-          <UserPhoto  />
-          <DeleteOverlay />
+          <UserPhoto photoUrl={currentUser?.photoUrl}  />
         </div>
       </div>
+      <DeleteOverlay userId={currentUser?.id} />
+    </div>
   );
 };
 
