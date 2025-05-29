@@ -44,25 +44,24 @@ const DonationCard = (prop: DonationCardProp) => {
         </div>
 
         <Badge className={`w-[20%] h-[35px] ml-1 ${prop.status === "PENDING"
-              ? 'bg-orange-600'
-                : prop.status === "FAILED"
-                  ? 'bg-red-600'
-                  : prop.status === "SUCCEEDED"
-                    ? 'bg-green-600'
-                    : 'bg-fuchsia-600'}`}>
-              
-              <h3 className="text-lg">
-                {prop.status === "PENDING" 
-                  ? "جاري المعالجة" 
-                  : prop.status === "FAILED" 
-                    ? "تم الرفض" 
-                    : prop.status === "SUCCEEDED" 
-                      ? "تم التبرع" 
-                      : "جاري المعالجة"
-                }
-              </h3>
-              
-            </Badge>
+          ? 'bg-orange-600'
+            : prop.status === "FAILED"
+              ? 'bg-red-600'
+              : prop.status === "SUCCEEDED"
+                ? 'bg-green-600'
+                : 'bg-fuchsia-600'}`}>
+          
+          <h3 className="text-lg">
+            {prop.status === "PENDING" 
+              ? "جاري المعالجة" 
+              : prop.status === "FAILED" 
+                ? "تم الرفض" 
+                : prop.status === "SUCCEEDED" 
+                  ? "تم التبرع" 
+                  : "جاري المعالجة"
+            }
+          </h3>
+        </Badge>
 
         <Button>
           <h3>الذهاب إلى مكان التبرع</h3>
