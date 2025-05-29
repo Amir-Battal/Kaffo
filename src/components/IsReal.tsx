@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, } from "./ui/form";
 import { useApproveOrRejectProblem, useGetProblemById, useUpdateProblemForContribution, } from "@/hooks/use-problem";
 import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
+import { useGetMyUser } from "@/hooks/use-user";
 
 
 const formSchema = z.object({
@@ -21,6 +22,8 @@ interface IsRealProps {
 }
 
 const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
+
+  const { currentUser } = useGetMyUser();
 
   const { mutate: approveOrRejectProblem } = useApproveOrRejectProblem();
   const { mutateAsync: updateForContribution } = useUpdateProblemForContribution();

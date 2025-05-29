@@ -87,13 +87,13 @@ const GovPerson = ({...props}): JSX.Element => {
               )}
             <div className="w-full flex flex-col gap-2">
               <div className="w-full flex flex-row gap-2 justify-between">
-                <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
+                {/* <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
                   <User size={40} color="#A9A9A9" />
                   <div>
                     <h3 className="text-lg">الاسم</h3>
                     <h3 className="text-sm">{govPerson[0].username}</h3>
                   </div>
-                </div>
+                </div> */}
                 <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
                   <Building2 size={40} color="#A9A9A9" />
                   <div>

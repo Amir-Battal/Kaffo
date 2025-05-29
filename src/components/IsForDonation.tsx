@@ -56,7 +56,7 @@ const IsForDonation = ({...prop}): JSX.Element => {
       <h3>تغطية التكاليف</h3>
 
       {/* {(prop.isForDonation && !prop.donationDone) || (problem?.forDonation && !prop.donationDone) || isForDonation */}
-      {isForDonation
+      {isForDonation && !prop.donationDone
         ?(
           <div className="w-[45%] flex flex-row gap-5">
             <Button className="w-full h-[40px] cursor-pointer" type="button" onClick={handleSelfFounded}>
