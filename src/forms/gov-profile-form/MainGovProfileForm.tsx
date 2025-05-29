@@ -8,8 +8,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAllMinistries, useAllParties } from "@/hooks/use-gov";
 import { useGetMyUser } from "@/hooks/use-user";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -90,6 +92,10 @@ export function MainGovProfileForm() {
             />
           ))}
         </div>
+        <Link target="_blank" to="http://localhost:9098/realms/kafu-realm/account/account-security/signing-in" className="flex flex-row justify-around cursor-pointer w-[40%] text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
+          <h3>تغيير كلمة المرور</h3>
+          <ChevronLeft />
+        </Link>
       </form>
     </Form>
   );

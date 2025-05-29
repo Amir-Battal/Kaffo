@@ -98,10 +98,10 @@ export const useCreateMyUser = () => {
 // ============= UPDATE USER =============
 type UpdateUserBasicInfoRequest = {
   id: string;
-  firstName: string;
-  lastName: string;
-  phone: string | undefined;
-  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string | undefined;
+  email?: string;
 
   addressId?: number; // ✅ عدّل الاسم هنا ليتوافق أيضًا
   govId?: number; 
@@ -124,6 +124,7 @@ export const  useUpdateUserBasicInfo = () => {
       email: data.email,
 
       govId: data.govId,
+      addressId: data.addressId,
 
       dateOfBirth: data.dateOfBirth,
       collegeDegree: data.collegeDegree,  

@@ -1,13 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
+  Form, FormControl, FormField, FormItem, FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,7 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Check, Edit, Ban } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { useGovUserInfo, useUpdateGovUserInfo } from "@/hooks/use-user"
+import { useGovUserInfo, useUpdateGovUserInfo, useUpdateUserBasicInfo } from "@/hooks/use-user"
+import { useAddress, useCities, useCreateAddress } from "@/hooks/use-Address"
 
 const formSchema = z.object({
   address: z.string().min(1, "العنوان مطلوب"),
@@ -24,7 +20,12 @@ const formSchema = z.object({
 
 export function SecondaryGovForm({ userId }: { userId: string }) {
   const { data: user, isLoading, isError } = useGovUserInfo(userId)
-  const { updateGovUserInfo } = useUpdateGovUserInfo()
+  const { updateUserBasicInfo } = useUpdateUserBasicInfo()
+  const { mutateAsync: createAddress } = useCreateAddress()
+  const { data: cities } = useCities()
+
+
+  const { data: address } = useAddress(user?.addressId);
 
   const [editable, setEditable] = useState(false)
 
@@ -39,53 +40,81 @@ export function SecondaryGovForm({ userId }: { userId: string }) {
   useEffect(() => {
     if (user) {
       form.reset({
-        address: user.address || "",
+        address: address?.description || "",
         about: user.description || "",
       })
     }
-  }, [user, form])
+  }, [user, address, form])
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateGovUserInfo(
-      {
-        id: userId,
-        address: values.address,
-        description: values.about,
-      },
-      {
-        onSuccess: () => {
-          sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح")
-          setEditable(false)
-          window.location.reload()
-        },
-        onError: (err) => {
-          console.error("فشل التحديث:", err)
-          toast("حدث خطأ أثناء التحديث", {
-            style: {
-              background: '#cc1100',
-              color: '#fff',
-              direction: 'rtl',
-              border: 'none',
-            },
-            icon: <Ban />,
-            closeButton: true
-          })
-        }
+  // const extractCityFromLastName = (lastName: string) => {
+  //   const parts = lastName?.trim()?.split(" ")
+  //   return parts?.[1] || "غير محدد"
+  // }
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      if (!user || !cities) return;
+
+
+      const cityNameFromLastName = user.lastName
+
+      const matchedCity = cities.find((c) => c.arabic === cityNameFromLastName)
+
+      if (!matchedCity) {
+        toast.error("لم يتم العثور على المدينة المطابقة في النظام.")
+        return
       }
-    )
+
+
+      const addressRes = await createAddress({
+        city: matchedCity.value ,
+        description: values.address,
+        latitude: 0,
+        longitude: 0,
+      })
+
+      updateUserBasicInfo(
+        {
+          id: userId,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          email: user.email,
+          description: values.about,
+          addressId: addressRes.id,
+        },
+        {
+          onSuccess: () => {
+            sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح")
+            setEditable(false)
+            window.location.reload()
+          },
+          onError: (err) => {
+            console.error("فشل التحديث:", err)
+            toast("حدث خطأ أثناء التحديث", {
+              style: { background: "#cc1100", color: "#fff", direction: "rtl", border: "none" },
+              icon: <Ban />,
+              closeButton: true,
+            })
+          },
+        }
+      )
+    } catch (err) {
+      console.error("خطأ أثناء إنشاء العنوان:", err)
+      toast("حدث خطأ أثناء إنشاء العنوان", {
+        style: { background: "#cc1100", color: "#fff", direction: "rtl", border: "none" },
+        icon: <Ban />,
+        closeButton: true,
+      })
+    }
   }
 
   const handleEdit = () => {
     if (!user?.phone || user.phone.trim() === "") {
       toast("يرجى كتابة رقم الهاتف أولاً قبل تعديل البيانات الثانوية", {
-        style: {
-          background: '#cc1100',
-          color: '#fff',
-          direction: 'rtl',
-          border: 'none',
-        },
+        style: { background: "#cc1100", color: "#fff", direction: "rtl", border: "none" },
         icon: <Ban />,
-        closeButton: true
+        closeButton: true,
       })
       return
     }
@@ -149,7 +178,7 @@ export function SecondaryGovForm({ userId }: { userId: string }) {
               <FormItem>
                 <FormLabel>وصف عنك</FormLabel>
                 <FormControl>
-                  <Textarea disabled className="text-gray-400" {...field} />
+                  <Textarea disabled {...field} />
                 </FormControl>
               </FormItem>
             )}
