@@ -3,14 +3,16 @@ import { Mail, MapPin, Smartphone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 type UserCardProps = {
-  username: String;
-  date: String;
-  study: String;
-  job: String;
-  details: String;
-  address: String;
-  phoneNumber: String;
-  email: String;
+  username?: String;
+  date?: String;
+  study?: String;
+  job?: String;
+  details?: String;
+  address?: String;
+  phoneNumber?: String;
+  email?: String;
+
+  isGov?: Boolean;
 }
 
 const UserCard = (prop: UserCardProps) => {
@@ -25,14 +27,27 @@ const UserCard = (prop: UserCardProps) => {
           </Avatar>
         </div>
         <div className="w-full flex flex-col gap-2">
-          <div>
-            <h1 className="text-xl font-bold">{prop.username}</h1>
-            <h3>تاريخ الميلاد: {prop.date}</h3>
-          </div>
-          <div>
-            <h2><span className="font-bold">الدراسة: </span>{prop.study}</h2>
-            <h2><span className="font-bold">العمل: </span>{prop.job}</h2>
-          </div>
+          {prop.isGov 
+            ? (
+            <div>
+              <div>
+                <h1 className="text-xl font-bold">{prop.username}</h1>
+              </div>
+            </div>
+            ):(
+            <div>
+              <div>
+                <h1 className="text-xl font-bold">{prop.username}</h1>
+                <h3>تاريخ الميلاد: {prop.date}</h3>
+              </div>
+              <div>
+                <h2><span className="font-bold">الدراسة: </span>{prop.study}</h2>
+                <h2><span className="font-bold">العمل: </span>{prop.job}</h2>
+              </div>
+            </div>
+
+            )
+          }
           <p className="w-[90%]">{prop.details}</p>
         </div>
       </div>

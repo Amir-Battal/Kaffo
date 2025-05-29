@@ -51,35 +51,39 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
   
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    values.progress = value;
+  values.progress = value;
 
-    try {
+  try {
+    let photoIds: number[] = [];
+
+    if (selectedFiles.length > 0) {
       const presigned = await getPresignedUrls(problemId, selectedFiles.length);
-      const photoIds: number[] = [];
 
       for (let i = 0; i < selectedFiles.length; i++) {
         await uploadFileToS3(presigned[i].presignedUrl, selectedFiles[i]);
         photoIds.push(presigned[i].photoId);
       }
-
-      await createProgress.mutateAsync({
-        comment: values.comment,
-        percentage: value,
-        progressDate: new Date().toISOString(),
-        problemId,
-        solutionId,
-        photoIds,
-      });
-
-      toast.success("تم إضافة التقدم بنجاح");
-      form.reset();
-      setValue(0);
-      setSelectedFiles([]);
-    } catch (error) {
-      toast.error("حدث خطأ أثناء إضافة التقدم");
-      console.error(error);
     }
-  };
+
+    await createProgress.mutateAsync({
+      comment: values.comment,
+      percentage: value,
+      progressDate: new Date().toISOString(),
+      problemId,
+      solutionId,
+      photoIds, // إما تكون قائمة بالصور أو فارغة
+    });
+
+    toast.success("تم إضافة التقدم بنجاح");
+    form.reset();
+    setValue(0);
+    setSelectedFiles([]);
+  } catch (error) {
+    toast.error("حدث خطأ أثناء إضافة التقدم");
+    console.error(error);
+  }
+};
+
 
   return (
     <div className="flex flex-col gap-8">

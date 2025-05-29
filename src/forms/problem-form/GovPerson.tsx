@@ -42,9 +42,9 @@ const govPerson: govPersonData[] = [
 
 
 
-const   GovPerson = ({...props}): JSX.Element => {
+const GovPerson = ({...props}): JSX.Element => {
 
-  const [govSelected, setGovSelected] = useState(false);
+  const [govSelected, setGovSelected] = useState(props.govSelected ? true : false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,13 +76,15 @@ const   GovPerson = ({...props}): JSX.Element => {
       {govSelected
         ?(
           <div className="flex flex-col gap-5">
-            <div className="flex flex-row justify-between">
-              <h1 className="text-xl">ممثل عن الجهة المعنية</h1>
-              <Button onClick={handleEdit} variant={"ghost"} className="m-1 cursor-pointer">
-                <h3>تعديل</h3>
-                <Edit />
-              </Button>
-            </div>
+              {!props.govSelected && (
+                <div className="flex flex-row justify-between">
+                  <h1 className="text-xl">ممثل عن الجهة المعنية</h1>
+                  <Button onClick={handleEdit} variant={"ghost"} className="m-1 cursor-pointer">
+                    <h3>تعديل</h3>
+                    <Edit />
+                  </Button>
+                </div>
+              )}
             <div className="w-full flex flex-col gap-2">
               <div className="w-full flex flex-row gap-2 justify-between">
                 <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
