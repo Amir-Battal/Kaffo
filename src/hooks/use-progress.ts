@@ -31,6 +31,31 @@ export const useGetProblemProgress = (problemId: number) => {
 };
 
 
+
+// ✅ GET All Progress of a Problem
+export const useGetAllProblemProgress = (problemId: number) => {
+  const fetchProgressList = async (): Promise<any[]> => {
+    const accessToken = keycloak.token;
+    const res = await axios.get(`${API_BASE_URL}/api/v1/problem/${problemId}/progress`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return Array.isArray(res.data) ? res.data : [];
+  };
+
+  const { data, isLoading, error } = useQuery(["allProblemProgress", problemId], fetchProgressList, {
+    enabled: !!problemId,
+  });
+
+  if (error) toast.error("فشل في تحميل جميع التقدمات");
+
+  return { progressList: data ?? [], isLoading };
+};
+
+
+
 // ✅ POST Create Progress
 export const useCreateProblemProgress = (problemId: number) => {
   const queryClient = useQueryClient();

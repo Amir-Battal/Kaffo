@@ -25,6 +25,9 @@ import {
   useDeleteContribution,
   useGetContributions,
 } from "../../hooks/use-Contribution";
+import { toast } from "sonner";
+
+
 
 const schema = z.object({
   contribution: z.string().min(1, "يرجى إدخال وصف المساهمة"),
@@ -40,11 +43,9 @@ interface Props {
 const ContributionForm: React.FC<Props> = ({ problemId }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  // جلب مساهمة المستخدم الحالي والمساهمات الأخرى
   const { data: userContribution } = useGetMyContribution(problemId);
   const { contributions } = useGetContributions(problemId);
 
-  // تهيئة الفورم مع zod
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -53,7 +54,6 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
     },
   });
 
-  // التغير عند تغيير بيانات مساهمة المستخدم (تعبئة الفورم تلقائياً عند الدخول في وضع التعديل)
   useEffect(() => {
     if (userContribution && isEditing) {
       methods.reset({
@@ -63,12 +63,10 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
     }
   }, [userContribution, isEditing, methods]);
 
-  // الميوتيشنز لإنشاء وتحديث وحذف
   const createMutation = useCreateContribution(problemId);
   const updateMutation = useUpdateContribution(problemId, userContribution?.id ?? -1);
   const deleteMutation = useDeleteContribution(problemId, userContribution?.id ?? -1);
 
-  // دالة الإرسال
   const onSubmit = (data: FormData) => {
     const payload = {
       description: data.contribution,
@@ -76,31 +74,35 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
       problemId,
       status: "PENDING_APPROVAL",
     };
-    console.log(payload);
 
     if (userContribution && isEditing) {
       updateMutation.mutate(payload, {
-        onSuccess: () => setIsEditing(false),
+        onSuccess: () => {
+          setIsEditing(false);
+          toast("تم تعديل المساهمة بنجاح" );
+        },
       });
     } else {
       createMutation.mutate(payload, {
-        onSuccess: () => methods.reset(),
+        onSuccess: () => {
+          methods.reset();
+          toast("تم إنشاء المساهمة بنجاح" );
+        },
       });
     }
   };
 
-  // حذف المساهمة
   const onDelete = () => {
     if (!userContribution?.id) return;
     deleteMutation.mutate(undefined, {
       onSuccess: () => {
         setIsEditing(false);
         methods.reset({ contribution: "", budget: 0 });
+        toast("تم حذف المساهمة بنجاح" );
       },
     });
   };
 
-  // واجهة النموذج
   const renderForm = () => (
     <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
       <FormField
@@ -135,7 +137,6 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
                     {...field}
                     ref={field.ref}
                   />
-
                 </FormControl>
               </div>
             </FormItem>
@@ -149,7 +150,6 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
     </form>
   );
 
-  // واجهة مساهمة المستخدم مع خيارات التعديل والحذف
   const renderUserContribution = () =>
     userContribution && !isEditing && (
       <ContributionCard
@@ -167,7 +167,6 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
       </ContributionCard>
     );
 
-  // عرض مساهمات المستخدمين الآخرين
   const renderOtherContributions = () =>
     contributions
       ?.filter((c) => c.id !== userContribution?.id)
@@ -184,9 +183,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
   return (
     <FormProvider {...methods}>
       <div className="flex flex-col gap-6" dir="rtl">
-        {/* إذا لم توجد مساهمة أو في حالة التعديل، عرض النموذج */}
         {(!userContribution || isEditing) ? renderForm() : renderUserContribution()}
-
         <div className="flex flex-col gap-4">
           {renderOtherContributions()}
         </div>

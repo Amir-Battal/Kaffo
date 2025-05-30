@@ -13,7 +13,11 @@ const DonationsPage = () => {
   }, [criteria]);
 
   const { problems, totalPages, isLoading } = useGetProblemsForContribution(
-    { page, size: 6 },
+    { 
+      page, 
+      size: 6,
+      sort: "submissionDate,desc"
+    },
     { ...criteria,
       forContribution: true}
   );

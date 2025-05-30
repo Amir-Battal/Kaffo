@@ -28,7 +28,7 @@ import { SolutionDTO } from "@/types";
 import keycloak from "@/lib/keycloak";
 
 import axios from "axios";
-import { useGetMyUser } from "@/hooks/use-user";
+import { useGetMyUser, useGetUserById } from "@/hooks/use-user";
 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -92,6 +92,10 @@ const SolutionForm: React.FC<Props> = ({
   const createMutation = useCreateContribution(problemId);
   const updateMutation = useUpdateContribution(problemId, userContribution?.id ?? -1);
   const deleteMutation = useDeleteContribution(problemId, userContribution?.id ?? -1);
+
+
+  const { data: proposedUser } = useGetUserById(userContribution?.proposedByUserId);
+
 
   // إرسال النموذج (إنشاء أو تحديث)
   const onSubmit = (data: FormData) => {
@@ -226,8 +230,8 @@ const SolutionForm: React.FC<Props> = ({
         ) : (
           // عرض مساهمة المستخدم مع خيارات التعديل والحذف
           <ContributionCard
-            username="أنا"
-            date={new Date(userContribution.createdAt).toLocaleDateString("ar-EG")}
+            username={proposedUser?.firstName + " " + proposedUser?.lastName}
+            date={new Date(userContribution.creationDate).toLocaleDateString()}
             contribution={userContribution.description}
             budget={userContribution.estimatedCost}
             isSelfSolv

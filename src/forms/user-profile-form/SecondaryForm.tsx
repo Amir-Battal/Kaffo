@@ -122,7 +122,7 @@ export function SecondaryForm({...props}): JSX.Element {
         });
     
         console.log("تم استخدام العنوان الحالي، لم يتم إنشاؤه من جديد.");
-        sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح");
+        sessionStorage.setItem("showToastSecondaryEdit", "تم تعديل البيانات الثانوية بنجاح");
         setEditable(false);
         window.location.reload();
         return;
@@ -156,7 +156,7 @@ export function SecondaryForm({...props}): JSX.Element {
             });
     
             console.log("✅ تم إنشاء عنوان جديد وربطه:", addressId);
-            sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح");
+            sessionStorage.setItem("showToastSecondaryEdit", "تم تعديل البيانات الثانوية بنجاح");
             setEditable(false);
             window.location.reload();
           },
@@ -186,7 +186,6 @@ export function SecondaryForm({...props}): JSX.Element {
           icon: <Ban/>,
           closeButton: true
         })
-        // toast.error("يرجى كتابة رقم الهاتف أولاً قبل تعديل البيانات الثانوية")
         return;
       }
 

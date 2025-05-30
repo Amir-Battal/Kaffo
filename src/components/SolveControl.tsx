@@ -6,7 +6,7 @@ import IsForDonation from "./IsForDonation";
 import ProblemProgress from "@/forms/problem-form/ProblemProgress";
 import GovPerson from "@/forms/problem-form/GovPerson";
 import EndProject from "./EndProject";
-import { useGetAcceptedContribution, useGetAllProblemsContribution, useGetContributions, useGetGovSolution, useGetPendingContributions, useGetRejectedContributions, useSelectContribution, useUnselectContribution } from "@/hooks/use-Contribution";
+import { useGetAcceptedContribution, useGetAllProblemsContribution, useGetContributions, useGetGovSolution, useGetPendingContributions, useGetRejectedContributions, useGetSolutionById, useSelectContribution, useUnselectContribution } from "@/hooks/use-Contribution";
 import { useGetProblemById } from "@/hooks/use-problem";
 import keycloak from "@/lib/keycloak";
 import { useGetMyUser } from "@/hooks/use-user";
@@ -74,6 +74,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const { data: elseContribution } = useGetAllProblemsContribution(problemId);
   //[/]|[\] Get Accepted Contribution [/]|[\]
   const { data: acceptedContribution } = useGetAcceptedContribution(problemId);
+  const { data: onlyAcceptedSolution } = useGetSolutionById(problemId, acceptedContribution?.id);
 
 
   //[/]|[\][/]|[\][/]|[\] Donation [/]|[\][/]|[\][/]|[\]
@@ -333,8 +334,8 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                           contributionId={acceptedContribution?.id!}  
                           problemId={problemId}
 
-                          startDate={acceptedContribution?.startDate}
-                          endDate={acceptedContribution?.endDate}
+                          startDate={onlyAcceptedSolution?.startDate}
+                          endDate={onlyAcceptedSolution?.endDate}
                         />
                         {isEndProject && <ProblemProgress problemId={problemId} solutionId={acceptedContribution?.id} />}
                       </div>
@@ -347,8 +348,8 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                       contributionId={acceptedContribution?.id!}  
                       problemId={problemId}
 
-                      startDate={acceptedContribution?.startDate}
-                      endDate={acceptedContribution?.endDate}
+                      startDate={onlyAcceptedSolution?.startDate}
+                      endDate={onlyAcceptedSolution?.endDate}
                     />
                     {isEndProject && <ProblemProgress problemId={problemId} solutionId={acceptedContribution?.id} />}
                   </div>

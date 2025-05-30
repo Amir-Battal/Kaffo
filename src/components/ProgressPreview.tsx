@@ -1,52 +1,89 @@
-import React, { useState } from 'react';
+import { useGetProblemPhotos } from '@/hooks/use-problem-photo';
+import { useGetAllProblemProgress } from '@/hooks/use-progress';
+import { JSX, useState } from 'react';
 
-const ProgressPreview = () => {
-  const imageGroups = [
-    Array(9).fill('https://via.placeholder.com/100'), // شريحة 1
-    Array(9).fill('https://via.placeholder.com/100?text=Slide+2'), // شريحة 2
-    Array(9).fill('https://via.placeholder.com/100?text=Slide+3')  // شريحة 3
-  ];
+interface ProgressPreviewProps {
+  problemId: number;
+}
 
-  const progressData = [
-    { percentage: '20%', comment: 'تم إنجاز مرحلة التخطيط لحل المشكلة' },
-    { percentage: '40%', comment: 'تم شراء المواد' },
-    { percentage: '60%', comment: 'تم البدء بالعمل' }
-  ];
+const ProgressPreview = ({ problemId }: ProgressPreviewProps): JSX.Element => {
+  const [currentSlides, setCurrentSlides] = useState<{ [key: number]: number }>({});
 
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const { progressList, isLoading: isProgressLoading } = useGetAllProblemProgress(problemId);
+  const { photos, isLoading: isPhotosLoading } = useGetProblemPhotos(problemId);
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % imageGroups.length);
+  if (isProgressLoading) return <div>جاري تحميل بيانات التقدم...</div>;
+
+  if (!Array.isArray(progressList) || progressList.length === 0) {
+    return <div>لا توجد بيانات تقدم لعرضها.</div>;
+  }
+
+  const handleNextSlide = (progressId: number, maxLength: number) => {
+    setCurrentSlides((prev) => ({
+      ...prev,
+      [progressId]: (prev[progressId] + 1) % maxLength,
+    }));
   };
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + imageGroups.length) % imageGroups.length);
+  const handlePrevSlide = (progressId: number, maxLength: number) => {
+    setCurrentSlides((prev) => ({
+      ...prev,
+      [progressId]: (prev[progressId] - 1 + maxLength) % maxLength,
+    }));
   };
 
   return (
-    <div dir='ltr' className='flex flex-row justify-between gap-40 '>
-      {/* القسم الأيسر - صور */}
-      <div className='grid grid-cols-3 gap-5 relative w-[60%]' >
-        {imageGroups[currentSlide].map((src, index) => (
-          <div key={index} className='w-[100px] h-[100px] bg-neutral-400 flex justify-center items-center'>
-            <img src={src} alt={`img-${index}`} style={{ width: '80%', height: '80%', objectFit: 'cover' }} />
-          </div>
-        ))}
-        {/* أسهم التنقل */}
-        <button onClick={prevSlide} style={{ position: 'absolute', left: '-30px', top: '40%', fontSize: '24px' }}>{'<'}</button>
-        <button onClick={nextSlide} style={{ position: 'absolute', right: '-30px', top: '40%', fontSize: '24px' }}>{'>'}</button>
-      </div>
+    <div dir="ltr" className="flex flex-col gap-10">
+      {progressList.map((progress) => {
+        const relatedPhotos = photos.filter((photo) => progress.photoIds.includes(photo.id));
+        const currentSlide = currentSlides[progress.id] || 0;
 
-      {/* القسم الأيمن - تعليقات */}
-      <div dir='ltr' className='w-full text-end flex flex-col gap-5'>
-        {progressData.map((item, index) => (
-          <div key={index} className=' mt-5 border-b border-gray-300 pb-4'>
-            <div className='text-lg font-semibold'>{item.percentage}</div>
-            <div className='text-neutral-400 text-sm'>التعليق</div>
-            <div className='mt-2'>{item.comment}</div>
+        return (
+          <div key={progress.id} className="flex flex-row justify-between gap-40 border-b pb-6">
+            {/* صور التقدم */}
+            <div className="grid grid-cols-3 gap-5 relative w-[60%]">
+              {relatedPhotos.length > 0 ? (
+                relatedPhotos.slice(currentSlide * 9, (currentSlide + 1) * 9).map((photo, index) => (
+                  <div key={index} className="w-[100px] h-[100px] bg-neutral-200 flex justify-center items-center">
+                    <img
+                      src={photo.url}
+                      alt={`progress-${progress.id}-img-${index}`}
+                      style={{ width: '80%', height: '80%', objectFit: 'cover' }}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-400 col-span-3">لا توجد صور لهذا التقدم</div>
+              )}
+
+              {/* أسهم التنقل */}
+              {relatedPhotos.length > 9 && (
+                <>
+                  <button
+                    onClick={() => handlePrevSlide(progress.id, Math.ceil(relatedPhotos.length / 9))}
+                    style={{ position: 'absolute', left: '-30px', top: '40%', fontSize: '24px' }}
+                  >
+                    {'<'}
+                  </button>
+                  <button
+                    onClick={() => handleNextSlide(progress.id, Math.ceil(relatedPhotos.length / 9))}
+                    style={{ position: 'absolute', right: '-30px', top: '40%', fontSize: '24px' }}
+                  >
+                    {'>'}
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* نص التقدم */}
+            <div dir="ltr" className="w-full text-end flex flex-col gap-3">
+              <div className="text-lg font-semibold">{progress.percentage}%</div>
+              <div className="text-neutral-400 text-sm">التعليق</div>
+              <div className="mt-2">{progress.comment}</div>
+            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 };

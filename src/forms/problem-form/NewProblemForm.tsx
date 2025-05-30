@@ -90,82 +90,81 @@ export function NewProblemForm() {
 
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-  try {
-    // 1. إنشاء العنوان أولًا
-    const newAddress = await createAddress({
-      city: data.governorate,
-      description: data.address,
-      latitude: data.lat,
-      longitude: data.lng,
-    });
-
-    if (!newAddress?.id) {
-      toast.error("فشل في إنشاء العنوان");
-      return;
-    }
-
-    // 2. إنشاء المشكلة بدون صور في البداية للحصول على problemId
-    const newProblem = await createProblem({
-      title: data.title,
-      description: data.description,
-      categoryId: data.categoryId,
-      addressId: newAddress.id,
-      isReal: true,
-      forContribution: false,
-      forDonation: false,
-      createdDate: new Date().toISOString(),
-      photoUrls: [],
-    });
-
-    if (!newProblem?.id) {
-      toast.error("فشل في إنشاء المشكلة");
-      return;
-    }
-
-    // 3. إذا كانت هناك صور، رفعها وتحديث خاصية الصور
-    if (selectedImages.length > 0) {
-      // الحصول على روابط التحميل الموقعة باستخدام problemId الفعلي
-      const presignedData = await getPresignedUrls(
-        newProblem.id,
-        selectedImages.length,
-        selectedImages[0].type
-      );
-
-      // رفع الصور إلى S3
-      await Promise.all(
-        selectedImages.map((file, i) =>
-          uploadFileToS3(presignedData[i].presignedUrl, file)
-        )
-      );
-
-      // استخراج مفاتيح الصور لتحديث المشكلة
-      const photoUrls = presignedData.map((item) => item.s3Key);
-
-      // تحديث الصور فقط في المشكلة
-      await updateProblem({
-        id: newProblem.id,
-        data: {
-          title: data.title,
-          description: data.description,
-          categoryId: data.categoryId,
-          addressId: newAddress.id,
-          isReal: true,
-          forContribution: false,
-          forDonation: false,
-          createdDate: newProblem.createdDate, // أو أي تاريخ تراه مناسبًا
-          photoUrls,
-        },
+    try {
+      // 1. إنشاء العنوان أولًا
+      const newAddress = await createAddress({
+        city: data.governorate,
+        description: data.address,
+        latitude: data.lat,
+        longitude: data.lng,
       });
 
-    }
+      if (!newAddress?.id) {
+        toast.error("فشل في إنشاء العنوان");
+        return;
+      }
 
-    sessionStorage.setItem("showToastDone", "تم إنشاء المشكلة بنجاح");
-    window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
-  } catch (err) {
-    toast.error("فشل في إنشاء المشكلة");
-    console.error(err);
-  }
-};
+      // 2. إنشاء المشكلة بدون صور
+      const newProblem = await createProblem({
+        title: data.title,
+        description: data.description,
+        categoryId: data.categoryId,
+        addressId: newAddress.id,
+        isReal: true,
+        forContribution: false,
+        forDonation: false,
+        createdDate: new Date().toISOString(),
+        photoUrls: [],
+      });
+
+      if (!newProblem?.id) {
+        toast.error("فشل في إنشاء المشكلة");
+        return;
+      }
+
+      // 3. رفع الصور إن وجدت
+      if (selectedImages.length > 0) {
+        const presignedData = await getPresignedUrls(
+          newProblem.id,
+          selectedImages.length,
+          selectedImages[0].type
+        );
+
+        await Promise.all(
+          selectedImages.map((file, i) =>
+            uploadFileToS3(presignedData[i].presignedUrl, file)
+          )
+        );
+
+        const photoUrls = presignedData.map((item) => item.s3Key);
+
+        // تحديث المشكلة بالصور
+        await updateProblem({
+          id: newProblem.id,
+          data: {
+            title: data.title,
+            description: data.description,
+            categoryId: data.categoryId,
+            addressId: newAddress.id,
+            isReal: true,
+            forContribution: false,
+            forDonation: false,
+            createdDate: newProblem.createdDate,
+            photoUrls,
+          },
+        });
+      } else {
+        // ✅ إعلام المستخدم بعدم وجود صور
+        toast.warning("تم إنشاء الشكوى ولكن لم يتم إرفاق صور");
+      }
+
+      sessionStorage.setItem("showToastNewProblem", "تم إنشاء الشكوى بنجاح");
+      window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
+    } catch (err) {
+      toast.error("فشل في إنشاء المشكلة");
+      console.error(err);
+    }
+  };
 
   return (
     <Form {...form}>

@@ -97,26 +97,6 @@ export function EditProblemForm({ problemId }: EditProp) {
   }
 }, [address, problem, speCategory]);
 
-useEffect(() => {
-      const toastMessage = sessionStorage.getItem("showToastEdit");
-      if (toastMessage) {
-        toast(toastMessage,{
-          style:{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: '20px',
-            background: '#008c2f',
-            color: '#fff',
-            direction: 'rtl',
-            border: 'none',
-          },
-          icon: <Check />,
-          closeButton: true
-        })
-        sessionStorage.removeItem("showToastEdit");
-      }
-    }, []);
-
 
   const handleLocationSelect = (lat: number, lng: number) => {
     setLocation({ lat, lng })
@@ -125,37 +105,37 @@ useEffect(() => {
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  if (!problem || !address || !speCategory) return;
+    if (!problem || !address || !speCategory) return;
 
-  try {
-    console.log(values);
-    // تحديث العنوان
-    await updateAddress({
-      ...address,
-      description: values.address,
-      city: governorate,
-      latitude: values.lat,
-      longitude: values.lng,
-    });
+    try {
+      // تحديث العنوان
+      await updateAddress({
+        ...address,
+        description: values.address,
+        city: governorate,
+        latitude: values.lat,
+        longitude: values.lng,
+      });
 
-    // تحديث المشكلة
-    await updateProblem({
-      id: problem.id,
-      data: {
-        title: values.title,
-        description: values.details,
-        categoryId: values.category, // تأكد من أن categoryId هو ID التصنيف الجديد
-        addressId: problem.addressId,
-      },
-    });
-    sessionStorage.setItem("showToastEdit", "تم تعديل المشكلة بنجاح");
-    window.location.reload();
+      // تحديث المشكلة
+      await updateProblem({
+        id: problem.id,
+        data: {
+          title: values.title,
+          description: values.details,
+          categoryId: values.category, // تأكد من أن categoryId هو ID التصنيف الجديد
+          addressId: problem.addressId,
+        },
+      });
+      window.location.reload();
     // toast.success("تم حفظ التعديلات");
-  } catch (error) {
-    console.error("فشل تحديث المشكلة:", error);
-    // toast.error("فشل تحديث المشكلة");
-  }
-};
+    } catch (error) {
+      console.error("فشل تحديث الشكوى:", error);
+      toast.error("فشل تحديث المشكلة");
+    } finally {
+      sessionStorage.setItem("showToastProblemEdit", "تم تعديل الشكوى بنجاح");
+    }
+  };
 
 
   if (loadingProblem || loadingAddress || loadingCategory || !speMinistry) {

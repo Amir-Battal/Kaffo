@@ -11,7 +11,7 @@ import {
   FormLabel,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Building2, Check, Edit, Mail, Smartphone, User } from "lucide-react"
+import { BriefcaseBusiness, Building2, Check, Edit, Mail, Smartphone, User } from "lucide-react"
 import { JSX, useState } from "react"
 
 
@@ -30,14 +30,14 @@ interface govPersonData {
 
 }
 
-const govPerson: govPersonData[] = [
-  {
-    username: 'أمير بطال',
-    phoneNumber: '0999 999 999',
-    email: ' amir@example.com',
-    concernedGov: 'مديرية مياه حلب'
-  },
-]
+// const govPerson: govPersonData[] = [
+//   {
+//     username: 'أمير بطال',
+//     phoneNumber: '0999 999 999',
+//     email: ' amir@example.com',
+//     concernedGov: 'مديرية مياه حلب'
+//   },
+// ]
 
 
 
@@ -49,10 +49,10 @@ const GovPerson = ({...props}): JSX.Element => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: govPerson[0].username,
-      phoneNumber: govPerson[0].phoneNumber,
-      email: govPerson[0].email,
-      concernedGov: govPerson[0].concernedGov
+      username: props.username,
+      phoneNumber: props.phoneNumber,
+      email: props.email,
+      concernedGov: props.concernedGov || props.parentMinistry
     },
   })
 
@@ -87,18 +87,18 @@ const GovPerson = ({...props}): JSX.Element => {
               )}
             <div className="w-full flex flex-col gap-2">
               <div className="w-full flex flex-row gap-2 justify-between">
-                {/* <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
-                  <User size={40} color="#A9A9A9" />
+                <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
+                  <BriefcaseBusiness size={40} color="#A9A9A9" />
                   <div>
-                    <h3 className="text-lg">الاسم</h3>
-                    <h3 className="text-sm">{govPerson[0].username}</h3>
+                    <h3 className="text-lg">الجهة المعنية</h3>
+                    <h3 className="text-sm">{props.username}</h3>
                   </div>
-                </div> */}
+                </div>
                 <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
                   <Building2 size={40} color="#A9A9A9" />
                   <div>
-                    <h3 className="text-lg">الجهة المعنية</h3>
-                    <h3 className="text-sm">{govPerson[0].concernedGov}</h3>
+                    <h3 className="text-lg">الوزارة التابعة لها</h3>
+                    <h3 className="text-sm">{props.concernedGov}, {props.parentMinistry}</h3>
                   </div>
                 </div>
               </div>
@@ -107,14 +107,14 @@ const GovPerson = ({...props}): JSX.Element => {
                   <Smartphone size={40} color="#A9A9A9" />
                   <div>
                     <h3 className="text-lg">رقم الهاتف</h3>
-                    <h3 className="text-sm" dir="ltr">{govPerson[0].phoneNumber}</h3>
+                    <h3 className="text-sm" dir="ltr">{props.phoneNumber}</h3>
                   </div>
                 </div>
                 <div className="w-full border-2 flex flex-row items-center gap-2 p-4">
                   <Mail size={40} color="#A9A9A9" />
                   <div>
                     <h3 className="text-lg">البريد الإلكتروني</h3>
-                    <h3 className="text-sm">{govPerson[0].email}</h3>
+                    <h3 className="text-sm">{props.email}</h3>
                   </div>
                 </div>
               </div>
