@@ -49,19 +49,22 @@ export function MainGovProfileForm() {
     },
   });
 
+console.log(currentUser, party, ministry);
+
   // تحديث القيم بعد توفر البيانات
   useEffect(() => {
-    if (currentUser && party && ministry) {
+    if (currentUser) {
       form.reset({
         firstName: currentUser.firstName || "",
         governorate: currentUser.lastName || "",
         phoneNumber: currentUser.phone || "",
         email: currentUser.email || "",
-        ministry: ministry.name || "",
-        concernedParty: party.name || "",
+        ministry: ministry?.name || "", // استخدم optional chaining
+        concernedParty: party?.name || "",
       });
     }
   }, [currentUser, party, ministry, form]);
+
 
   return (
     <Form {...form}>

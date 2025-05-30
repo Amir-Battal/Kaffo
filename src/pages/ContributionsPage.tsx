@@ -12,6 +12,8 @@ const DonationsPage = () => {
     setPage(0); // إعادة الصفحة للصفر عند تغيير الفلاتر
   }, [criteria]);
 
+  
+
   const { problems, totalPages, isLoading } = useGetProblemsForContribution(
     { 
       page, 
