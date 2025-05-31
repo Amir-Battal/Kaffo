@@ -193,10 +193,12 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                   </div>
 
                   <div>
-                    <div className="flex flex-row gap-5">
-                      <ProblemOverlay problemId={numericProblemId} status="edit" />
-                      <ProblemOverlay problemId={numericProblemId} status="delete" />
-                    </div>  
+                    {problem.submittedByUserId === currentUser?.id && (
+                      <div className="flex flex-row gap-5">
+                        <ProblemOverlay problemId={numericProblemId} status="edit" />
+                        <ProblemOverlay problemId={numericProblemId} status="delete" />
+                      </div>  
+                    )}
                     <SolveControl problemId={numericProblemId} />
                   </div>
 
@@ -313,7 +315,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                         )}
 
                         <div className="flex flex-col gap-10">
-                          {(problem.isReal && acceptedContribution) &&
+                          {(problem.isReal && acceptedContribution && onlyAcceptedSolution?.startDate) &&
                             <div className="flex flex-col gap-5">
                               <h1 className="text-2xl font-semibold">الوقت المتوقع لإنهاء المشروع</h1>
                               <div className="flex flex-col gap-2">

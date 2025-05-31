@@ -24,6 +24,8 @@ import MinistriesSelect from "@/components/MinistriesSelect"
 import { useMinistryById } from "@/hooks/use-gov"
 import { toast } from "sonner"
 import { Check } from "lucide-react"
+import keycloak from "@/lib/keycloak"
+import { useGetMyUser } from "@/hooks/use-user"
 
 const formSchema = z.object({
   title: z.string(),
@@ -40,11 +42,21 @@ type EditProp = {
 }
 
 export function EditProblemForm({ problemId }: EditProp) {
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || [];
+
+  const { currentUser } = useGetMyUser();
   const { problem, isLoading: loadingProblem } = useGetProblemById(problemId)
   const { data: address, isLoading: loadingAddress } = useAddress(problem?.addressId ?? 0)
   const { data: speCategory, isLoading: loadingCategory } = useCategory(problem?.categoryId ?? 0)
+
+
+
+  const { data: userGov } = useMinistryById(currentUser?.govId);
+  const { data: userMinistry } = useMinistryById(userGov?.parentGovId);
   const { data: speMinistry } = useMinistryById(speCategory?.govId ?? null);
 
+
+  const usedMinistry = roles.includes("ROLE_GOV") ? userMinistry : speMinistry;
 
 
 
@@ -172,20 +184,21 @@ export function EditProblemForm({ problemId }: EditProp) {
               )}
             />
 
-            <div className="flex flex-col gap-2">
-              <h1>الوزارة</h1>
-              <MinistriesSelect
-              edit
-              value={ministryName || speMinistry?.name}
-              setMinistry={(name, id) => {
-                setMinistryName(name);
-                setMinistryId(id);
-                form.setValue("category", 0); // تصفير التصنيف عند تغيير الوزارة
-                setCategory(""); // تصفير اسم التصنيف
-              }}
-            />
-
-            </div>
+            {!roles.includes("ROLE_GOV") && (
+              <div className="flex flex-col gap-2">
+                <h1>الوزارة</h1>
+                <MinistriesSelect
+                  edit
+                  value={ministryName || speMinistry?.name}
+                  setMinistry={(name, id) => {
+                    setMinistryName(name);
+                    setMinistryId(id);
+                    form.setValue("category", 0); // تصفير التصنيف عند تغيير الوزارة
+                    setCategory(""); // تصفير اسم التصنيف
+                  }}
+                />
+              </div>
+            )}
 
             <FormField
               control={form.control}

@@ -49,13 +49,16 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   // console.log("select", select);
   // console.log("solution", solution);
 
+  console.log(solution);
+
+
 
   return (
     <div className="flex flex-col gap-5">
       {(select && solution) && (
         <ContributionCard
-          username={`${solution?.id}`}
-          date={solution?.startDate}
+          username={`${solution.submitterFirstName} ${solution.submitterLastName}`}
+          date={solution?.creationDate}
           contribution={solution?.description}
           budget={solution?.estimatedCost}
         >
@@ -74,8 +77,8 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
               <ContributionCard
                 key={c.id}
                 // username={`${useGetUserById(c.proposedByUserId).data?.firstName} ${useGetUserById(c.proposedByUserId).data?.lastName}`}
-                username={`${c.proposedByUser?.firstName} ${c.proposedByUser?.lastName}`}
-                date={c.startDate}
+                username={`${c.submitterFirstName} ${c.submitterLastName}`}
+                date={c.creationDate}
                 contribution={c.description}  
                 budget={c.estimatedCost}
               >

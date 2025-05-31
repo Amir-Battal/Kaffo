@@ -26,6 +26,7 @@ import {
   useGetContributions,
 } from "../../hooks/use-Contribution";
 import { toast } from "sonner";
+import { useGetUserById } from "@/hooks/use-user";
 
 
 
@@ -45,6 +46,8 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
 
   const { data: userContribution } = useGetMyContribution(problemId);
   const { contributions } = useGetContributions(problemId);
+
+  const { data: userCotnributionDetails } = useGetUserById(userContribution?.proposedByUserId);
 
   const methods = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -153,8 +156,8 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
   const renderUserContribution = () =>
     userContribution && !isEditing && (
       <ContributionCard
-        username="أنت"
-        date={userContribution.createdAt || ""}
+        username={userCotnributionDetails?.firstName + " " + userCotnributionDetails?.lastName}
+        date={userContribution.creationDate || ""}
         contribution={userContribution.description || ""}
         budget={userContribution.estimatedCost || 0}
       >
@@ -174,7 +177,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
         <ContributionCard
           key={c.id}
           username={`${c.user.firstName} ${c.user.lastName}`}
-          date={c.createdAt}
+          date={c.creationDate}
           contribution={c.description}
           budget={c.estimatedCost}
         />

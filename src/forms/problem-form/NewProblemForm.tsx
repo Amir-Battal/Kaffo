@@ -23,6 +23,9 @@ import { useCreateAddress } from "@/hooks/use-Address"
 import { usePresignedUpload } from "@/hooks/use-problem-photo"
 import { toast } from "sonner"
 import MinistriesSelect from "@/components/MinistriesSelect"
+import keycloak from "@/lib/keycloak"
+import { useGetMyUser } from "@/hooks/use-user"
+import { useMinistryById } from "@/hooks/use-gov"
 
 
 const formSchema = z.object({
@@ -38,6 +41,14 @@ const formSchema = z.object({
 
 
 export function NewProblemForm() {
+
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
+  const { currentUser } = useGetMyUser();
+  const { data: gov } = useMinistryById(currentUser?.govId);
+  const { data: ministry } = useMinistryById(gov?.parentGovId);
+  
+
   const { createProblem, isLoading } = useCreateProblem()
   const { updateProblem } = useUpdateProblem()
   const { mutateAsync: createAddress } = useCreateAddress()
@@ -52,6 +63,17 @@ export function NewProblemForm() {
 
   const [ministryId, setMinistryId] = useState<number | null>(null);
 
+  // if(roles.includes("ROLE_GOV")){
+  //   setMinistryId(ministry?.id)
+  // }
+
+  useEffect(() => {
+    if (ministry) {
+      setMinistryId(ministry.id)
+    }
+  }, [ministry])
+
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -196,13 +218,16 @@ export function NewProblemForm() {
               )}
             />
             
-            <div className="flex flex-col gap-2">
-              <h1>الوزارة</h1>
-              <MinistriesSelect setMinistry={(name, id) => setMinistryId(id)} />
-            </div>
+            {!roles.includes("ROLE_GOV") && (
+              <div className="flex flex-col gap-2">
+                <h1>الوزارة</h1>
+                <MinistriesSelect setMinistry={(name, id) => setMinistryId(id)} />
+              </div>
+            )}
 
 
             <FormField
+
               control={form.control}
               name="categoryId"
               render={({ field }) => (
