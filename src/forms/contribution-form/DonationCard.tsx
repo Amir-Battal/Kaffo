@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronLeft, DollarSign, EuroIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type DonationCardProp = {
   username?: string,
@@ -10,6 +11,7 @@ type DonationCardProp = {
   budget?: string | number,
   status?: string,
   currency?: string,
+  problemId?: string,
 }
 
 const DonationCard = (prop: DonationCardProp) => {
@@ -43,30 +45,37 @@ const DonationCard = (prop: DonationCardProp) => {
           
         </div>
 
-        <Badge className={`w-[20%] h-[35px] ml-1 ${prop.status === "PENDING"
+        <Badge className={`w-[20%] h-[35px] ml-1 ${prop.status === "CREATED"
           ? 'bg-orange-600'
             : prop.status === "FAILED"
               ? 'bg-red-600'
-              : prop.status === "SUCCEEDED"
+              : prop.status === "SUCCESS"
                 ? 'bg-green-600'
                 : 'bg-fuchsia-600'}`}>
           
           <h3 className="text-lg">
-            {prop.status === "PENDING" 
+            {prop.status === "CREATED" 
               ? "جاري المعالجة" 
               : prop.status === "FAILED" 
                 ? "تم الرفض" 
-                : prop.status === "SUCCEEDED" 
+                : prop.status === "SUCCESS" 
                   ? "تم التبرع" 
                   : "جاري المعالجة"
             }
           </h3>
         </Badge>
 
-        <Button>
+          <Link
+            to={`/problems/${prop.problemId}`}
+            className="flex flex-row items-center justify-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+          >
+            <h3>الذهاب إلى مكان التبرع</h3>
+            <ChevronLeft />
+          </Link>
+        {/* <Button>
           <h3>الذهاب إلى مكان التبرع</h3>
           <ChevronLeft />
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

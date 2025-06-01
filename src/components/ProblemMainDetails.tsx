@@ -199,7 +199,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                   <div className="flex flex-col gap-4 mt-4">
                     <h2 className="text-xl font-bold">المتبرعون:</h2>
                     <ul className="flex flex-col gap-2">
-                      {publicDonors?.content.map((donation: any) => (
+                      {publicDonors?.content?.map((donation: any) => (
                           <li key={donation.id} className="bg-gray-100 p-3 rounded-md">
                             <div className="flex justify-between">
                               <span>{donation.isAnonymous ? "متبرع مجهول" : `${donation.firstName} ${donation.lastName}`}</span>
