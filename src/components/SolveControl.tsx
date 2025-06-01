@@ -77,6 +77,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const { data: onlyAcceptedSolution } = useGetSolutionById(problemId, acceptedContribution?.id);
 
 
+
   //[/]|[\][/]|[\][/]|[\] Donation [/]|[\][/]|[\][/]|[\]
   const { data: donations = [], isLoading: isLoadingDonations, isError } = useGetProblemDonations(problemId);
   const { data: publicDonors = [] } = useGetPublicDonors(problemId);
@@ -89,9 +90,9 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const remainingAmount = (acceptedContribution?.estimatedCost || 0) - totalDonated;
 
 
-
   //[/]|[\] Get Gov Solution [/]|[\]
   const { data: govSolution } = useGetGovSolution(problemId);
+
 
   //[/]|[\] Selected Solution and Reject other [/]|[\]
   const { mutate: selectContribution, isLoading } = useSelectContribution({
@@ -223,6 +224,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     }
   };
 
+  console.log(acceptedContribution);
 
 
   return (
@@ -284,6 +286,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                   problemId={problemId}
                   setSolutionSet={setSolutionSet}
                   setSelfBudget={setSelfBudget}
+                  setIsSelected={setIsSelected}
                 />
               )}
 

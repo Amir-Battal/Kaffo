@@ -2,12 +2,14 @@ import { Check, ChevronLeft, Timer } from "lucide-react";
 import { Button } from "./ui/button";
 import { JSX, useEffect, useState } from "react";
 import { useGetProblemById, useUpdateProblemForDonation } from "@/hooks/use-problem";
+import { useUpdateSolutionStatus } from "@/hooks/use-Contribution";
 
 const IsForDonation = ({...prop}): JSX.Element => {
 
   const [isForDonation, setIsForDonation] = useState<boolean>();
 
   const { mutate: updateForDonation } = useUpdateProblemForDonation();
+  const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
   const { problem } = useGetProblemById(prop.problemId);
 
   
@@ -16,8 +18,15 @@ const IsForDonation = ({...prop}): JSX.Element => {
       problemId: prop.problemId,
       forDonation: true,
       isReal: problem?.isReal,
-      forContribution: problem?.forContribution
+      forContribution: problem?.forContribution,
+      status: "PENDING_FUNDING"
     });
+    updateSolutionStatus({
+      problemId: prop.problemId,
+      solutionId: prop.acceptedContribution.id,
+      status: "PENDING_FUNDING"
+    })
+
     prop.setIsForDonation(true);
     setIsForDonation(true);
     prop.setSelfFounded(false);
@@ -29,7 +38,8 @@ const IsForDonation = ({...prop}): JSX.Element => {
       problemId: prop.problemId,
       forDonation: false,
       isReal: problem?.isReal,
-      forContribution: problem?.forContribution
+      forContribution: problem?.forContribution,
+      status: "WORK_IN_PROGRESS"
     });
     prop.setIsForDonation(false);
     setIsForDonation(false);
@@ -48,7 +58,6 @@ const IsForDonation = ({...prop}): JSX.Element => {
   // console.log("forDonation", prop.isForDonation);
   // console.log("selfFounded", prop.selfFounded);
 
-  console.log("isForDonation", isForDonation);
 
   return (
 
@@ -71,7 +80,7 @@ const IsForDonation = ({...prop}): JSX.Element => {
         ):prop.isForDonation && prop.donationDone
         ?(
           <div className="w-[45%] flex flex-row gap-5">
-            <Button className="w-full h-[40px] cursor-pointer" type="button" onClick={handleSelfFounded}>
+            <Button disabled className="w-full h-[40px] cursor-pointer" type="button" onClick={handleSelfFounded}>
               <h3>تغطية التكاليف</h3>
               <ChevronLeft />
             </Button>

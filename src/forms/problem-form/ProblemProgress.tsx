@@ -13,6 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { useCreateProblemProgress, useGetProblemProgress} from "@/hooks/use-progress";
 import { usePresignedUpload } from "@/hooks/use-problem-photo";
+import { useUpdateSolutionStatus } from "@/hooks/use-Contribution";
 
 const formSchema = z.object({
   comment: z.string().min(1, "الرجاء إضافة تعليق"),
@@ -29,6 +30,7 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
 
   const { data: lastProgress, isLoading: isProgressLoading } = useGetProblemProgress(problemId); // جلب التقدم السابق
 
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,6 +38,9 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
       progress: 0,
     },
   });
+
+
+  const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
 
   const handleSliderChange = (values: number[]) => {
     setValue(values[0]);
@@ -48,7 +53,9 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
       setValue(lastProgress.percentage);  // مهم: تعيين القيمة الحالية للـ slider مع النسبة الأخيرة
     }
   }, [lastProgress]);
-  
+
+
+
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
   values.progress = value;
@@ -73,6 +80,14 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
       solutionId,
       photoIds, // إما تكون قائمة بالصور أو فارغة
     });
+
+    if(value === 100) {
+      updateSolutionStatus({
+        problemId: problemId,
+        solutionId: solutionId,
+        status: "RESOLVED"
+      })
+    }
 
     toast.success("تم إضافة التقدم بنجاح");
     form.reset();

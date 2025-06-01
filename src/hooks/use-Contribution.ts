@@ -3,6 +3,8 @@ import keycloak from "@/lib/keycloak";
 // import { SolutionDTO } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { SolutionDTO } from "@/types";
+import { useGetMyUser } from "./use-user";
+import { toast } from "sonner";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -80,9 +82,15 @@ export const useCreateContribution = (problemId: number) => {
   const queryClient = useQueryClient();
   const accessToken = keycloak.token;
 
+  const { currentUser } = useGetMyUser();
+
   return useMutation({
     mutationFn: async (data: Partial<SolutionDTO>) => {
-      const res = await axios.post(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, data, {
+      const res = await axios.post(`${API_BASE_URL}/api/v1/problems/${problemId}/solutions`, {
+        status: currentUser?.govId ? "APPROVED" : "PENDING_APPROVAL",
+        acceptedByUserId: currentUser?.govId ? currentUser?.id : null,
+        ...data,
+      }, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
@@ -154,7 +162,9 @@ export const useGetAcceptedContribution = (problemId: number) => {
       });
 
       const allSolutions: SolutionDTO[] = res.data;
-      const acceptedSolution = allSolutions.find((sol) => sol.status === "ACCEPTED" && sol.proposedByUserId !== sol.acceptedByUserId) ?? null;
+
+      console.log(allSolutions);
+      const acceptedSolution = allSolutions.find((sol) => (sol.status === "APPROVED" || sol.status === "PENDING_FUNDING" || sol.status === "WORK_IN_PROGRESS" || sol.status === "RESOLVED") && sol.proposedByUserId !== sol.acceptedByUserId) ?? null;
 
 
       return acceptedSolution;
@@ -242,7 +252,7 @@ export const useGetGovSolution = (problemId: number) => {
       const allSolutions: SolutionDTO[] = res.data;
       const govSolution = allSolutions.find(
         (sol) =>
-          sol.status === "ACCEPTED" &&
+          sol.status === "APPROVED" &&
           sol.proposedByUserId === sol.acceptedByUserId
       ) ?? null;
 
@@ -279,7 +289,7 @@ export const useSelectContribution = ({
         `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${acceptedId}`,
         {
           ...contribution,
-          status: "ACCEPTED",
+          status: "APPROVED",
           acceptedByUserId: currentUser?.id,
           acceptedReason: `تم اختيار الحل من قبل ${currentUser?.firstName} ${currentUser?.lastName}`,
         },
@@ -384,6 +394,7 @@ interface UpdateDatesPayload {
   contributionId: number;
   startDate: string;
   endDate: string;
+  status: string;
 }
 
 export const useUpdateContributionDates = ({ problemId, onSuccess }: UpdateDatesParams) => {
@@ -391,7 +402,7 @@ export const useUpdateContributionDates = ({ problemId, onSuccess }: UpdateDates
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ contributionId, startDate, endDate }: UpdateDatesPayload) => {
+    mutationFn: async ({ contributionId, startDate, endDate, status }: UpdateDatesPayload) => {
       if (!problemId) throw new Error("problemId غير موجود");
 
       // 1. جلب البيانات الحالية للمساهمة
@@ -410,6 +421,7 @@ export const useUpdateContributionDates = ({ problemId, onSuccess }: UpdateDates
         ...existing,
         startDate,
         endDate,
+        status,
       };
 
       const { data: updatedSolution } = await axios.put(
@@ -436,4 +448,49 @@ export const useUpdateContributionDates = ({ problemId, onSuccess }: UpdateDates
       console.error("خطأ في تحديث التواريخ:", err);
     },
   });
+};
+
+
+
+
+interface UpdateSolutionStatus {
+  problemId: number;
+  solutionId: number;
+  status: string;
+}
+
+export const useUpdateSolutionStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async ({ problemId, solutionId, status }: UpdateSolutionStatus) => {
+      const accessToken = keycloak.token;
+
+      const payload: Partial<SolutionDTO> = {
+        status, // ✅ الآن أصبح معرفًا بشكل صحيح
+      };
+
+      const response = await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/problems/${problemId}/solutions/${solutionId}/status`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("problems");
+        toast.success("تم تعديل حالة المساهمة");
+      },
+      onError: (error: any) => {
+        toast.error("حدث خطأ أثناء تعديل 'contribution status': " + error.message);
+      },
+    }
+  );
 };

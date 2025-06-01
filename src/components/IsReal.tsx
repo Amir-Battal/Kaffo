@@ -61,7 +61,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
       approveOrRejectProblem(
         {
           problemId,
-          isReal: true,
+          isReal: true, 
         },
         {
           onSuccess: () => setIsReal(true),
@@ -108,6 +108,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
       {isReal && (
         <div className="w-[45%] flex flex-row gap-5">
           <Button
+            disabled
             className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800"
             type="button"
             onClick={handleReal}
@@ -116,6 +117,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
             <Check />
           </Button>
           <Button
+            disabled
             className="w-full h-[40px] cursor-pointer"
             type="button"
             onClick={handleNotReal}
@@ -138,6 +140,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
               <ChevronLeft />
             </Button>
             <Button
+              disabled
               className="w-full h-[40px] cursor-pointer bg-red-600 hover:bg-red-800"
               type="button"
               onClick={handleNotReal}

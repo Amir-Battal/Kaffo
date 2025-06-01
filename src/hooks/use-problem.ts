@@ -379,9 +379,11 @@ export const useDeleteProblem = () => {
 
 // ============= APPROVE OR REJECT PROBLEM =============
 type ApproveProblemParams = {
-  problemId: number;
-  isReal: boolean;
+  problemId?: number;
+  isReal?: boolean;
   rejectionReason?: string;
+  approvedByUserId?: string;
+  status?: string;
 };
 
 export const useApproveOrRejectProblem = () => {
@@ -391,14 +393,28 @@ export const useApproveOrRejectProblem = () => {
   return useMutation(
     async ({ problemId, isReal, rejectionReason }: ApproveProblemParams) => {
       const accessToken = keycloak.token;
-
       const userId = currentUser?.id;
 
+      // الخطوة 1: إذا كانت isReal مطلوبة وقيمتها true، نحدثها أولاً لوحدها
+      if (isReal) {
+        await axios.patch(
+          `${API_BASE_URL}/api/v1/problems/${problemId}`,
+          { isReal: true }, // فقط تحديث isReal
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
 
-      const payload: any = {
+      // الخطوة 2: تحديث حالة الشكوى
+      const payload: ApproveProblemParams = {
         isReal,
-        approvedByUser: userId,
+        approvedByUserId: userId,
         rejectionReason,
+        status: isReal ? "APPROVED" : "REJECTED",
       };
 
       const response = await axios.patch(
@@ -427,22 +443,26 @@ export const useApproveOrRejectProblem = () => {
 };
 
 
+
+
 type UpdateForContributionParams = {
-  problemId: number;
-  forContribution: boolean; // عادةً هنا نرسل القيمة الجديدة (true)
-  isReal: boolean;
+  problemId?: number;
+  forContribution?: boolean;
+  isReal?: boolean;
+  status?: string;
 };
 
 export const useUpdateProblemForContribution = () => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    async ({ problemId, forContribution, isReal }: UpdateForContributionParams) => {
+    async ({ problemId, forContribution, isReal, status }: UpdateForContributionParams) => {
       const accessToken = keycloak.token;
 
       const payload = {
         forContribution,
         isReal,
+        status
       };
 
       const response = await axios.patch(
@@ -476,7 +496,7 @@ export const rejectAllProblems = async (contributions: any, problemId: number) =
   const accessToken = keycloak.token;
   try {
     const rejectPromises = contributions.map((c: any) =>
-      c.status !== "ACCEPTED" &&
+      c.status !== "APPROVED" &&
       axios.put(
         `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${c.id}`,
         {
@@ -502,7 +522,7 @@ export const pendingAllProblems = async (contributions: any, problemId: number) 
   const accessToken = keycloak.token;
   try {
     const rejectPromises = contributions.map((c: any) =>
-      c.status !== "ACCEPTED" &&
+      c.status !== "APPROVED" &&
       axios.put(
         `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${c.id}`,
         {
@@ -532,21 +552,23 @@ export const pendingAllProblems = async (contributions: any, problemId: number) 
 interface UpdateForDonationParams {
   problemId: number;
   forDonation: boolean;
-  forContribution: boolean;
-  isReal: boolean;
+  forContribution?: boolean;
+  isReal?: boolean;
+  status: string;
 }
 
 export const useUpdateProblemForDonation = () => {
   const queryClient = useQueryClient();
 
   return useMutation(
-    async ({ problemId, forDonation, isReal, forContribution }: UpdateForDonationParams) => {
+    async ({ problemId, forDonation, isReal, forContribution, status }: UpdateForDonationParams) => {
       const accessToken = keycloak.token;
 
       const payload: Partial<ProblemDTO> = {
         forContribution,
         forDonation,
         isReal,
+        status, // ✅ الآن أصبح معرفًا بشكل صحيح
       };
 
       const response = await axios.patch(
@@ -569,6 +591,57 @@ export const useUpdateProblemForDonation = () => {
       },
       onError: (error: any) => {
         toast.error("حدث خطأ أثناء تعديل 'forDonation': " + error.message);
+      },
+    }
+  );
+};
+
+
+
+
+interface UpdateProblemStatus {
+  isReal: boolean;
+  forContribution: boolean;
+  forDonation: boolean;
+  problemId: number;
+  status: string;
+}
+
+
+export const useUpdateProblemStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async ({ problemId, status, isReal, forContribution, forDonation }: UpdateProblemStatus) => {
+      const accessToken = keycloak.token;
+
+      const payload: Partial<ProblemDTO> = {
+        isReal,
+        forContribution,
+        forDonation,
+        status, // ✅ الآن أصبح معرفًا بشكل صحيح
+      };
+
+      const response = await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/api/v1/problems/${problemId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return response.data;
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("problems");
+        toast.success("تم تعديل حالة المشكلة بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error("حدث خطأ أثناء تعديل 'problem status': " + error.message);
       },
     }
   );

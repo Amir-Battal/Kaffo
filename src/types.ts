@@ -28,7 +28,7 @@ export interface ProblemDTO {
   forContribution: boolean;
   forDonation: boolean;
   submissionDate: string;
-  status: 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
+  status?: string;
   rejectionReason: string;
   addressId: number;
   submittedByUserId?: number;

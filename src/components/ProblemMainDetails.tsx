@@ -101,7 +101,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   //[/]|[\][/]|[\][/]|[\] ADDRESS [/]|[\][/]|[\][/]|[\]
   const { data: address } = useAddress(addressId);
   const { data: cities } = useCities();
-  const { data: userAddress } = useAddress(currentUser?.addressId);
+  const { data: userAddress } = useAddress(user?.addressId);
 
   const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 

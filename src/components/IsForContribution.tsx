@@ -14,10 +14,14 @@ const IsForContribution = ({...prop}): JSX.Element => {
 
   // const [isForContribution, setIsForContribution] = useState<boolean>();
 
-  
 
   const handleForCotnribution = () => {
-    updateForContribution({ problemId: prop.problemId, forContribution: true, isReal: true });
+    updateForContribution({ 
+      problemId: prop.problemId, 
+      forContribution: true, 
+      isReal: true,
+      status: "WORK_IN_PROGRESS"
+    });
     prop.setIsForContribution(true);
 
 
@@ -31,7 +35,12 @@ const IsForContribution = ({...prop}): JSX.Element => {
   }
 
   const handleSelfSolve = async () => {
-    updateForContribution({ problemId: prop.problemId, forContribution: false, isReal: true });
+    updateForContribution({ 
+      problemId: prop.problemId, 
+      forContribution: false, 
+      isReal: true,
+      status: "WORK_IN_PROGRESS"
+    });
     prop.setIsForContribution(false);
 
     // prop.setIsSelfSolve(true);
@@ -42,6 +51,13 @@ const IsForContribution = ({...prop}): JSX.Element => {
     console.log("Problem is Self Solve");
     rejectAllProblems(prop.contributions, prop.problemId);
   }
+
+
+  // useEffect(() => {
+  //   if(prop.acceptedContribution){
+  //     setIsSelected(prop.isSelected);
+  //   }
+  // }, [prop.acceptedContribution])
 
   // useEffect(() => {
   //   if(problem?.forContribution){
@@ -69,16 +85,16 @@ const IsForContribution = ({...prop}): JSX.Element => {
           ):(prop.isSelected) 
           ?(
             <div className="w-[45%] flex flex-row gap-5">
-              <Button className="w-full h-[40px] cursor-pointer" type="button" onClick={handleSelfSolve}>
+              <Button disabled className="w-full h-[40px] cursor-pointer" type="button" onClick={handleSelfSolve}>
                 <h3>التكفل بالحل</h3>
                 <Check />
               </Button>
-              <Button className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleForCotnribution}>
+              <Button disabled className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleForCotnribution}>
                 <h3>تم اختيار المساهمة</h3>
                 <Check />
               </Button>
             </div>
-          ):prop.isSelfSolve
+          ):(prop.isSelfSolve)
           ?(
             <div className="w-[45%] flex flex-row gap-5">
               <Button className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleSelfSolve}>
