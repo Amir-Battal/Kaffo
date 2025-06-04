@@ -226,9 +226,10 @@ export function EditProblemForm({ problemId }: EditProp) {
                   <FormLabel>المحافظة</FormLabel>
                   <FormControl>
                     <GovernorateSelect
-                      setGov={setGovernorate}
-                      value={governorate}
-                    />
+                        value={field.value}
+                        onChange={field.onChange} // ✅ تمرير الدالة المطلوبة
+                        setGovernorate={setGovernorate} // ✅ ما زلت تحتفظ بهذه
+                      />
 
                   </FormControl>
                 </FormItem>

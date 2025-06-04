@@ -93,11 +93,11 @@ const IsForDonation = ({...prop}): JSX.Element => {
         ):!isForDonation
         ?(
           <div className="w-[45%] flex flex-row gap-5">
-            <Button disabled className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleSelfFounded}>
+            <Button className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleSelfFounded}>
               <h3>تغطية التكاليف</h3>
               <Check />
             </Button>
-            <Button disabled className="w-full h-[40px] cursor-pointer" type="button" onClick={handleForDonation}>
+            <Button className="w-full h-[40px] cursor-pointer" type="button" onClick={handleForDonation}>
               <h3>تفويض التكلفة للتبرع</h3>
               <ChevronLeft />
             </Button>

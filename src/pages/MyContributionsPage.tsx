@@ -1,4 +1,4 @@
-import PaginationComp from "@/components/PaginationComp";
+// import PaginationComp from "@/components/PaginationComp";
 import ContributionCard from "@/forms/contribution-form/ContributionCard";
 import { useGetMyContributions } from "@/hooks/use-Contribution";
 
@@ -22,20 +22,18 @@ const MyContributionsPage = () => {
                     <p>لم تقم بأي مساهمات بعد.</p>
                 ):(contribution.map((item) => (
                     <ContributionCard  
-                        username={item.use}
                         date={item.creationDate}
                         description={item.description}
                         problemId={item.problemId}
                         contribution={item.description}
                         budget={item.estimatedCost}
                         status={item.status}
-                        problem_type={item.problem_type}
                         isMyContribution
                     />
                     ))
                 )}
             </div>
-            <PaginationComp />
+            {/* <PaginationComp /> */}
         </div>
     )
 }

@@ -113,7 +113,7 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
       )}
 
       {/* نموذج إضافة تقدم جديد */}
-        {lastProgress.percentage === 100
+        {lastProgress?.percentage === 100
           ?(
             <div></div>
           ):(
