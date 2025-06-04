@@ -113,65 +113,72 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
       )}
 
       {/* نموذج إضافة تقدم جديد */}
-      <div className="flex flex-col gap-6">
-        <h3 className="text-xl font-semibold text-right">إضافة نسبة إنجاز جديدة</h3>
-
-        <div className="flex flex-row-reverse items-center gap-3">
-          <span className="text-lg">0</span>
-          
-          <Slider
-            min={lastPercentage}               // ✅ الحد الأدنى هو التقدم الأخير
-            max={100}
-            defaultValue={[lastPercentage]}    // ✅ يبدأ من آخر نسبة
-            value={[value]}                    // اجعل القيمة مرتبطة بـ state
-            onValueChange={(values) => {
-              // ✅ لا تقبل أقل من آخر نسبة تقدم
-              const newValue = values[0];
-              if (newValue >= lastPercentage) {
-                setValue(newValue);
-              }
-            }}
-          />
-
-          <span className="text-lg">100</span>
-        </div>
-
-        <p className="text-center text-[18px]">نسبة الإنجاز {value}%</p>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
-            <FormField
-              control={form.control}
-              name="comment"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">إضافة تعليق</FormLabel>
-                  <FormControl>
-                    <Input placeholder="تعليق عن نسبة الإنجاز" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-
-            <div className="w-full flex flex-col gap-2">
-              <FormLabel className="font-semibold">صور المشكلة</FormLabel>
-              <FileUploader onFilesChange={setSelectedFiles} />
-              {selectedFiles.length > 0 && (
-                <ul className="list-disc pr-4 text-right text-sm text-gray-600">
-                  {selectedFiles.map((file) => (
-                    <li key={file.name}>{file.name}</li>
-                  ))}
-                </ul>
-              )}
+        {lastProgress.percentage === 100
+          ?(
+            <div></div>
+          ):(
+            
+          <div className="flex flex-col gap-6">
+            <h3 className="text-xl font-semibold text-right">إضافة نسبة إنجاز جديدة</h3>
+    
+            <div className="flex flex-row-reverse items-center gap-3">
+              <span className="text-lg">0</span>
+              
+              <Slider
+                min={lastPercentage}               // ✅ الحد الأدنى هو التقدم الأخير
+                max={100}
+                defaultValue={[lastPercentage]}    // ✅ يبدأ من آخر نسبة
+                value={[value]}                    // اجعل القيمة مرتبطة بـ state
+                onValueChange={(values) => {
+                  // ✅ لا تقبل أقل من آخر نسبة تقدم
+                  const newValue = values[0];
+                  if (newValue >= lastPercentage) {
+                    setValue(newValue);
+                  }
+                }}
+              />
+    
+              <span className="text-lg">100</span>
             </div>
-
-            <Button type="submit" className="w-1/2 self-center">
-              <span>تأكيد</span>
-              <Check className="ml-2" />
-            </Button>
-          </form>
-        </Form>
-      </div>
+    
+            <p className="text-center text-[18px]">نسبة الإنجاز {value}%</p>
+    
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+                <FormField
+                  control={form.control}
+                  name="comment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-semibold">إضافة تعليق</FormLabel>
+                      <FormControl>
+                        <Input placeholder="تعليق عن نسبة الإنجاز" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+    
+                <div className="w-full flex flex-col gap-2">
+                  <FormLabel className="font-semibold">صور المشكلة</FormLabel>
+                  <FileUploader onFilesChange={setSelectedFiles} />
+                  {selectedFiles.length > 0 && (
+                    <ul className="list-disc pr-4 text-right text-sm text-gray-600">
+                      {selectedFiles.map((file) => (
+                        <li key={file.name}>{file.name}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+    
+                <Button type="submit" className="w-1/2 self-center">
+                  <span>تأكيد</span>
+                  <Check className="ml-2" />
+                </Button>
+              </form>
+            </Form>
+          </div>
+          )
+        }
     </div>
   );
 };
