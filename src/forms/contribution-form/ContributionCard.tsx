@@ -8,6 +8,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ChevronLeft, DollarSign, Image } from "lucide-react";
+import { useGetProblemById } from "@/hooks/use-problem";
+import { useGetUserById } from "@/hooks/use-user";
+import { useCategory } from "@/hooks/use-category";
+import { useAddress } from "@/hooks/use-Address";
+import { Link } from "react-router-dom";
 
 const formSchema = z.object({
   username: z.string(),
@@ -19,7 +24,9 @@ const formSchema = z.object({
 type ContributionCardProps = {
   username?: string;
   date?: string;
+  problemId?: number;
   contribution?: string;
+  description?: string;
   problem_type?: string;
   budget?: number;
   status?: string;
@@ -32,7 +39,9 @@ type ContributionCardProps = {
 const ContributionCard = ({
   username,
   date,
+  problemId,
   contribution,
+  description,
   problem_type,
   budget,
   status,
@@ -59,6 +68,14 @@ const ContributionCard = ({
     }
   };
 
+  const { problem} = useGetProblemById(problemId);
+  const { data: user } = useGetUserById(problem?.submittedByUserId);
+  const { data: address } = useAddress(problem?.addressId);
+  const { data: category } = useCategory(problem?.addressId);
+
+  console.log(address)
+  console.log(category)
+
   return (
     <Form {...form}>
       <form className="w-full flex flex-col gap-5 border-2 pb-5 p-4" dir="rtl">
@@ -71,7 +88,7 @@ const ContributionCard = ({
                 <AvatarFallback>CN</AvatarFallback>
               </Avatar>
             )}
-            <h3>{username} - {date}</h3>
+            <h3>{user?.firstName + " " + user?.lastName} - {problem?.submissionDate.split("T")[0]}</h3>
           </div>
 
           {status && (
@@ -87,16 +104,16 @@ const ContributionCard = ({
         <div className="flex justify-between gap-4">
           {/* Left side - problem info */}
           <div className="flex-1 space-y-4">
-            <h1 className="text-xl">{problem_type}</h1>
+            <h1 className="text-xl">{problem?.title}</h1>
 
             {isMyContribution
               ?(
                 <div>
-                  <p>إحدى بلاطات الرصيف مكسورة تؤدي إلى إصابة الناس وعرقلتهم أثناء المشي.</p>
+                  <p>{problem?.description}</p>
                   <div className="flex flex-wrap gap-2 pt-5">
-                    <Badge className="rounded-none">محافظة حلب</Badge>
-                    <Badge className="rounded-none" variant="secondary">رصيف مكسور</Badge>
-                    <Badge className="rounded-none" variant="secondary">بلدية حلب</Badge>
+                    <Badge className="rounded-none">{address?.city}</Badge>
+                    <Badge className="rounded-none" variant="secondary">{category?.name}</Badge>
+                    {/* <Badge className="rounded-none" variant="secondary">بلدية حلب</Badge> */}
                   </div>
                 </div>
               ):(
@@ -138,10 +155,18 @@ const ContributionCard = ({
           </div>
 
           {isMyContribution && (
-            <Button>
-              <span>الذهاب إلى مكان المساهمة</span>
+
+            // <Button onClick={() => {window.location.replace(`http://localhost:5173/contribution/${problemId}`)}}>
+            //   <span>الذهاب إلى مكان المساهمة</span>
+            //   <ChevronLeft />
+            // </Button>
+            <Link
+              to={`/problems/${problemId}`}
+              className="flex flex-row items-center justify-center gap-2 bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800"
+            >
+              <h3>الذهاب إلى مكان المساهمة</h3>
               <ChevronLeft />
-            </Button>
+            </Link>
           )}
         </div>
       </form>

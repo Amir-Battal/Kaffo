@@ -3,9 +3,11 @@ import DonationCard from "@/forms/contribution-form/DonationCard";
 // import PaginationComp from "@/components/PaginationComp";
 // import { useGetMyUser } from "@/hooks/use-user";
 import { useGetMyDonations } from "@/hooks/use-donation";
+import { useGetMyUser } from "@/hooks/use-user";
 
 const MyDonationsPage = () => {
   const { data: donations = [], isLoading } = useGetMyDonations();
+  const {currentUser} = useGetMyUser();
 
 return (
   <div className="flex flex-col gap-10 px-10">
@@ -20,7 +22,8 @@ return (
         donations.map((item) => (
           <DonationCard
             key={item.id}
-            username="أنا"
+            problemId={item.problemId}
+            username={currentUser?.firstName +" " + currentUser?.lastName}
             time=""
             date={new Date(item.donationDate).toLocaleDateString()}
             budget={item.amount}

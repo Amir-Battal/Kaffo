@@ -59,6 +59,50 @@ export const useGetContributions = ( problemId : Number) => {
   };
 };
 
+
+
+export type Contribution = {
+  id: number;
+  problemId: number;
+  description: string;
+  estimatedCost: number;
+  status: string;
+  acceptedReason: string;
+  startDate: string;
+  endDate: string;
+  feedback: string;
+  rating: number;
+  proposedByUserId: number;
+  acceptedByUserId: number;
+  creationDate: string;
+};
+
+export const useGetMyContributions = () => {
+  const accessToken = keycloak.token;
+
+  return useQuery<Contribution[], Error>({
+    queryKey: ["my-contributions"],
+    queryFn: async () => {
+      try {
+        const response = await axios.get<Contribution[]>(
+          `${API_BASE_URL}/api/v1/solutions/me`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+        return response.data;
+      } catch (error: any) {
+        const message = error?.response?.data?.message || error.message || "حدث خطأ غير متوقع";
+        toast.error(`فشل تحميل المساهمات: ${message}`);
+        throw new Error(message);
+      }
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
 export const useGetMyContribution = (problemId: number) => {
   const accessToken = keycloak.token;
 

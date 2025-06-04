@@ -171,105 +171,95 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
               <Badge className="rounded-none" variant="secondary">{category?.name}</Badge>
               <Badge className="rounded-none" variant="secondary">{address?.description}</Badge>
             </div>
+            
 
-            {roles.includes("ROLE_GOV")
-              ?(
-                <div className="flex flex-col gap-5">
-                  <div className="flex flex-col gap-5">
-                    <h3>تاريخ إنشاء الشكوى: {new Date(problem.submissionDate).toLocaleDateString()}</h3>
-                    {user && (
-                      <UserCard
-                        username={`${user.firstName} ${user.lastName}`}
-                        date={String(user.dateOfBirth)}
-                        study={String(user.collegeDegree)}
-                        job={String(user.job)}
-                        details={String(user.description)}
-                        address={`${userAddress?.description}`}
-                        phoneNumber={String(user.phone)}
-                        email={user.email}
-                        isGov={(user.firstName === currentUser?.firstName) && currentUser.govId ? true : false}
-                      />
+            {roles.includes("ROLE_GOV") ? (
+              <div className="flex flex-col gap-5">
+                <h3>تاريخ إنشاء الشكوى: {new Date(problem.submissionDate).toLocaleDateString()}</h3>
+                {user && (
+                  <UserCard
+                    username={`${user.firstName} ${user.lastName}`}
+                    date={String(user.dateOfBirth)}
+                    study={String(user.collegeDegree)}
+                    job={String(user.job)}
+                    details={String(user.description)}
+                    address={`${userAddress?.description}`}
+                    phoneNumber={String(user.phone)}
+                    email={user.email}
+                    isGov={(user.firstName === currentUser?.firstName) && currentUser.govId ? true : false}
+                  />
+                )}
+              </div>
+            ) : (
+              <h3 className="text-[10]">{user?.firstName + " " + user?.lastName} - {new Date(problem.submissionDate).toLocaleDateString()}</h3>
+            )}
+          </div>
+
+          {/* نموذج المساهمة أو التبرع */}
+          {prop.contribution ? (
+            <div className="flex flex-col gap-10">
+              <h1 className="text-2xl">شارك في حل المشكلة وقدم اقتراحًا لحلها</h1>
+              <ContributionForm problemId={numericProblemId} />
+              {/* <PaginationComp /> */}
+            </div>
+          ) : prop.donation ? (
+            <div className="flex flex-col gap-20">
+              <div className="flex flex-col gap-5">
+                <h1 className="text-2xl">شارك في حل المشكلة وقم بالتبرع</h1>
+                {acceptedContribution && proposedUser && (
+                  <ContributionCard
+                    username={`${proposedUser.firstName} ${proposedUser.lastName}`}
+                    date={acceptedContribution.startDate}
+                    contribution={acceptedContribution.description}
+                    budget={acceptedContribution.estimatedCost}
+                  />
+                )}
+              </div>
+
+              <div className="flex flex-col gap-10">
+                {isDonated && (
+                  <div className="flex flex-row gap-2 items-center">
+                    <h3 className="text-[22px]">تم التبرع بمبلغ {donation} ليرة سورية</h3>
+                    <Check size={30} />
+                  </div>
+                )}
+                <h3>التبرع بجزء من المبلغ</h3>
+                <DonationForm
+                  max={remainingAmount > 0 ? remainingAmount : 0}
+                  setDonation={setDonation}
+                  setIsDonated={setIsDonated}
+                  problemId={numericProblemId}
+                />
+
+                {successfulDonations.length > 0 && (
+                  <div className="flex flex-col gap-4 mt-4">
+                    <h2 className="text-xl font-bold">المتبرعون:</h2>
+                    <ul className="flex flex-col gap-2">
+                      {publicDonors?.content?.map((donation: any) => (
+                          <li key={donation.id} className="bg-gray-100 p-3 rounded-md">
+                            <div className="flex justify-between">
+                              <span>{donation.isAnonymous ? "متبرع مجهول" : `${donation.firstName} ${donation.lastName}`}</span>
+                              <span>{donation.amount} {donation.currency}</span>
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              بتاريخ: {new Date(donation.donationDate).toLocaleDateString()}
+                            </div>
+                          </li>
+                        ))}
+                    </ul>
+                    <div className="text-lg font-semibold text-green-700">
+                      تم جمع {totalDonated} / {acceptedContribution?.estimatedCost} {acceptedContribution?.currency}
+                    </div>
+                    {remainingAmount <= 0 && (
+                      <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
+
                     )}
                   </div>
 
-                  <div>
-                    {problem.submittedByUserId === currentUser?.id && (
-                      <div className="flex flex-row gap-5">
-                        <ProblemOverlay problemId={numericProblemId} status="edit" />
-                        <ProblemOverlay problemId={numericProblemId} status="delete" />
-                      </div>  
-                    )}
-                    <SolveControl problemId={numericProblemId} />
-                  </div>
-
-                </div>
-              ):(
-                <div className="flex flex-col gap-5">
-                  <h3 className="text-[10]">{user?.firstName + " " + user?.lastName} - {new Date(problem.submissionDate).toLocaleDateString()}</h3>
-                  
-                  {prop.contribution 
-                    ? (
-                      <div className="flex flex-col gap-10">
-                        <h1 className="text-2xl">شارك في حل المشكلة وقدم اقتراحًا لحلها</h1>
-                        <ContributionForm problemId={numericProblemId} />
-                        {/* <PaginationComp /> */}
-                      </div>
-                    ):prop.donation ? (
-                      <div className="flex flex-col gap-20">
-                        <div className="flex flex-col gap-5">
-                          <h1 className="text-2xl">شارك في حل المشكلة وقم بالتبرع</h1>
-                          {acceptedContribution && proposedUser && (
-                            <ContributionCard
-                              username={`${proposedUser.firstName} ${proposedUser.lastName}`}
-                              date={acceptedContribution.startDate}
-                              contribution={acceptedContribution.description}
-                              budget={acceptedContribution.estimatedCost}
-                            />
-                          )}
-                        </div>
-        
-                        <div className="flex flex-col gap-10">
-                          {isDonated && (
-                            <div className="flex flex-row gap-2 items-center">
-                              <h3 className="text-[22px]">تم التبرع بمبلغ {donation} ليرة سورية</h3>
-                              <Check size={30} />
-                            </div>
-                          )}
-                          <h3>التبرع بجزء من المبلغ</h3>
-                          <DonationForm
-                            max={remainingAmount > 0 ? remainingAmount : 0}
-                            setDonation={setDonation}
-                            setIsDonated={setIsDonated}
-                            problemId={numericProblemId}
-                          />
-        
-                          {successfulDonations.length > 0 && (
-                            <div className="flex flex-col gap-4 mt-4">
-                              <h2 className="text-xl font-bold">المتبرعون:</h2>
-                              <ul className="flex flex-col gap-2">
-                                {publicDonors?.content?.map((donation: any) => (
-                                    <li key={donation.id} className="bg-gray-100 p-3 rounded-md">
-                                      <div className="flex justify-between">
-                                        <span>{donation.isAnonymous ? "متبرع مجهول" : `${donation.firstName} ${donation.lastName}`}</span>
-                                        <span>{donation.amount} {donation.currency}</span>
-                                      </div>
-                                      <div className="text-sm text-gray-600">
-                                        بتاريخ: {new Date(donation.donationDate).toLocaleDateString()}
-                                      </div>
-                                    </li>
-                                  ))}
-                              </ul>
-                              <div className="text-lg font-semibold text-green-700">
-                                تم جمع {totalDonated} / {acceptedContribution?.estimatedCost} {acceptedContribution?.currency}
-                              </div>
-                              {remainingAmount <= 0 && (
-                                <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
+                 )}
+               </div>
+            </div>
+            ) : (
                     <div className="flex flex-col gap-5">
                       <div>
                         {(currentUser?.id === problem?.submittedByUserId) && (!problem.isReal) ? (
