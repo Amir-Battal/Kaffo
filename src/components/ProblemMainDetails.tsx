@@ -1,14 +1,11 @@
-// ProblemMainDetails.tsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { jwtDecode } from "jwt-decode";
-import { Check } from "lucide-react";
+import { Ban, Check } from "lucide-react";
 
 import { Badge } from "./ui/badge";
 import MapPicker from "./MapPicker";
 import ImageGallery from "./ImageGallery";
-import PaginationComp from "./PaginationComp";
 import ProblemOverlay from "@/forms/problem-form/ProblemOverlay";
 import ContributionForm from "@/forms/contribution-form/ContributionForm";
 import ContributionCard from "@/forms/contribution-form/ContributionCard";
@@ -18,7 +15,7 @@ import SolveControl from "./SolveControl";
 
 import { useGetProblemById } from "@/hooks/use-problem";
 import { useGetProblemPhotos } from "@/hooks/use-problem-photo";
-import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
+import { useGetAcceptedContribution, useGetSolutionById } from "@/hooks/use-Contribution";
 import { useGetProblemDonations, useGetPublicDonors } from "@/hooks/use-donation";
 import { useGetMyUser, useGetUserById } from "@/hooks/use-user";
 import { useAddress, useCities } from "@/hooks/use-Address";
@@ -27,6 +24,8 @@ import { useCategory } from "@/hooks/use-category";
 import keycloak from "@/lib/keycloak";
 import GovPerson from "@/forms/problem-form/GovPerson";
 import ProgressPreview from "./ProgressPreview";
+import { useMinistryById } from "@/hooks/use-gov";
+import { useGetProblemProgress } from "@/hooks/use-progress";
 
 type MainDetailsProp = {
   contribution?: boolean;
@@ -35,81 +34,118 @@ type MainDetailsProp = {
 };
 
 const ProblemMainDetails = (prop: MainDetailsProp) => {
+  
+  //[/]|[\][/]|[\][/]|[\] KEYCLOAK [/]|[\][/]|[\][/]|[\]
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
+
+  //[/]|[\][/]|[\][/]|[\] PROBLEM [/]|[\][/]|[\][/]|[\]
   const { problemId } = useParams();
   const numericProblemId = Number(problemId);
 
-  const [donation, setDonation] = useState<number>(0);
-  const [isDonated, setIsDonated] = useState<boolean>(false);
-
   const { problem, isLoading: isProblemLoading } = useGetProblemById(numericProblemId);
   const { photos, isLoading: isPhotosLoading } = useGetProblemPhotos(numericProblemId);
-  const { data: acceptedContribution } = useGetAcceptedContribution(numericProblemId);
-  const { data: donations = [], isLoading: isLoadingDonations, isError } = useGetProblemDonations(numericProblemId);
-
 
   const addressId = problem?.addressId ?? 0;
   const categoryId = problem?.categoryId ?? 0;
   const submittedByUserId = problem?.submittedByUserId?.toString() ?? "";
 
-  const { data: address } = useAddress(addressId);
+  const { data: problemProgress } = useGetProblemProgress(numericProblemId);
 
-  const { data: category } = useCategory(categoryId);
-  const { data: user, isLoading: userLoading } = useGetUserById(submittedByUserId);
-  const { data: cities } = useCities();
+  console.log(problemProgress);
   
-  const { currentUser } = useGetMyUser();
-  const { data: userAddress } = useAddress(currentUser?.addressId);
+  
+  //[/]|[\][/]|[\][/]|[\] CONTRIBUTIONS [/]|[\][/]|[\][/]|[\]
+  const { data: acceptedContribution } = useGetAcceptedContribution(numericProblemId,);
 
+  const { data: onlyAcceptedSolution } = useGetSolutionById(numericProblemId, acceptedContribution?.id);
+
+
+  const startDateObj = new Date(onlyAcceptedSolution?.startDate);
+  const endDateObj = new Date(onlyAcceptedSolution?.endDate);
+
+  console.log(acceptedContribution);
+  const diffInTime = endDateObj.getTime() - startDateObj.getTime(); // الفارق بالملي ثانية
+  const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24)); // تحويله إلى أيام
+  
   const proposedUserId = acceptedContribution?.proposedByUserId ?? "";
+  
+
+  //[/]|[\][/]|[\][/]|[\] USER [/]|[\][/]|[\][/]|[\]
+  const { currentUser } = useGetMyUser();
+  const { data: user, isLoading: userLoading } = useGetUserById(submittedByUserId);
+  const { data: govPerson } = useGetUserById(problem?.approvedByUserId?.toString() ?? "");
+  const { data: govMinistry } = useMinistryById(govPerson?.govId);
+  const { data: parentMinistry } = useMinistryById(govMinistry?.parentGovId);
+
+
   const { data: proposedUser } = useGetUserById(proposedUserId, { enabled: !!proposedUserId });
+
+
+  //[/]|[\][/]|[\][/]|[\] DONATIONS [/]|[\][/]|[\][/]|[\]
+  const [donation, setDonation] = useState<number>(0);
+  const [isDonated, setIsDonated] = useState<boolean>(false);
+
+  const { data: donations = [], isLoading: isLoadingDonations, isError } = useGetProblemDonations(numericProblemId);
+  const { data: publicDonors = [] } = useGetPublicDonors(numericProblemId);
 
   const successfulDonations = donations.filter(d => d.status === "SUCCESS");
   const donorIds = successfulDonations.filter(d => !d.isAnonymous).map(d => d.donorId);
+  const totalDonated = successfulDonations.reduce((sum, d) => sum + d.amount, 0);
+  const remainingAmount = (acceptedContribution?.estimatedCost || 0) - totalDonated;
   
-  const { data: publicDonors = [] } = useGetPublicDonors(numericProblemId);
-
-  const startDateObj = new Date(acceptedContribution?.startDate);
-  const endDateObj = new Date(acceptedContribution?.endDate);
-
-  const diffInTime = endDateObj.getTime() - startDateObj.getTime(); // الفارق بالملي ثانية
-  const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24)); // تحويله إلى أيام
 
 
+  
 
+  //[/]|[\][/]|[\][/]|[\] ADDRESS [/]|[\][/]|[\][/]|[\]
+  const { data: address } = useAddress(addressId);
+  const { data: cities } = useCities();
+  const { data: userAddress } = useAddress(user?.addressId);
 
   const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 
-  // const token = keycloak.token;
-  // type DecodedToken = { resource_access?: { [key: string]: { roles?: string[] } } };
-  // const decoded = token ? jwtDecode<DecodedToken>(token) : null;
-  // const roles = decoded?.resource_access?.["kafu-client"]?.roles ?? [];
-  // const isGov = roles.includes("ROLE_GOV");
 
-  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+  //[/]|[\][/]|[\][/]|[\] CATEGORY [/]|[\][/]|[\][/]|[\]
+  const { data: category } = useCategory(categoryId);  
 
 
-  const totalDonated = successfulDonations.reduce((sum, d) => sum + d.amount, 0);
-  const remainingAmount = (acceptedContribution?.estimatedCost || 0) - totalDonated;
+
+  const location = useLocation();
+  const toastMessage = location.state?.toastMessage;
+  const toastType = location.state?.type;
+
 
   useEffect(() => {
-    const toastMessage = sessionStorage.getItem("showToastDone");
-    if (toastMessage) {
-      toast(toastMessage, {
-        style: {
-          display: 'flex',
-          flexDirection: 'row',
-          gap: '20px',
-          background: '#008c2f',
-          color: '#fff',
-          direction: 'rtl',
-          border: 'none',
-        },
-        icon: <Check />,
-        closeButton: true,
-      });
-      sessionStorage.removeItem("showToastDone");
+    const keys = [
+      { key: "showToastNewProblem", icon: <Check />, bg: "#008c2f" },
+      { key: "showToastProblemEdit", icon: <Check />, bg: "#008c2f" },
+      { key: "showToastContributionSet", icon: <Check />, bg: "#008c2f" },
+      { key: "showToastContributionUpdate", icon: <Check />, bg: "#008c2f" },
+      { key: "showToastContributionDelete", icon: <Ban />, bg: "#cc1100" },
+    ];
+
+    for (const { key, icon, bg } of keys) {
+      const message = sessionStorage.getItem(key);
+      if (message) {
+        toast(message, {
+          style: {
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '20px',
+            background: bg,
+            color: '#fff',
+            direction: 'rtl',
+            border: 'none',
+          },
+          icon,
+          closeButton: true,
+        });
+        sessionStorage.removeItem(key);
+      }
     }
   }, []);
+
 
   if (isProblemLoading) return <div>جاري تحميل التفاصيل...</div>;
   if (!problem) return <div>المشكلة غير موجودة</div>;
@@ -135,7 +171,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
               <Badge className="rounded-none" variant="secondary">{category?.name}</Badge>
               <Badge className="rounded-none" variant="secondary">{address?.description}</Badge>
             </div>
-
+            
 
             {roles.includes("ROLE_GOV") ? (
               <div className="flex flex-col gap-5">
@@ -216,98 +252,109 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                     </div>
                     {remainingAmount <= 0 && (
                       <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
+
                     )}
                   </div>
-                )}
-              </div>
+
+                 )}
+               </div>
             </div>
-          ) : (
-            <div className="flex flex-col gap-10">
-              <div>
-                {roles.includes("ROLE_GOV") 
-                  ? (
-                    <div>
-                      <div className="flex flex-row gap-5">
-                        <ProblemOverlay problemId={prop.problemId} status="edit" />
-                        <ProblemOverlay problemId={prop.problemId} status="delete" />
-                      </div>  
-                      <SolveControl problemId={prop.problemId} />
-                    </div>
-                  ) 
-                  : (currentUser?.id === problem?.submittedByUserId) && (!problem.isReal) ? (
-                    <div className="flex flex-row gap-5">
-                      <ProblemOverlay problemId={prop.problemId} status="edit" />
-                      <ProblemOverlay problemId={prop.problemId} status="delete" />
-                    </div>
-                  ):(<div></div>)
-                }
-              </div>
-              {!roles.includes("ROLE_GOV") && (
-                <div>
-              <div>
-                {(problem.isReal && problem.forContribution) && (acceptedContribution && proposedUser)
-                  && (
+            ) : (
                     <div className="flex flex-col gap-5">
-                      <h1 className="text-2xl font-semibold">المساهمة المعتمدة</h1>
-                      <ContributionCard
-                        username={`${proposedUser?.firstName} ${proposedUser?.lastName}`}
-                        date={acceptedContribution?.startDate}
-                        contribution={acceptedContribution?.description}
-                        budget={acceptedContribution?.estimatedCost}
-                      />
+                      <div>
+                        {(currentUser?.id === problem?.submittedByUserId) && (!problem.isReal) ? (
+                            <div className="flex flex-row gap-5">
+                              <ProblemOverlay problemId={numericProblemId} status="edit" />
+                              <ProblemOverlay problemId={numericProblemId} status="delete" />
+                            </div>
+                          ):(<div></div>)
+                        }
+                      </div>
+        
+                      <div className="flex flex-col gap-10">
+                        <div>
+                          {(problem.isReal && acceptedContribution)
+                          && (
+                            <div className="flex flex-col gap-5">
+                              <h1 className="text-2xl font-semibold">المساهمة المعتمدة</h1>
+                              <ContributionCard
+                                username={`${proposedUser?.firstName} ${proposedUser?.lastName}`}
+                                date={acceptedContribution?.creationDate}
+                                contribution={acceptedContribution?.description}
+                                budget={acceptedContribution?.estimatedCost}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {govPerson && problem.isReal && (
+                          <div className="flex flex-col gap-5">
+                            <div className="flex flex-col gap-2">
+                              <h1 className="text-2xl font-semibold">الجهة المعنية</h1>
+                              <h3>تفاصيل التواصل مع الجهة المعنية</h3>
+                            </div>
+                            <GovPerson
+                              username={govPerson.firstName + " " + govPerson.lastName}
+                              phoneNumber={govPerson.phone}
+                              email={govPerson.email}
+                              concernedGov={govMinistry?.name}
+                              parentMinistry={parentMinistry?.name}
+                              govSelected 
+                            />
+                          </div>
+                        )}
+
+                        <div className="flex flex-col gap-10">
+                          {(problem.isReal && acceptedContribution && onlyAcceptedSolution?.startDate) &&
+                            <div className="flex flex-col gap-5">
+                              <h1 className="text-2xl font-semibold">الوقت المتوقع لإنهاء المشروع</h1>
+                              <div className="flex flex-col gap-2">
+                                <h3 className="text-lg">يجب إنهاء المشروع خلال <b>{diffInDays}</b> أيام حيث ان المدة المتوقعة لإنهاء المشروع هي</h3>
+                                <h3 className="text-lg">من تاريخ <b>{onlyAcceptedSolution?.startDate}</b> إلى تاريخ <b>{onlyAcceptedSolution?.endDate}</b></h3>
+                              </div>
+                            </div>
+                          }      
+                          {(problem.isReal && problem.forDonation) && publicDonors &&
+                            <div className="flex flex-col gap-5">
+                              <h1 className="text-2xl font-semibold">الأشخاص المتبرعين لحل المشكلة</h1>
+                              {publicDonors?.content?.map((donation) => (
+                                <h3 className="text-lg">تم التبرع بمبلغ <b>{donation.amount}</b> من قبل السيد/ة <b>{donation.firstName + donation.lastName}</b> بتاريخ <b>{donation.donationDate.split("T")[0]}</b></h3>
+                              ))}
+                              <div className="text-lg font-semibold text-green-700">
+                                تم جمع {totalDonated} / {acceptedContribution?.estimatedCost} {acceptedContribution?.currency}
+                              </div>
+                              {remainingAmount <= 0 && (
+                                <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
+                              )}
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      
                     </div>
-                  )
-                }
-              </div>
-                <div className="flex flex-col gap-10">
-                  <div className="flex flex-col gap-5">
-                    <h1 className="text-2xl font-semibold">الوقت المتوقع لإنهاء المشروع</h1>
-                    <div className="flex flex-col gap-2">
-                      <h3 className="text-lg">يجب إنهاء المشروع خلال <b>{diffInDays}</b> أيام حيث ان المدة المتوقعة لإنهاء المشروع هي</h3>
-                      <h3 className="text-lg">من تاريخ <b>{acceptedContribution?.startDate}</b> إلى تاريخ <b>{acceptedContribution?.endDate}</b></h3>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-2">
-                      <h1 className="text-2xl font-semibold">الشخص الممثل للجهة المعنية</h1>
-                      <h3>هنا تجد تفاصيل التواصل الخاصة بالشخص الممثل عن الجهة المعنية</h3>
-                    </div>
-                    {/* // TODO: get gov person */}
-                    <GovPerson govSelected/>
-                  </div>
-                  <div className="flex flex-col gap-5">
-                    <h1 className="text-2xl font-semibold">الأشخاص المتبرعين لحل المشكلة</h1>
-                    {publicDonors?.content.map((donation) => (
-                      <h3 className="text-lg">تم التبرع بمبلغ <b>{donation.amount}</b> من قبل السيد/ة <b>{donation.firstName + donation.lastName}</b> بتاريخ <b>{donation.donationDate.split("T")[0]}</b></h3>
-                    ))}
-                    <div className="text-lg font-semibold text-green-700">
-                      تم جمع {totalDonated} / {acceptedContribution?.estimatedCost} {acceptedContribution?.currency}
-                    </div>
-                    {remainingAmount <= 0 && (
-                      <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
-                    )}
-                  </div>
+                  )}
+
                 </div>
-                </div>
-              )}
-              
-            </div>
-          )}
+              )
+            }
+          </div>
         </div>
 
         {/* عرض الصور والموقع */}
         <div className="w-[40%] flex flex-col gap-10">
-          {isPhotosLoading ? (
-            <div className="flex justify-center items-center bg-gray-100 w-full h-[350px]">جاري تحميل الصور...</div>
-          ) : photos.length > 0 ? (
-            <div className="w-full h-[350px]">
-              <ImageGallery images={photos.map(photo => photo.s3Key)} />
-            </div>
-          ) : (
-            <div className="flex justify-center items-center bg-gray-100 w-full h-[350px]">
-              لا توجد صور متاحة
-            </div>
-          )}
+          {isPhotosLoading 
+            ? (
+              <div className="flex justify-center items-center bg-gray-100 w-full h-[350px]">جاري تحميل الصور...</div>
+            ) : photos.length > 0 ? (
+              <div className="w-full h-[350px]">
+                <ImageGallery images={photos.map(photo => photo.s3Key)} />
+              </div>
+            ) : (
+              <div className="flex justify-center items-center bg-gray-100 w-full h-[350px]">
+                لا توجد صور متاحة
+              </div>
+            )
+          }
 
           <div className="w-[100%] flex flex-col gap-2 z-0">
             <MapPicker disableMap lat={address?.latitude} lng={address?.longitude} onLocationSelect={() => {}} />
@@ -315,10 +362,14 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
           </div>
         </div>
       </div>
-      {!roles.includes("ROLE_GOV") && (!prop.donation && !prop.contribution) && (
-        <div className="flex flex-col gap-5 px-10 ml-10">
+
+
+      {!roles.includes("ROLE_GOV") && (!prop.donation && !prop.contribution) && problemProgress && (
+        <div className="flex flex-col gap-10 px-10 ml-10">
           <h1 className="text-2xl font-semibold">تقدم حل المشكلة</h1>
-          <ProgressPreview />
+          <ProgressPreview 
+            problemId={numericProblemId}
+          />
         </div>
       )}
     </div>

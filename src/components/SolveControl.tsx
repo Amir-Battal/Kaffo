@@ -3,15 +3,19 @@ import IsReal from "./IsReal";
 import IsForContribution from "./IsForContribution";
 import SolutionForm from "@/forms/contribution-form/SolutionForm";
 import IsForDonation from "./IsForDonation";
-import Donations from "./Donations";
 import ProblemProgress from "@/forms/problem-form/ProblemProgress";
 import GovPerson from "@/forms/problem-form/GovPerson";
 import EndProject from "./EndProject";
-import { useGetAcceptedContribution, useGetAllProblemsContribution, useGetContributions, useGetGovSolution, useGetPendingContributions, useGetRejectedContributions, useSelectContribution, useUnselectContribution } from "@/hooks/use-Contribution";
-import { useGetProblemById, useUpdateProblemForContribution } from "@/hooks/use-problem";
+import { useGetAcceptedContribution, useGetAllProblemsContribution, useGetContributions, useGetGovSolution, useGetPendingContributions, useGetRejectedContributions, useGetSolutionById, useSelectContribution, useUnselectContribution } from "@/hooks/use-Contribution";
+import { useGetProblemById } from "@/hooks/use-problem";
 import keycloak from "@/lib/keycloak";
 import { useGetMyUser } from "@/hooks/use-user";
 import SelectContributionsProcess from "./SelectContributionsProcess";
+import { useCreateDonation, useGetProblemDonations, useGetPublicDonors } from "@/hooks/use-donation";
+import { Button } from "./ui/button";
+import { toast } from "sonner";
+import { v4 as uuidv4 } from "uuid";
+
 
 
 const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
@@ -49,6 +53,10 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const [isDateSet, setIsDateSet] = useState<Boolean>();
 
 
+  const [isPayLoading, setIsPayLoading] = useState(false);
+
+
+
 
 
   //[/]|[\] Get All Contributions by ProblemId [/]|[\]
@@ -66,10 +74,25 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const { data: elseContribution } = useGetAllProblemsContribution(problemId);
   //[/]|[\] Get Accepted Contribution [/]|[\]
   const { data: acceptedContribution } = useGetAcceptedContribution(problemId);
+  const { data: onlyAcceptedSolution } = useGetSolutionById(problemId, acceptedContribution?.id);
+
+
+
+  //[/]|[\][/]|[\][/]|[\] Donation [/]|[\][/]|[\][/]|[\]
+  const { data: donations = [], isLoading: isLoadingDonations, isError } = useGetProblemDonations(problemId);
+  const { data: publicDonors = [] } = useGetPublicDonors(problemId);
+  const donationMutation = useCreateDonation(problemId);
+  
+
+  const successfulDonations = donations.filter(d => d.status === "SUCCESS");
+  const donorIds = successfulDonations.filter(d => !d.isAnonymous).map(d => d.donorId);
+  const totalDonated = successfulDonations.reduce((sum, d) => sum + d.amount, 0);
+  const remainingAmount = (acceptedContribution?.estimatedCost || 0) - totalDonated;
 
 
   //[/]|[\] Get Gov Solution [/]|[\]
   const { data: govSolution } = useGetGovSolution(problemId);
+
 
   //[/]|[\] Selected Solution and Reject other [/]|[\]
   const { mutate: selectContribution, isLoading } = useSelectContribution({
@@ -137,6 +160,9 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     if(acceptedContribution?.startDate && acceptedContribution.endDate){
       setIsDateSet(true);
     }
+    if(remainingAmount === 0){
+      setDonationDone(true)
+    }
   }, [])
 
 
@@ -165,9 +191,40 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
 
 
   //[/]|[\]  [/]|[\]
-  console.log("isForDonation", isForDonation);
-  console.log("selfFounded", selfFounded);
+  // console.log("isForDonation", isForDonation);
+  // console.log("selfFounded", selfFounded);
 
+
+  const handleGovPay = async (amount: number) => {
+    if (amount <= 0) {
+      toast.error("الرجاء اختيار مبلغ صحيح للتبرع");
+      return;
+    }
+
+    setIsPayLoading(true);
+    try {
+      const response = await donationMutation.mutateAsync({
+        amount,
+        currency: "USD",
+        paymentMethod: 'STRIPE',
+        isAnonymous: false,
+        successUrl: window.location.href,
+        cancelUrl: window.location.href,
+        idempotencyKey: uuidv4(),
+      });
+
+
+      if (response.sessionUrl) {
+        window.location.href = response.sessionUrl;
+      }
+    } catch (error) {
+      toast.error("حدث خطأ أثناء تنفيذ التبرع");
+    } finally {
+      setIsPayLoading(false);
+    }
+  };
+
+  console.log(acceptedContribution);
 
 
   return (
@@ -229,6 +286,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                   problemId={problemId}
                   setSolutionSet={setSolutionSet}
                   setSelfBudget={setSelfBudget}
+                  setIsSelected={setIsSelected}
                 />
               )}
 
@@ -250,27 +308,42 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                 {/* {isForDonation || problem?.forDonation ? ( */}
                 {isForDonation ? (
                   <div className="flex flex-col gap-5">
-                    <Donations
-                      setDonationDone={setDonationDone}
-                      donationDone={donationDone}
-                      expectedDonate={selectedContribution?.budget || selfBudget}
-
-                      solutionId={acceptedContribution?.id}
-
-                      startDate={acceptedContribution?.startDate}
-                      endDate={acceptedContribution?.endDate}
-                    />
-                    {(donationDone && (isSelected || isSelfSolve)) && (
-                      <GovPerson setGovSelected={setGovSelected} />
+                    {publicDonors?.content?.map((donation) => (
+                      <h3 className="text-lg">تم التبرع بمبلغ <b>{donation.amount}</b> من قبل  <b>{donation.firstName + " " + donation.lastName}</b> بتاريخ <b>{donation.donationDate.split("T")[0]}</b></h3>
+                    ))}
+                    <div className="text-lg font-semibold text-green-700">
+                      تم جمع {totalDonated} / {acceptedContribution?.estimatedCost}
+                    </div>
+                    {remainingAmount >=0 && !donationDone && (
+                      <div className="flex flex-col gap-5">
+                        <div>المبلغ المتبقي: {remainingAmount}</div>
+                        <Button
+                          className="w-[50%] h-[60px] flex flex-col cursor-pointer"
+                          onClick={() => handleGovPay(remainingAmount)}
+                          disabled={isPayLoading || remainingAmount <= 0}
+                        >
+                          <h3>التبرع بكامل المبلغ المتبقي</h3>
+                          <h3 className="text-[12px]">المبلغ هو {remainingAmount} ليرة سورية</h3>
+                        </Button>
+                      </div>
                     )}
-                    {govSelected && (
-                      <div>
-                        <EndProject setIsEndProject={setIsEndProject} />
+                    {remainingAmount <= 0 && (
+                      <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
+                    )}
+                    {donationDone && (
+                      <div className="flex flex-col gap-5">
+                        <EndProject 
+                          setIsEndProject={setIsEndProject} 
+                          contributionId={acceptedContribution?.id!}  
+                          problemId={problemId}
+
+                          startDate={onlyAcceptedSolution?.startDate}
+                          endDate={onlyAcceptedSolution?.endDate}
+                        />
                         {isEndProject && <ProblemProgress problemId={problemId} solutionId={acceptedContribution?.id} />}
                       </div>
                     )}
                   </div>
-                // ) : selfFounded || !problem?.forDonation ? (
                 ) : selfFounded ? (
                   <div className="flex flex-col gap-10">
                     <EndProject 
@@ -278,8 +351,8 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                       contributionId={acceptedContribution?.id!}  
                       problemId={problemId}
 
-                      startDate={acceptedContribution?.startDate}
-                      endDate={acceptedContribution?.endDate}
+                      startDate={onlyAcceptedSolution?.startDate}
+                      endDate={onlyAcceptedSolution?.endDate}
                     />
                     {isEndProject && <ProblemProgress problemId={problemId} solutionId={acceptedContribution?.id} />}
                   </div>

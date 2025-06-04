@@ -16,27 +16,15 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
   const initialValue = Math.min(Math.floor(max / 2), max);
   const [value, setValue] = useState<number>(initialValue);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAnonymous, setIsAnonymous] = useState<boolean>(false); // حالة التبرع كمجهول
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
 
   const donationMutation = useCreateDonation(problemId);
 
-
   const handleSubmit = async (amount: number) => {
     if (amount <= 0) {
-      toast.error("الرجاء اختيار مبلغ صحيح للتبرع");
+      toast.warning("الرجاء اختيار مبلغ صالح للتبرع.");
       return;
     }
-
-    console.log("donation payload", {
-      amount,
-      currency: "USD",
-      paymentMethod: 'STRIPE',
-      isAnonymous,
-      successUrl: window.location.href,
-      cancelUrl: window.location.href,
-      idempotencyKey: uuidv4(),
-    });
-
 
     setIsLoading(true);
     try {
@@ -44,18 +32,18 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
         amount,
         currency: "USD",
         paymentMethod: 'STRIPE',
-        isAnonymous, // استخدم قيمة المجهولية
+        isAnonymous,
         successUrl: window.location.href,
         cancelUrl: window.location.href,
         idempotencyKey: uuidv4(),
       });
 
-
+      toast.success("تم إنشاء طلب التبرع بنجاح، سيتم تحويلك لبوابة الدفع...");
       if (response.sessionUrl) {
         window.location.href = response.sessionUrl;
       }
     } catch (error) {
-      toast.error("حدث خطأ أثناء تنفيذ التبرع");
+      toast.error("حدث خطأ أثناء تنفيذ عملية التبرع. الرجاء المحاولة لاحقاً.");
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +59,6 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
 
   return (
     <div className="flex flex-col gap-6 pb-6">
-      {/* اختيار قيمة التبرع */}
       <div className="flex flex-col gap-4 items-center">
         <div className="w-full flex flex-col">
           <div className="flex flex-row-reverse gap-3 items-center">
@@ -88,7 +75,6 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
           <p className="text-center text-[18px]">تم تحديد مبلغ {value} ليرة سورية</p>
         </div>
 
-        {/* Checkbox للمجهولية */}
         <label className="flex gap-2 items-center">
           <input
             type="checkbox"
@@ -108,7 +94,6 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
         </Button>
       </div>
 
-      {/* زر التبرع بكامل المبلغ */}
       <Button
         className="w-[50%] h-[60px] flex flex-col"
         onClick={() => handleSubmit(max)}

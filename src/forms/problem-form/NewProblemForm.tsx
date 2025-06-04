@@ -23,6 +23,9 @@ import { useCreateAddress } from "@/hooks/use-Address"
 import { usePresignedUpload } from "@/hooks/use-problem-photo"
 import { toast } from "sonner"
 import MinistriesSelect from "@/components/MinistriesSelect"
+import keycloak from "@/lib/keycloak"
+import { useGetMyUser } from "@/hooks/use-user"
+import { useMinistryById } from "@/hooks/use-gov"
 
 
 const formSchema = z.object({
@@ -38,6 +41,14 @@ const formSchema = z.object({
 
 
 export function NewProblemForm() {
+
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
+  const { currentUser } = useGetMyUser();
+  const { data: gov } = useMinistryById(currentUser?.govId);
+  const { data: ministry } = useMinistryById(gov?.parentGovId);
+  
+
   const { createProblem, isLoading } = useCreateProblem()
   const { updateProblem } = useUpdateProblem()
   const { mutateAsync: createAddress } = useCreateAddress()
@@ -52,6 +63,17 @@ export function NewProblemForm() {
 
   const [ministryId, setMinistryId] = useState<number | null>(null);
 
+  // if(roles.includes("ROLE_GOV")){
+  //   setMinistryId(ministry?.id)
+  // }
+
+  useEffect(() => {
+    if (ministry) {
+      setMinistryId(ministry.id)
+    }
+  }, [ministry])
+
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,82 +112,81 @@ export function NewProblemForm() {
 
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
-  try {
-    // 1. إنشاء العنوان أولًا
-    const newAddress = await createAddress({
-      city: data.governorate,
-      description: data.address,
-      latitude: data.lat,
-      longitude: data.lng,
-    });
-
-    if (!newAddress?.id) {
-      toast.error("فشل في إنشاء العنوان");
-      return;
-    }
-
-    // 2. إنشاء المشكلة بدون صور في البداية للحصول على problemId
-    const newProblem = await createProblem({
-      title: data.title,
-      description: data.description,
-      categoryId: data.categoryId,
-      addressId: newAddress.id,
-      isReal: true,
-      forContribution: false,
-      forDonation: false,
-      createdDate: new Date().toISOString(),
-      photoUrls: [],
-    });
-
-    if (!newProblem?.id) {
-      toast.error("فشل في إنشاء المشكلة");
-      return;
-    }
-
-    // 3. إذا كانت هناك صور، رفعها وتحديث خاصية الصور
-    if (selectedImages.length > 0) {
-      // الحصول على روابط التحميل الموقعة باستخدام problemId الفعلي
-      const presignedData = await getPresignedUrls(
-        newProblem.id,
-        selectedImages.length,
-        selectedImages[0].type
-      );
-
-      // رفع الصور إلى S3
-      await Promise.all(
-        selectedImages.map((file, i) =>
-          uploadFileToS3(presignedData[i].presignedUrl, file)
-        )
-      );
-
-      // استخراج مفاتيح الصور لتحديث المشكلة
-      const photoUrls = presignedData.map((item) => item.s3Key);
-
-      // تحديث الصور فقط في المشكلة
-      await updateProblem({
-        id: newProblem.id,
-        data: {
-          title: data.title,
-          description: data.description,
-          categoryId: data.categoryId,
-          addressId: newAddress.id,
-          isReal: true,
-          forContribution: false,
-          forDonation: false,
-          createdDate: newProblem.createdDate, // أو أي تاريخ تراه مناسبًا
-          photoUrls,
-        },
+    try {
+      // 1. إنشاء العنوان أولًا
+      const newAddress = await createAddress({
+        city: data.governorate,
+        description: data.address,
+        latitude: data.lat,
+        longitude: data.lng,
       });
 
-    }
+      if (!newAddress?.id) {
+        toast.error("فشل في إنشاء العنوان");
+        return;
+      }
 
-    sessionStorage.setItem("showToastDone", "تم إنشاء المشكلة بنجاح");
-    window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
-  } catch (err) {
-    toast.error("فشل في إنشاء المشكلة");
-    console.error(err);
-  }
-};
+      // 2. إنشاء المشكلة بدون صور
+      const newProblem = await createProblem({
+        title: data.title,
+        description: data.description,
+        categoryId: data.categoryId,
+        addressId: newAddress.id,
+        isReal: true,
+        forContribution: false,
+        forDonation: false,
+        createdDate: new Date().toISOString(),
+        photoUrls: [],
+      });
+
+      if (!newProblem?.id) {
+        toast.error("فشل في إنشاء المشكلة");
+        return;
+      }
+
+      // 3. رفع الصور إن وجدت
+      if (selectedImages.length > 0) {
+        const presignedData = await getPresignedUrls(
+          newProblem.id,
+          selectedImages.length,
+          selectedImages[0].type
+        );
+
+        await Promise.all(
+          selectedImages.map((file, i) =>
+            uploadFileToS3(presignedData[i].presignedUrl, file)
+          )
+        );
+
+        const photoUrls = presignedData.map((item) => item.s3Key);
+
+        // تحديث المشكلة بالصور
+        await updateProblem({
+          id: newProblem.id,
+          data: {
+            title: data.title,
+            description: data.description,
+            categoryId: data.categoryId,
+            addressId: newAddress.id,
+            isReal: true,
+            forContribution: false,
+            forDonation: false,
+            createdDate: newProblem.createdDate,
+            photoUrls,
+          },
+        });
+      } else {
+        // ✅ إعلام المستخدم بعدم وجود صور
+        toast.warning("تم إنشاء الشكوى ولكن لم يتم إرفاق صور");
+      }
+
+      sessionStorage.setItem("showToastNewProblem", "تم إنشاء الشكوى بنجاح");
+      window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
+    } catch (err) {
+      toast.error("فشل في إنشاء المشكلة");
+      console.error(err);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -197,13 +218,16 @@ export function NewProblemForm() {
               )}
             />
             
-            <div className="flex flex-col gap-2">
-              <h1>الوزارة</h1>
-              <MinistriesSelect setMinistry={(name, id) => setMinistryId(id)} />
-            </div>
+            {!roles.includes("ROLE_GOV") && (
+              <div className="flex flex-col gap-2">
+                <h1>الوزارة</h1>
+                <MinistriesSelect setMinistry={(name, id) => setMinistryId(id)} />
+              </div>
+            )}
 
 
             <FormField
+
               control={form.control}
               name="categoryId"
               render={({ field }) => (

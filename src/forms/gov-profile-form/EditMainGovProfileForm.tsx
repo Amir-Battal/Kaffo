@@ -104,6 +104,7 @@ export function EditMainGovProfileForm() {
       govId: concernedPartyId,
     });
 
+    sessionStorage.setItem("showToastEdit", "تم تعديل البيانات الأساسية بنجاح");
     window.location.reload();
 
     console.log("✅ تم تعديل البيانات الاساسية بنجاح", values);

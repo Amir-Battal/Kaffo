@@ -85,7 +85,7 @@ export function SecondaryGovForm({ userId }: { userId: string }) {
         },
         {
           onSuccess: () => {
-            sessionStorage.setItem("showToast", "تم تعديل البيانات الثانوية بنجاح")
+            sessionStorage.setItem("showToastSecondaryEdit", "تم تعديل البيانات الثانوية بنجاح")
             setEditable(false)
             window.location.reload()
           },
@@ -111,8 +111,8 @@ export function SecondaryGovForm({ userId }: { userId: string }) {
 
   const handleEdit = () => {
     if (!user?.phone || user.phone.trim() === "") {
-      toast("يرجى كتابة رقم الهاتف أولاً قبل تعديل البيانات الثانوية", {
-        style: { background: "#cc1100", color: "#fff", direction: "rtl", border: "none" },
+      toast("يرجى إكمال البيانات الأساسية", {
+        style: { background: "#cc1100", color: "#fff", gap: "20px", direction: "rtl", border: "none" },
         icon: <Ban />,
         closeButton: true,
       })

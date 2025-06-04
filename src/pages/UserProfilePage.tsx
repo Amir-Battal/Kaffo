@@ -29,7 +29,7 @@ const UserProfilePage = () => {
     };
 
     useEffect(() => {
-      const toastMessage = sessionStorage.getItem("showToast");
+      const toastMessage = sessionStorage.getItem("showToastEdit") || sessionStorage.getItem("showToastSecondaryEdit");
       if (toastMessage) {
         toast(toastMessage,{
           style:{
@@ -44,7 +44,8 @@ const UserProfilePage = () => {
           icon: <Check />,
           closeButton: true
         })
-        sessionStorage.removeItem("showToast");
+        sessionStorage.removeItem("showToastEdit");
+        sessionStorage.removeItem("showToastSecondaryEdit");
       }
     }, []);
       

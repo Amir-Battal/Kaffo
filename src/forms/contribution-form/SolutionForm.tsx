@@ -28,7 +28,7 @@ import { SolutionDTO } from "@/types";
 import keycloak from "@/lib/keycloak";
 
 import axios from "axios";
-import { useGetMyUser } from "@/hooks/use-user";
+import { useGetMyUser, useGetUserById } from "@/hooks/use-user";
 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -45,12 +45,14 @@ interface Props {
   problemId: number;
   setSolutionSet: (value: boolean) => void;
   setSelfBudget: (value: number) => void;
+  setIsSelected: (value: boolean) => void;
 }
 
 const SolutionForm: React.FC<Props> = ({
   problemId,
   setSolutionSet,
   setSelfBudget,
+  setIsSelected,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
@@ -58,6 +60,7 @@ const SolutionForm: React.FC<Props> = ({
   // جلب مساهمة المستخدم الحالي
   const { data: userContribution, isLoading } = useGetMyContribution(problemId);
   const { currentUser } = useGetMyUser();
+
 
   // تهيئة الفورم
   const methods = useForm<FormData>({
@@ -93,6 +96,10 @@ const SolutionForm: React.FC<Props> = ({
   const updateMutation = useUpdateContribution(problemId, userContribution?.id ?? -1);
   const deleteMutation = useDeleteContribution(problemId, userContribution?.id ?? -1);
 
+
+  const { data: proposedUser } = useGetUserById(userContribution?.proposedByUserId);
+
+
   // إرسال النموذج (إنشاء أو تحديث)
   const onSubmit = (data: FormData) => {
     const payload: Partial<SolutionDTO> = {
@@ -106,13 +113,14 @@ const SolutionForm: React.FC<Props> = ({
       updateMutation.mutate(
         {
           ...payload,
-          status: "ACCEPTED",
+          status: "APPROVED",
         },
         {
           onSuccess: () => {
             setIsEditing(false);
             setSolutionSet(true);
             setSelfBudget(data.budget);
+            setIsSelected(true);
           },
         }
       );
@@ -126,7 +134,7 @@ const SolutionForm: React.FC<Props> = ({
               `${API_BASE_URL}/api/v1/problems/${problemId}/solutions/${created.id}`,
               { 
                 ...payload,
-                status: "ACCEPTED",
+                status: "APPROVED",
                 acceptedReason: 'التكلف بالحل من قبل الجهة المعنية',
                 acceptedByUserId: currentUser?.id
               },
@@ -142,8 +150,9 @@ const SolutionForm: React.FC<Props> = ({
             setSolutionSet(true);
             setSelfBudget(data.budget);
             setIsEditing(false);
+            setIsSelected(true);
           } catch (error) {
-            console.error("فشل تحديث الحالة إلى ACCEPTED", error);
+            console.error("فشل تحديث الحالة إلى APPROVED", error);
           }
         },
       });
@@ -160,6 +169,7 @@ const SolutionForm: React.FC<Props> = ({
         setIsEditing(true); // السماح بإنشاء مساهمة جديدة
         setSolutionSet(false);
         setSelfBudget(0);
+        setIsSelected(false);
       },
     });
   };
@@ -226,8 +236,8 @@ const SolutionForm: React.FC<Props> = ({
         ) : (
           // عرض مساهمة المستخدم مع خيارات التعديل والحذف
           <ContributionCard
-            username="أنا"
-            date={new Date(userContribution.createdAt).toLocaleDateString("ar-EG")}
+            username={proposedUser?.firstName + " " + proposedUser?.lastName}
+            date={new Date(userContribution.creationDate).toLocaleDateString()}
             contribution={userContribution.description}
             budget={userContribution.estimatedCost}
             isSelfSolv

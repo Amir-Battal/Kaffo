@@ -5,11 +5,36 @@ import { SecondaryGovForm } from "@/forms/gov-profile-form/SecondaryGovForm";
 import { MainGovProfileForm } from "@/forms/gov-profile-form/MainGovProfileForm";
 import EditGovOverlay from "@/forms/gov-profile-form/EditGovOverlay";
 import { useGetMyUser } from "@/hooks/use-user";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { Check } from "lucide-react";
 
 
 const GovProfilePage = () => {
 
   const { currentUser } = useGetMyUser();
+
+
+  useEffect(() => {
+    const toastMessage = sessionStorage.getItem("showToastEdit") || sessionStorage.getItem("showToastSecondaryEdit");
+    if (toastMessage) {
+      toast(toastMessage,{
+        style:{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '20px',
+          background: '#008c2f',
+          color: '#fff',
+          direction: 'rtl',
+          border: 'none',
+        },
+        icon: <Check />,
+        closeButton: true
+      })
+      sessionStorage.removeItem("showToastEdit");
+      sessionStorage.removeItem("showToastSecondaryEdit");
+    }
+  }, []);
 
   return (
     <div className="flex flex-col">

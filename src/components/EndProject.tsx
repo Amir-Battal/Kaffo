@@ -2,7 +2,8 @@ import { JSX, useEffect, useState } from "react";
 import DateRangePicker from "./DateRangePicker";
 import { Button } from "./ui/button";
 import { Check, Edit } from "lucide-react";
-import { useUpdateContributionDates } from "@/hooks/use-Contribution";
+import { useUpdateContributionDates, useUpdateSolutionStatus } from "@/hooks/use-Contribution";
+import { useGetProblemById, useUpdateProblemStatus } from "@/hooks/use-problem";
 
 
 interface EndProjectProps {
@@ -27,6 +28,11 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
       console.log("تم التحديث بنجاح:", updated);
     },
   });
+  const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
+  const { mutate: updateProblemStatus } = useUpdateProblemStatus();
+
+  const {problem} = useGetProblemById(problemId);
+  
 
 
   const formatLocalDate = (date: Date): string => {
@@ -59,7 +65,16 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
       contributionId,
       startDate: formatLocalDate(date.from),
       endDate: formatLocalDate(date.to),
+      status: "WORK_IN_PROGRESS"
     });
+    updateProblemStatus({
+      isReal: problem?.isReal,
+      forContribution: problem?.forContribution,
+      forDonation: problem?.forDonation,
+      problemId: problemId,
+      status: "WORK_IN_PROGRESS"
+    })
+
 
     setIsDateSet(true);
     setIsEndProject(true);

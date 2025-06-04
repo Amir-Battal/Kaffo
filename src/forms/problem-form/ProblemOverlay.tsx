@@ -33,14 +33,14 @@ const ProblemOverlay = ({ status, isMyAucation, problemId }: EditProp) => {
       // 2. حذف المشكلة
       await deleteProblem(problemId);
 
-      sessionStorage.setItem("showToastDelete", "تم حذف المشكلة بنجاح");
+      sessionStorage.setItem("showToastProblemDelete", "تم حذف الشكوى بنجاح");
       if(isMyAucation) {
         window.location.replace("http://localhost:5173/user-activities/aucations");
       } else{
         window.location.replace("http://localhost:5173/problems");
       }
     } catch (err) {
-      toast.error("حدث خطأ أثناء حذف المشكلة");
+      toast.error("حدث خطأ أثناء حذف الشكوى");
       console.error("Delete failed:", err);
     }
   };

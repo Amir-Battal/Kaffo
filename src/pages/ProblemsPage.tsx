@@ -4,7 +4,7 @@ import ProblemCard from "@/components/ProblemCard";
 import { useGetAllProblems } from "@/hooks/use-problem";
 import ProblemHeader from "@/components/ProblemHeader";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
+import { Ban, Check } from "lucide-react";
 
 const ProblemsPage = () => {
   const [page, setPage] = useState(0); // ⚠️ backend يبدأ من 0
@@ -17,22 +17,22 @@ const ProblemsPage = () => {
   }, [criteria]);
 
   useEffect(() => {
-      const toastMessage = sessionStorage.getItem("showToastDelete");
+      const toastMessage = sessionStorage.getItem("showToastProblemDelete");
       if (toastMessage) {
         toast(toastMessage,{
           style:{
             display: 'flex',
             flexDirection: 'row',
             gap: '20px',
-            background: '#008c2f',
+            background: '#cc1100',
             color: '#fff',
             direction: 'rtl',
             border: 'none',
           },
-          icon: <Check />,
+          icon: <Ban />,
           closeButton: true
         })
-        sessionStorage.removeItem("showToastDelete");
+        sessionStorage.removeItem("showToastProblemDelete");
       }
     }, []);
 
