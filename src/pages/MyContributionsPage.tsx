@@ -33,7 +33,6 @@ const MyContributionsPage = () => {
                     ))
                 )}
             </div>
-            {/* <PaginationComp /> */}
         </div>
     )
 }

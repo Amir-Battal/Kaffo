@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import { Check, DollarSign, Edit } from "lucide-react";
+import { Badge, Check, DollarSign, Edit } from "lucide-react";
 
 import ContributionCard from "./ContributionCard";
 import DeleteDialog from "./DeleteDialog";
@@ -163,12 +163,30 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
         contribution={userContribution.description || ""}
         budget={userContribution.estimatedCost || 0}
       >
-        <div className="flex flex-row-reverse gap-2 mt-2">
-          <Button onClick={() => setIsEditing(true)} variant="ghost">
-            تعديل <Edit className="ml-1" />
-          </Button>
-          <DeleteDialog onConfirm={onDelete} />
+        <div className={` text-white text-sm flex justify-center items-center w-[30%] h-[50px]
+          ${userContribution?.status === "REJECTED"
+            ? "bg-red-600"
+            : userContribution?.status === "PENDING_APPROVAL"
+            ? "bg-amber-500"
+            : "bg-green-600"
+          }`}>
+          <h1>
+            {userContribution?.status === "REJECTED"
+              ? "تم رفض المساهمة"
+              : userContribution?.status === "PENDING_APPROVAL"
+              ? "قيد المراجعة"
+              : "تم قبول المساهمة"
+            }
+          </h1>
         </div>
+        {userContribution.status === "PENDING_APPROVAL" && (
+          <div className="flex flex-row-reverse gap-2 mt-2">
+            <Button onClick={() => setIsEditing(true)} variant="ghost">
+              تعديل <Edit className="ml-1" />
+            </Button>
+            <DeleteDialog onConfirm={onDelete} />
+          </div>
+        )}
       </ContributionCard>
     );
 
@@ -188,6 +206,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
   return (
     <FormProvider {...methods}>
       <div className="flex flex-col gap-6" dir="rtl">
+    
         {(!userContribution || isEditing) ? renderForm() : renderUserContribution()}
         <div className="flex flex-col gap-4">
           {renderOtherContributions()}

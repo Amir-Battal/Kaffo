@@ -272,7 +272,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                     ) : (
                     <div className="flex flex-col gap-5">
                       <div>
-                        {(currentUser?.id === problem?.submittedByUserId) && (!problem.isReal) ? (
+                        {(currentUser?.id === problem?.submittedByUserId) && (!problem.isReal) && (problem.status !== "REJECTED") ? (
                             <div className="flex flex-row gap-5">
                               <ProblemOverlay problemId={numericProblemId} status="edit" />
                               <ProblemOverlay problemId={numericProblemId} status="delete" />
@@ -351,7 +351,31 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
         </div>
 
         {/* عرض الصور والموقع */}
-        <div className="w-[40%] flex flex-col gap-10">
+        <div className="w-[40%] flex flex-col items-end gap-10">
+          <Badge className={`w-[40%] h-[50px]
+            ${problem.status === "RESOLVED"
+              ? "bg-green-600"
+              : problem.status === "REJECTED"
+              ? "bg-red-600"
+              : problem.status === "APPROVED"
+              ? "bg-blue-600"
+              : "bg-amber-500"
+            }`}>
+            <h1>
+              {problem.status === "RESOLVED"
+                ? "تم حل المشكلة"
+                : problem.status === "REJECTED"
+                ? "تم رفض المشكلة"
+                : problem.status === "PENDING_APPROVAL"
+                ? "بانتظار الموافقة"
+                : problem.status === "APPROVED"
+                ? "تم قبول المشكلة"
+                : problem.status === "PENDING_FUNDING"
+                ? "بانتظار التمويل"
+                : "جاري حل المشكلة"
+              }
+            </h1>
+          </Badge>
           {isPhotosLoading 
             ? (
               <div className="flex justify-center items-center bg-gray-100 w-full h-[350px]">جاري تحميل الصور...</div>

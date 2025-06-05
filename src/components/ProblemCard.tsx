@@ -37,7 +37,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
   const { data: address } = useAddress(problem.addressId);
   const { data: category } = useCategory(problem.categoryId);
   const { data: user, isLoading: userLoading } = useGetUserById(problem.submittedByUserId?.toString() ?? "");
-    const { data: cities } = useCities();
+  const { data: cities } = useCities();
   
     const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 
@@ -50,10 +50,12 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
     <Card className="w-[90%] h-[480px] m-0 p-0 rounded-none">
       <CardHeader className="m-0 p-0">
       <div className="bg-gray-500 w-full h-[170px] relative">
-          {myAucation && (
+          {myAucation && (!problem?.isReal) && (
             <div className="flex flex-row gap-2 absolute m-2 z-10">
-              <ProblemOverlay isMyAucation problemId={problem.id} status={"edit"} />
-              <ProblemOverlay isMyAucation problemId={problem.id} status={"delete"} />
+              {problem?.status !== "REJECTED" &&
+                <ProblemOverlay isMyAucation problemId={problem.id} status={"edit"} />
+              }
+                <ProblemOverlay isMyAucation problemId={problem.id} status={"delete"} />
             </div>
           )}
           {isPhotoLoading ? (
@@ -76,8 +78,29 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
             <CardTitle className="text-xl">{problem.title}</CardTitle>
           </div>
           {myAucation && (
-            <Badge className="w-[40%] h-[50px] bg-amber-500">
-              <h1>{problem.status}</h1>
+            <Badge className={`w-[40%] h-[50px]
+              ${problem.status === "RESOLVED"
+                ? "bg-green-600"
+                : problem.status === "REJECTED"
+                ? "bg-red-600"
+                : problem.status === "APPROVED"
+                ? "bg-blue-600"
+                : "bg-amber-500"
+              }`}>
+              <h1>
+                {problem.status === "RESOLVED"
+                  ? "تم حل المشكلة"
+                  : problem.status === "REJECTED"
+                  ? "تم رفض المشكلة"
+                  : problem.status === "PENDING_APPROVAL"
+                  ? "بانتظار الموافقة"
+                  : problem.status === "APPROVED"
+                  ? "تم قبول المشكلة"
+                  : problem.status === "PENDING_FUNDING"
+                  ? "بانتظار التمويل"
+                  : "جاري حل المشكلة"
+                }
+              </h1>
             </Badge>
           )}
         </div>

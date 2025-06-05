@@ -10,7 +10,7 @@ import { ChevronLeft, DollarSign, Image } from "lucide-react";
 import { useGetProblemById } from "@/hooks/use-problem";
 import { useGetUserById } from "@/hooks/use-user";
 import { useCategory } from "@/hooks/use-category";
-import { useAddress } from "@/hooks/use-Address";
+import { useAddress, useCities } from "@/hooks/use-Address";
 import { Link } from "react-router-dom";
 
 const formSchema = z.object({
@@ -52,16 +52,23 @@ const ContributionCard = ({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "جاري المعالجة":
-        return "bg-orange-600";
-      case "التعديل مسموح":
-        return "bg-blue-600";
-      case "تم الرفض":
+      case "PENDING_APPROVAL":
+        return "bg-amber-600";
+      case "REJECTED":
         return "bg-red-600";
-      case "تم القبول":
-        return "bg-green-600";
       default:
-        return "bg-fuchsia-600";
+        return "bg-green-600";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "PENDING_APPROVAL":
+        return "قيد المراجعة";
+      case "REJECTED":
+        return "تم رفض المساهمة";
+      default:
+        return "تم قبول المساهمة";
     }
   };
 
@@ -69,6 +76,11 @@ const ContributionCard = ({
   const { data: user } = useGetUserById(Number(problem?.submittedByUserId));
   const { data: address } = useAddress(Number(problem?.addressId));
   const { data: category } = useCategory(problem?.categoryId);
+
+  const { data: cities } = useCities();
+  const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
+
+  console.log(cityArabicName);
 
 
 
@@ -95,7 +107,7 @@ const ContributionCard = ({
 
           {status && (
             <Badge className={`w-1/5 h-9 ml-1 ${getStatusColor(status)}`}>
-              <span className="text-lg">{status}</span>
+              <span className="text-lg">{getStatusLabel(status)}</span>
             </Badge>
           )}
 
@@ -113,9 +125,9 @@ const ContributionCard = ({
                 <div>
                   <p>{problem?.description}</p>
                   <div className="flex flex-wrap gap-2 pt-5">
-                    <Badge className="rounded-none">{address?.city}</Badge>
+                    <Badge className="rounded-none">{cityArabicName}</Badge>
                     <Badge className="rounded-none" variant="secondary">{category?.name}</Badge>
-                    {/* <Badge className="rounded-none" variant="secondary">بلدية حلب</Badge> */}
+                    <Badge className="rounded-none" variant="secondary">{address?.description}</Badge>
                   </div>
                 </div>
               ):(
