@@ -77,6 +77,44 @@ export const useGetAllProblems = (
 };
 
 
+// ============= GET ALL GOV RELATED PROBLEMS =============
+
+export const useGetAllGovRelatedProblems = (
+  { page, size = 6, sort = [] }: GetProblemsParams,
+  criteria: ProblemCriteria
+) => {
+  const accessToken = keycloak.token;
+
+  const fetchProblems = async (): Promise<ProblemPageResponse> => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/problems`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        page,
+        size,
+        sort,
+        ...criteria, // مرر الفلاتر هنا
+      },
+    });
+    return response.data;
+  };
+
+  const queryKey = ["problems", page, size, sort, criteria];
+
+  const { data, isLoading, isError, error } = useQuery(queryKey, fetchProblems);
+
+  return {
+    problems: data?.content ?? [],
+    totalPages: data?.totalPages ?? 1,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+
 // ============= GET PROBLEMS FOR CONTRIBUTIONS =============
 
 export const useGetProblemsForDonation = (

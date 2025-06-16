@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+
+@font-face {
+  font-family: "Cairo";
+  src: url('./assets//Cairo/static/Cairo-Regular.ttf');
+}
+
+
 * {
   font-family: "Cairo", sans-serif;
   scroll-behavior: smooth;
