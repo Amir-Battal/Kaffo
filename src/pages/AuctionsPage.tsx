@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
 import PaginationComp from "@/components/PaginationComp";
 import ProblemCard from "@/components/ProblemCard";
-import { useGetAllProblems } from "@/hooks/use-problem";
+import { useGetAllProblems, useGetMyProblems } from "@/hooks/use-problem";
 import ProblemHeader from "@/components/ProblemHeader";
 import { toast } from "sonner";
 import { Ban, Check } from "lucide-react";
 
 const AuctionsPage = () => {
   const [page, setPage] = useState(0); // يبدأ من 0
-  // TODO: get all problems using gov Id
-  const [criteria, setCriteria] = useState({
-    status: "جاري المعالجة",       // فلترة على حالة المشكلة
-    categoryId: null,              // يمكن تغييره حسب الحاجة
-  });
+
+  const [criteria, setCriteria] = useState({});
 
   useEffect(() => {
     setPage(0);
@@ -38,11 +35,11 @@ const AuctionsPage = () => {
     }
   }, []);
 
-  const { problems, totalPages, isLoading } = useGetAllProblems({
-    page,
-    size: 6,
-    sort: "submissionDate,desc",
-  }, criteria);
+  const { problems, totalPages, isLoading } = useGetMyProblems(
+    { page, size: 6 },
+    criteria
+  );
+
 
   return (
     <div className="flex flex-col gap-10 pr-10 mb-25">

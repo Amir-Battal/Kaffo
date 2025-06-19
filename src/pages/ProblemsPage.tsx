@@ -1,49 +1,87 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import PaginationComp from "@/components/PaginationComp";
 import ProblemCard from "@/components/ProblemCard";
-import { useGetAllProblems } from "@/hooks/use-problem";
+import {
+  useGetAllGovRelatedProblems,
+  useGetAllProblems,
+  useGetResolvedGovProblems,
+} from "@/hooks/use-problem";
 import ProblemHeader from "@/components/ProblemHeader";
 import { toast } from "sonner";
-import { Ban, Check } from "lucide-react";
+import { Ban } from "lucide-react";
+import keycloak from "@/lib/keycloak";
+import { useGetMyUser } from "@/hooks/use-user";
+import { useMinistryById } from "@/hooks/use-gov";
 
 const ProblemsPage = () => {
-  const [page, setPage] = useState(0); // ⚠️ backend يبدأ من 0
-
-  // TODO: get all problems using gov Id & completed status
+  const [page, setPage] = useState(0);
   const [criteria, setCriteria] = useState({});
+  const location = useLocation(); // ⬅️ لجلب المسار الحالي
+
+
+  const { currentUser, isLoading: isUserLoading } = useGetMyUser();
+  const { data: gov, isLoading: isGovLoading } = useMinistryById(currentUser?.govId);
+
+  const roles =
+    keycloak.tokenParsed?.resource_access?.["react-client"]?.roles || [];
+
+  const isGov = roles.includes("ROLE_GOV");
+  const govId = gov?.parentGovId;
+
+  const isCompletedView = location.pathname === "/problems/completed"; // ✅ الشرط
+
+
+  // تحديد الـ hook المناسب بناءً على المسار والدور
+  const {
+    problems,
+    totalPages,
+    isLoading,
+  } = isGov && govId
+    ? isCompletedView
+      ? useGetResolvedGovProblems(
+          { page, size: 6, sort: "submissionDate,desc" },
+          criteria,
+          govId
+        )
+      : useGetAllGovRelatedProblems(
+          { page, size: 6, sort: "submissionDate,desc" },
+          criteria,
+          govId
+        )
+    : useGetAllProblems(
+        { page, size: 6, sort: "submissionDate,desc" },
+        isCompletedView ? { ...criteria, status: "RESOLVED" } : criteria
+      );
 
   useEffect(() => {
-    setPage(0);
+    setPage(0); // إعادة التصفير عند تغيير الفلاتر
   }, [criteria]);
 
+
   useEffect(() => {
-      const toastMessage = sessionStorage.getItem("showToastProblemDelete");
-      if (toastMessage) {
-        toast(toastMessage,{
-          style:{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: '20px',
-            background: '#cc1100',
-            color: '#fff',
-            direction: 'rtl',
-            border: 'none',
-          },
-          icon: <Ban />,
-          closeButton: true
-        })
-        sessionStorage.removeItem("showToastProblemDelete");
-      }
-    }, []);
+    const toastMessage = sessionStorage.getItem("showToastProblemDelete");
+    if (toastMessage) {
+      toast(toastMessage, {
+        style: {
+          display: "flex",
+          flexDirection: "row",
+          gap: "20px",
+          background: "#cc1100",
+          color: "#fff",
+          direction: "rtl",
+          border: "none",
+        },
+        icon: <Ban />,
+        closeButton: true,
+      });
+      sessionStorage.removeItem("showToastProblemDelete");
+    }
+  }, []);
 
-    const { problems, totalPages, isLoading } = useGetAllProblems({
-      page,
-      size: 6,
-      sort: "submissionDate,desc", // ✅ مثال
-    }, criteria);
-
-    
-
+  if (isGov && !govId) {
+    return <p className="text-center">جارٍ تحميل الجهة المعنية...</p>;
+  }
 
   return (
     <div className="flex flex-col gap-10 pr-10 mb-25">

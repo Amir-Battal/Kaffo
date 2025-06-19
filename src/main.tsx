@@ -14,8 +14,8 @@ const queryClient = new QueryClient();
 
 
 keycloak.init({
-  onLoad: 'check-sso', // ✅ تحقق من الجلسة فقط، بدون إجبار تسجيل الدخول
-  silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html', // ✅ (اختياري لكنه مفيد)
+  onLoad: 'check-sso',
+  silentCheckSsoRedirectUri: window.location.origin + '/silent-check-sso.html',
 }).then((authenticated) => {
   if (authenticated) {
     localStorage.setItem("token", keycloak.token!);

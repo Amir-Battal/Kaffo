@@ -81,7 +81,8 @@ export const useGetAllProblems = (
 
 export const useGetAllGovRelatedProblems = (
   { page, size = 6, sort = [] }: GetProblemsParams,
-  criteria: ProblemCriteria
+  criteria: ProblemCriteria,
+  govId?: number
 ) => {
   const accessToken = keycloak.token;
 
@@ -95,15 +96,61 @@ export const useGetAllGovRelatedProblems = (
         page,
         size,
         sort,
-        ...criteria, // مرر الفلاتر هنا
+        govId,
+        ...criteria,
       },
     });
+
     return response.data;
   };
 
-  const queryKey = ["problems", page, size, sort, criteria];
+  const queryKey = ["problems", "gov", page, size, sort, criteria, govId];
 
-  const { data, isLoading, isError, error } = useQuery(queryKey, fetchProblems);
+  const { data, isLoading, isError, error } = useQuery(queryKey, fetchProblems, {
+    enabled: !!govId, // ⬅️ اجعل الطلب يتم فقط عند توفر govId
+  });
+
+  return {
+    problems: data?.content ?? [],
+    totalPages: data?.totalPages ?? 1,
+    isLoading,
+    isError,
+    error,
+  };
+};
+
+// ============= GET ALL RESOLVED GOV RELATED PROBLEMS =============
+export const useGetResolvedGovProblems = (
+  { page, size = 6, sort = [] }: GetProblemsParams,
+  criteria: ProblemCriteria = {},
+  govId?: number
+) => {
+  const accessToken = keycloak.token;
+
+  const fetchResolvedProblems = async (): Promise<ProblemPageResponse> => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/problems`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        page,
+        size,
+        sort,
+        govId,
+        ...criteria,           // ← ✅ أولاً ننشر المعايير
+        status: "RESOLVED",    // ← ✅ ثم نغصب الحالة
+      },
+    });
+
+    return response.data;
+  };
+
+  const queryKey = ["problems", "gov", "resolved", page, size, sort, criteria, govId];
+
+  const { data, isLoading, isError, error } = useQuery(queryKey, fetchResolvedProblems, {
+    enabled: !!govId,
+  });
 
   return {
     problems: data?.content ?? [],

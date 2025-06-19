@@ -24,7 +24,7 @@ const UserProfilePage = () => {
         !!user.collegeDegree &&
         !!user.job &&
         !!user.description &&
-        !!user.addressId // نتحقق فقط من وجود ID، لأن البيانات الكاملة تُجلب لاحقًا
+        !!user.addressId
       );
     };
 
