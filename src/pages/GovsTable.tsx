@@ -24,6 +24,7 @@ import ProblemCategorySelect from "@/components/ProblemCategorySelect"
 import { useEffect, useMemo, useState } from "react"
 import { useAllParties } from "@/hooks/use-gov"
 import { useAddress, useCities } from "@/hooks/use-Address"
+import NewGovOverlay from "@/forms/gov-profile-form/NewGovOverlay"
 
 export type Gov = {
   id: string
@@ -135,21 +136,20 @@ export function GovsTable() {
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-[90%] flex flex-col gap-5">
-        <Link
-          to="/gov-profile"
-          className="w-[12%] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2 rounded-[10px] hover:bg-gray-800"
-        >
-          <h3 className="text-sm">مستخدم جديد</h3>
-          <Plus size={17} />
-        </Link>
 
-        {/* Header */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl">الجهات المعنية</h1>
-          <h3 className="text-sm text-neutral-600 font-light">
-            تستطيع إيجاد كل حسابات الجهات المعنية والتعديل عليها
-          </h3>
+
+        <div className="w-full flex flex-row justify-between"> 
+          {/* Header */}
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl">الجهات المعنية</h1>
+            <h3 className="text-sm text-neutral-600 font-light">
+              تستطيع إيجاد كل حسابات الجهات المعنية والتعديل عليها
+            </h3>
+          </div>
+
+          <NewGovOverlay />
         </div>
+
 
         {/* Filters */}
         <div className="w-full flex flex-row justify-between">

@@ -1,4 +1,3 @@
-// SecondaryGovForm.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,18 +25,35 @@ const formSchema = z.object({
   governorate: z.string().optional(),
 });
 
-export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMinistry: boolean }) {
-  const { data: user, isLoading, isError } = useGovUserInfo(userId);
-  const { currentUser: gov } = useGovById(Number(userId));
-  const { updateUserBasicInfo } = useUpdateUserBasicInfo();
-  const { mutateAsync: createAddress } = useCreateAddress();
+export function SecondaryGovForm({
+  userId,
+  isMinistry,
+}: {
+  userId: string;
+  isMinistry: boolean;
+}) {
+  // فقط إذا كانت وزارة أو جهة معنية نستدعي useGovById
+  const govId = isMinistry ? Number(userId) : null;
+  const govQuery = useGovById(govId);
+  const { currentUser: gov, isLoading: govLoading } = isMinistry
+    ? govQuery
+    : { currentUser: null, isLoading: false };
+
   const { data: cities } = useCities();
+  const { mutateAsync: createAddress } = useCreateAddress();
   const { mutateAsync: updateGovInfo } = useUpdateGovInfo();
+
+  const userInfoResult = useGovUserInfo(userId);
+  const { data: user, isLoading: userLoading, isError: userError } = !isMinistry
+    ? userInfoResult
+    : { data: null, isLoading: false, isError: false };
+
+  const { updateUserBasicInfo } = useUpdateUserBasicInfo();
 
   const [editable, setEditable] = useState(false);
 
-  const { data: address } = useAddress(user?.addressId);
   const { data: govAddress } = useAddress(gov?.addressId);
+  const { data: userAddress } = useAddress(user?.addressId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -56,11 +72,11 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
       });
     } else if (user) {
       form.reset({
-        address: address?.description || "",
+        address: userAddress?.description || "",
         about: user.description || "",
       });
     }
-  }, [user, gov, address, govAddress, isMinistry, form]);
+  }, [user, gov, userAddress, govAddress, isMinistry, form]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -84,7 +100,7 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
 
       if (isMinistry && gov) {
         await updateGovInfo({
-          id: Number(userId),
+          id: govId!,
           name: gov.name,
           email: gov.email,
           phone: gov.phone,
@@ -109,7 +125,12 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
     } catch (error) {
       console.error("خطأ أثناء التحديث:", error);
       toast("حدث خطأ أثناء التحديث", {
-        style: { background: "#cc1100", color: "#fff", direction: "rtl", border: "none" },
+        style: {
+          background: "#cc1100",
+          color: "#fff",
+          direction: "rtl",
+          border: "none",
+        },
         icon: <Ban />,
         closeButton: true,
       });
@@ -117,9 +138,15 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
   };
 
   const handleEdit = () => {
-    if (!user?.phone || user.phone.trim() === "") {
+    if (!isMinistry && (!user?.phone || user.phone.trim() === "")) {
       toast("يرجى إكمال البيانات الأساسية", {
-        style: { background: "#cc1100", color: "#fff", gap: "20px", direction: "rtl", border: "none" },
+        style: {
+          background: "#cc1100",
+          color: "#fff",
+          gap: "20px",
+          direction: "rtl",
+          border: "none",
+        },
         icon: <Ban />,
         closeButton: true,
       });
@@ -128,20 +155,30 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
     setEditable(true);
   };
 
-  if (isLoading) return <div>جاري تحميل بيانات المستخدم...</div>;
-  if (isError) return <div>حدث خطأ أثناء جلب البيانات.</div>;
+  if ((isMinistry && govLoading) || (!isMinistry && userLoading)) {
+    return <div>جاري تحميل البيانات...</div>;
+  }
+
+  if (isMinistry && !gov) return <div>لم يتم العثور على الجهة.</div>;
+  if (!isMinistry && userError) return <div>حدث خطأ أثناء جلب المستخدم.</div>;
 
   return (
     <Form {...form}>
       {editable ? (
-        <form onSubmit={form.handleSubmit(onSubmit)} dir="rtl" className="w-full space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          dir="rtl"
+          className="w-full space-y-6"
+        >
           <FormField
             control={form.control}
             name="address"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>العنوان</FormLabel>
-                <FormControl><Input placeholder="حلب، العزيزية" {...field} /></FormControl>
+                <FormControl>
+                  <Input placeholder="حلب، العزيزية" {...field} />
+                </FormControl>
               </FormItem>
             )}
           />
@@ -152,7 +189,12 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>المحافظة</FormLabel>
-                  <FormControl><GovernorateSelect value={field.value} onChange={field.onChange} /></FormControl>
+                  <FormControl>
+                    <GovernorateSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
@@ -163,12 +205,17 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>وصف عنك</FormLabel>
-                  <FormControl><Textarea placeholder="قم بكتابة وصف عنك" {...field} /></FormControl>
+                  <FormControl>
+                    <Textarea placeholder="قم بكتابة وصف عنك" {...field} />
+                  </FormControl>
                 </FormItem>
               )}
             />
           )}
-          <Button type="submit" className="w-[40%] flex justify-around h-[50px] text-white bg-black hover:bg-gray-800 rounded-[10px]">
+          <Button
+            type="submit"
+            className="w-[40%] flex justify-around h-[50px] text-white bg-black hover:bg-gray-800 rounded-[10px]"
+          >
             <h3>تأكيد التعديل</h3>
             <Check />
           </Button>
@@ -181,7 +228,9 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
             render={({ field }) => (
               <FormItem>
                 <FormLabel>العنوان</FormLabel>
-                <FormControl><Input disabled className="text-gray-400" {...field} /></FormControl>
+                <FormControl>
+                  <Input disabled className="text-gray-400" {...field} />
+                </FormControl>
               </FormItem>
             )}
           />
@@ -192,7 +241,13 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>المحافظة</FormLabel>
-                  <FormControl><GovernorateSelect disabled value={field.value} onChange={field.onChange} /></FormControl>
+                  <FormControl>
+                    <GovernorateSelect
+                      disabled
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />
@@ -203,12 +258,18 @@ export function SecondaryGovForm({ userId, isMinistry }: { userId: string; isMin
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>وصف عنك</FormLabel>
-                  <FormControl><Textarea disabled {...field} /></FormControl>
+                  <FormControl>
+                    <Textarea disabled {...field} />
+                  </FormControl>
                 </FormItem>
               )}
             />
           )}
-          <Button type="button" onClick={handleEdit} className="w-[40%] flex justify-around h-[50px] text-white bg-black hover:bg-gray-800 rounded-[10px]">
+          <Button
+            type="button"
+            onClick={handleEdit}
+            className="w-[40%] flex justify-around h-[50px] text-white bg-black hover:bg-gray-800 rounded-[10px]"
+          >
             <h3>تعديل البيانات الثانوية</h3>
             <Edit />
           </Button>

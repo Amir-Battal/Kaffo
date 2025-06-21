@@ -1,8 +1,9 @@
-// نسخة محسّنة من النموذج لتجنّب إعادة ضبط البيانات بعد التعديل
-
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+
 import {
   Form,
   FormControl,
@@ -11,21 +12,20 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import GovernorateSelect from "@/components/GovernorateSelect";
 import MinistriesSelect from "@/components/MinistriesSelect";
 import ConcernedPartySelect from "@/components/ConcernedPartySelect";
-import { Button } from "@/components/ui/button";
-import GovernorateSelect from "@/components/GovernorateSelect";
-import { useGetMyUser, useUpdateUserBasicInfo } from "@/hooks/use-user";
+
 import {
   useAllMinistries,
   useAllParties,
   useGovById,
   useUpdateGovInfo,
 } from "@/hooks/use-gov";
+import { useGetMyUser, useUpdateUserBasicInfo } from "@/hooks/use-user";
 import { useAddress, useCities } from "@/hooks/use-Address";
-import { useParams } from "react-router-dom";
 
 const formSchema = z.object({
   firstName: z.string(),
@@ -46,15 +46,14 @@ export function EditMainGovProfileForm() {
 
   const { currentUser } = govId ? useGovById(Number(govId)) : useGetMyUser();
   const isMinistry = currentUser?.parentGovId === null;
-  const isConcernedParty = currentUser?.parentGovId;
+  const isConcernedParty = !!currentUser?.parentGovId;
 
   const { data: address } = useAddress(currentUser?.addressId);
   const { data: cities } = useCities();
-  const cityArabicName = cities?.find((c) => c.value === address?.city)?.arabic ?? address?.city;
-
-  const { updateUserBasicInfo } = useUpdateUserBasicInfo();
   const { data: parties } = useAllParties();
   const { data: ministries } = useAllMinistries();
+
+  const { updateUserBasicInfo } = useUpdateUserBasicInfo();
   const { mutateAsync: updateGovInfo } = useUpdateGovInfo();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,7 +71,7 @@ export function EditMainGovProfileForm() {
     if (!currentUser || !cities || !ministries || !parties || hasUpdated) return;
 
     const matchedGovernorate = cities.find(
-      (gov) => gov.arabic === (currentUser?.lastName || cityArabicName)
+      (gov) => gov.arabic === (currentUser.lastName || address?.city)
     );
 
     form.reset({
@@ -83,26 +82,26 @@ export function EditMainGovProfileForm() {
       concernedPartyId: currentUser.govId || 0,
     });
 
-    if (currentUser.govId) {
-      const party = parties.find((p) => p.id === currentUser.govId);
-      const ministry = ministries.find((m) => m.id === party?.parentGovId);
-      if (party && ministry) {
-        setMinistryId(party.parentGovId);
-        setConcernedPartyId(party.id);
-        setMinistryName(ministry.name);
-        setConcernedPartyName(party.parentGovName);
-      }
-    } else if (currentUser.parentGovId) {
+    if (isConcernedParty) {
       const ministry = ministries.find((m) => m.id === currentUser.parentGovId);
       if (ministry) {
         setMinistryId(ministry.id);
         setMinistryName(ministry.name);
       }
+    } else if (currentUser.govId) {
+      const party = parties.find((p) => p.id === currentUser.govId);
+      const ministry = ministries.find((m) => m.id === party?.parentGovId);
+      if (party && ministry) {
+        setMinistryId(ministry.id);
+        setMinistryName(ministry.name);
+        setConcernedPartyId(party.id);
+        setConcernedPartyName(party.parentGovName);
+      }
     }
-  }, [currentUser, parties, cities, ministries, form, hasUpdated]);
+  }, [currentUser, parties, ministries, cities, address, form, hasUpdated]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const selectedCity = cities?.find((city) => city.value === values.governorate);
+    const selectedCity = cities?.find((c) => c.value === values.governorate);
     const arabicCity = selectedCity?.arabic || "";
 
     if (!currentUser) return;
@@ -114,28 +113,32 @@ export function EditMainGovProfileForm() {
         email: values.email,
         phone: values.phoneNumber,
       });
-      setHasUpdated(true);
-      sessionStorage.setItem("showToastEdit", "تم تعديل بيانات الجهة بنجاح");
-      window.location.reload();
-      return;
-    }
+    } else if (isConcernedParty) {
+      await updateGovInfo({
+        id: currentUser.id,
+        name: values.firstName,
+        email: values.email,
+        phone: values.phoneNumber,
+        parentGovId: ministryId ?? currentUser.parentGovId,
+      });
+    } else {
+      if (!concernedPartyId) {
+        alert("حدث خطأ في تحديد الجهة المعنية");
+        return;
+      }
 
-    if (!concernedPartyId) {
-      alert("حدث خطأ في تحديد الجهة المعنية");
-      return;
+      await updateUserBasicInfo({
+        id: currentUser.id,
+        firstName: values.firstName,
+        lastName: arabicCity,
+        phone: values.phoneNumber,
+        email: values.email,
+        govId: concernedPartyId,
+      });
     }
-
-    await updateUserBasicInfo({
-      id: currentUser.id,
-      firstName: values.firstName,
-      lastName: arabicCity,
-      phone: values.phoneNumber,
-      email: values.email,
-      govId: concernedPartyId,
-    });
 
     setHasUpdated(true);
-    sessionStorage.setItem("showToastEdit", "تم تعديل البيانات الأساسية بنجاح");
+    sessionStorage.setItem("showToastEdit", "تم تعديل البيانات بنجاح");
     window.location.reload();
   };
 
@@ -143,15 +146,15 @@ export function EditMainGovProfileForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-10 py-10" dir="rtl">
         <div className="grid grid-cols-2 gap-5">
-          <FormField control={form.control} name="firstName" render={({ field }) => (
+          <FormField name="firstName" control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>الاسم الأول</FormLabel>
               <FormControl><Input placeholder="الاسم الكامل" {...field} /></FormControl>
             </FormItem>
           )} />
 
-          {!isMinistry && (
-            <FormField control={form.control} name="governorate" render={({ field }) => (
+          {!isMinistry && !isConcernedParty && (
+            <FormField name="governorate" control={form.control} render={({ field }) => (
               <FormItem>
                 <FormLabel>المحافظة</FormLabel>
                 <GovernorateSelect value={field.value} onChange={field.onChange} />
@@ -159,14 +162,14 @@ export function EditMainGovProfileForm() {
             )} />
           )}
 
-          <FormField control={form.control} name="phoneNumber" render={({ field }) => (
+          <FormField name="phoneNumber" control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>رقم الهاتف</FormLabel>
               <FormControl><Input placeholder="0999999999" {...field} /></FormControl>
             </FormItem>
           )} />
 
-          <FormField control={form.control} name="email" render={({ field }) => (
+          <FormField name="email" control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>البريد الإلكتروني</FormLabel>
               <FormControl><Input placeholder="email@example.com" {...field} /></FormControl>
@@ -187,7 +190,7 @@ export function EditMainGovProfileForm() {
               />
             </div>
 
-            {ministryId !== null && (
+            {!isConcernedParty && ministryId !== null && (
               <div className="flex flex-col gap-2">
                 <FormLabel>الجهة المعنية</FormLabel>
                 <ConcernedPartySelect

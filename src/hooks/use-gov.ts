@@ -117,3 +117,41 @@ export const useUpdateGovInfo = () => {
     },
   });
 };
+
+
+
+
+
+
+export type CreateGovPayload = {
+  name: string;
+  email: string;
+  phone: string;
+  logoUrl?: string;
+  addressId: number;
+  parentGovId?: number;
+};
+
+export const useCreateGov = () => {
+  return useMutation({
+    mutationFn: async (payload: CreateGovPayload) => {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/govs`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("تم إنشاء الجهة بنجاح!");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "حدث خطأ أثناء إنشاء الجهة.");
+    },
+  });
+};
