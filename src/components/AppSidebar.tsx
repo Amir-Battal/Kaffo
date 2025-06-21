@@ -222,6 +222,27 @@ export function AppSidebar() {
                       }
                     </SidebarMenuItem>
                   ))
+                ) : roles.includes("ROLE_ADMIN") ?(
+                  AdminItems.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      {/* {item.title === 'الأنشطة'  */}
+                      {item.title === 'تسجيل الخروج'
+                      ?(
+                        <SidebarMenuButton asChild>
+                          <LogoutDialog />
+                        </SidebarMenuButton>
+                      ):(
+                        <SidebarMenuButton asChild>
+                          <a href={item.url}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </a>
+                        </SidebarMenuButton>
+                      )
+                      }
+                    </SidebarMenuItem>
+                  ))
+
                 ):(
                   UserItems.map((item) => (
                     <SidebarMenuItem key={item.title}>

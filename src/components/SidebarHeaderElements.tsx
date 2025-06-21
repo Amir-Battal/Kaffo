@@ -13,7 +13,7 @@ const SidebarHeaderElements = ({...props}): JSX.Element => {
 
   return (
     <div>
-      <Link to={`${props.roles.includes("ROLE_GOV") ? "/gov-profile" :  "/user-profile" }`} className="w-[100%] flex flex-row gap-2 p-1">
+      <Link to={`${props.roles.includes("ROLE_GOV") || props.roles.includes("ROLE_ADMIN") ? "/gov-profile" :  "/user-profile" }`} className="w-[100%] flex flex-row gap-2 p-1">
         <Avatar>
           <AvatarImage className="object-cover object-center" src={`${currentUser.photoUrl}`} />
           <AvatarFallback>{currentUser?.firstName.split("")[0]}</AvatarFallback>

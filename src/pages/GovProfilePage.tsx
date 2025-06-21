@@ -8,11 +8,16 @@ import { useGetMyUser } from "@/hooks/use-user";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { Check } from "lucide-react";
+import { useParams } from "react-router-dom";
+import { useGovById } from "@/hooks/use-gov";
 
 
 const GovProfilePage = () => {
+  const { govId } = useParams();
 
-  const { currentUser } = useGetMyUser();
+  const { currentUser } = govId ? useGovById(Number(govId)) : useGetMyUser();
+
+  console.log(currentUser);
 
 
   useEffect(() => {
@@ -37,7 +42,7 @@ const GovProfilePage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col">
+    <div className={`flex flex-col ${currentUser?.keycloakId ? 'gap-10' : 'gap-40'}`}>
       <div className="w-full flex flex-row justify-between px-10 gap-10">
         <div className="w-[60%] flex flex-col">
           <div className="w-full">
@@ -52,7 +57,7 @@ const GovProfilePage = () => {
           
           <div className="w-full my-5 py-5">
             <h3 className="text-gray-400 my-5">يفضل إكمال البيانات لتعزيز المصداقية</h3>
-            <SecondaryGovForm userId={currentUser?.id} />
+            <SecondaryGovForm isMinistry={currentUser?.keycloakId ? false : true} userId={currentUser?.id} />
           </div>
         </div>
 

@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import { useState, useMemo, useEffect } from "react";
 import {
-  ColumnDef,
   ColumnFiltersState,
   SortingState,
   VisibilityState,
@@ -12,11 +11,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { ChevronLeft, Filter, Plus, Repeat, Search } from "lucide-react"
+} from "@tanstack/react-table";
 
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -24,221 +23,174 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import NewProblemOverlay from "@/forms/problem-form/NewProblemOverlay"
-import { Input } from "@/components/ui/input"
-import ProblemStatusSelect from "@/components/ProblemStatusSelect"
+import { useGetAllProblems } from "@/hooks/use-problem";
+import ProblemHeader from "@/components/ProblemHeader";
+import { useGetUserById } from "@/hooks/use-user";
+import { useCategory } from "@/hooks/use-category";
+import { useAddress, useCities } from "@/hooks/use-Address";
+import { Link } from "react-router-dom";
+import { useMinistryById } from "@/hooks/use-gov";
 
-const data: Problem[] = [
-  {
-    id: "derv1ws0",
-    title: 'رصيف مكسور',
-    user: "مديرية كهرباء حلب",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب', 'اي شي', 'اي شي ٢'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جديدة",
-  },
-  {
-    id: "3u1reuv4",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري التحقق",
-  },
-  {
-    id: "m5gr84i9",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
-  },
-  {
-    id: "m5gr84i8",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
-  },
-  {
-    id: "m5gr84i7",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
-  },
-  {
-    id: "m5gr84i6",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
-  },
-  {
-    id: "m5gr84i5",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
-  },
-  {
-    id: "m5gr84i4",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "جاري المعالجة",
-  },
-  {
-    id: "5kma53ae",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "تم حل المشكلة",
-  },
-  {
-    id: "bhqecj4p",
-    title: 'رصيف مكسور',
-    user: "أمير بطال",
-    concernedGov: "بلدية حلب",
-    category: ['رصيف مكسور', 'بلدية حلب'],
-    governorate: "حلب",
-    location: "العزيزية",
-    status: "تم الرفض",
-  }
-]
-
-export type Problem = {
-  id: string
-  title: string
-  user: string
-  concernedGov: string
-  category: string[]
-  governorate: string
-  location: string
-  status: "جاري التحقق" | "جاري المعالجة" | "جديدة" | "تم الرفض" | "تم حل المشكلة"
-}
-
-export const columns: ColumnDef<Problem>[] = [
+// ----------------------------
+// Columns
+// ----------------------------
+const columns = [
   {
     accessorKey: "title",
     header: "العنوان",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("title")}</div>
-    ),
+    cell: ({ row }) => <div>{row.getValue("title")}</div>,
   },
   {
     accessorKey: "user",
     header: "المستخدم",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("user")}</div>
-    ),
+    cell: ({ row }) => {
+      const userId = row.original.userId;
+      const { data: user } = useGetUserById(userId);
+      return <div>{user?.firstName + " " + user?.lastName || "جارٍ التحميل..."}</div>;
+    },
   },
   {
     accessorKey: "concernedGov",
     header: "الجهة المعنية",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("concernedGov")}</div>
-    ),
+    cell: ({ row }) => {
+      const categoryId = row.original.categoryId;
+      return <ConcernedGovCell categoryId={categoryId} />;
+    },
   },
   {
     accessorKey: "category",
     header: "الصنف",
-
-    cell: ({ row }) => (
-      <div className="flex flex-row gap-2 justify-center">
-        {row.original.category.slice(0, 2).map((item, index) => (
-          <Badge key={index} className="w-[40%] h-[30px] bg-neutral-200 text-black font-normal">{item}</Badge>
-        ))}
-        {row.original.category.length > 2 && (
-          <Badge className="w-[40px] h-[30px] bg-neutral-200 text-black font-normal"><Plus /></Badge>
-        )}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const categoryId = row.original.categoryId;
+      const { data: category } = useCategory(categoryId);
+      return (
+        <Badge className="bg-neutral-200 text-black">
+          {category?.name || "جارٍ التحميل..."}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "governorate",
     header: "المحافظة",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("governorate")}</div>
-    ),
+    cell: ({ row }) => {
+      const addressId = row.original.addressId;
+      const { data: address } = useAddress(addressId);
+      const { data: cities } = useCities();
+      const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
+      return <div>{cityArabicName || "جارٍ التحميل..."}</div>;
+    },
   },
   {
     accessorKey: "location",
     header: "المنطقة",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("location")}</div>
-    ),
+    cell: ({ row }) => {
+      const addressId = row.original.addressId;
+      const { data: address } = useAddress(addressId);
+      return <div>{address?.description.split(" ")[0] + "..." || "جارٍ التحميل..."}</div>;
+    },
   },
   {
     accessorKey: "status",
     header: "الحالة",
-    cell: ({ row }) => (
-      <Badge className={`w-[80%] h-[30px] ${row.original.status === 'جاري المعالجة'
-        ? 'bg-orange-600'
-        : row.original.status === 'جاري التحقق'
-          ? 'bg-blue-600'
-          : row.original.status === 'تم الرفض'
-            ? 'bg-red-600'
-            : row.original.status === 'تم حل المشكلة'
-              ? 'bg-green-600'
-              : 'bg-fuchsia-600'}`}>
-        {row.original.status}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const status = row.original.status;
+      const color = {
+        "جارية": "bg-fuchsia-600",
+        "جاري التحقق": "bg-blue-600",
+        "جاري المعالجة": "bg-orange-600",
+        "تم الرفض": "bg-red-600",
+        "تم حل المشكلة": "bg-green-600",
+        "جديدة": "bg-gray-500",
+      }[status];
+      return <Badge className={`w-[80%] h-[30px] ${color}`}>{status}</Badge>;
+    },
   },
   {
     accessorKey: "details",
     header: "التفاصيل",
-    cell: () => (
-      <Button className="rounded-none cursor-pointer">
-        <h1>التفاصيل</h1>
-        <ChevronLeft />
-      </Button>
-    )
-  }
-]
 
+    cell: ({row}) => (
+      <Link to={`/problems/${row.original.id}`} className="w-full h-[30px] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2  hover:bg-gray-800">
+        <h3 className="text-[14px]">تفاصيل</h3>
+        <ChevronLeft />
+      </Link>
+    ),
+  },
+];
+
+// ----------------------------
+// Component
+// ----------------------------
 export function ProblemsTable() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+
+
+  const [filters, setFilters] = useState<{
+    searchText: string;
+    city: string | null;
+    status: string | null;
+    categoryId: number | null;
+  }>({
+    searchText: "",
+    city: null,
+    status: null,
+    categoryId: null,
+  });
+
+
+  const [page, setPage] = useState(0);
+  const size = 6;
+
+  const criteria = useMemo(() => {
+    return {
+      searchText: filters.searchText || undefined,
+      status: filters.status || undefined,
+      city: filters.city || undefined,
+      categoryId: filters.categoryId || undefined,
+    };
+  }, [filters]);
+
+  const { problems, isLoading, totalPages } = useGetAllProblems(
+    { page, size, sort: "submissionDate,desc" },
+    criteria
+  );
+
+  const mappedData = useMemo(() => {
+    return problems.map((p) => ({
+      id: p.id.toString(),
+      title: p.title,
+      userId: p.submittedByUserId,
+      categoryId: p.categoryId,
+      addressId: p.addressId,
+      status:
+        p.status === "APPROVED"
+          ? "جديدة"
+          : p.status === "PENDING_APPROVAL"
+          ? "جاري التحقق"
+          : p.status === "RESOLVED"
+          ? "تم حل المشكلة"
+          : p.status === "REJECTED"
+          ? "تم الرفض"
+          : "جاري المعالجة",
+    }));
+  }, [problems]);
+
 
   const table = useReactTable({
-    data,
+    data: mappedData,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     state: {
@@ -247,50 +199,29 @@ export function ProblemsTable() {
       columnVisibility,
       rowSelection,
     },
-  })
+  });
 
   return (
     <div className="w-full flex flex-col items-center">
       <div className="w-[90%] flex flex-col gap-5">
-
-        <NewProblemOverlay />
+        {/* ✅ Problem Header */}
 
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl">المشكلات (الشكاوي)</h1>
-          <h3 className="text-sm text-neutral-600 font-light">تستطيع إيجاد كل المشكلات والتعديل عليها</h3>
+          <h3 className="text-sm text-neutral-600 font-light">يمكنك الاطلاع والتعديل على جميع المشكلات</h3>
         </div>
 
-        <div className="w-full flex flex-row justify-between">
-          <div className="w-[50%] flex flex-row gap-5">
-            <div className="w-full flex flex-row items-center">
-              <Search />
-              <Input placeholder="تبحث عن مشكلة معينة ..."/>
-            </div>
-            <ProblemStatusSelect status='جاري المعالجة' />
-          </div>
-          <div className="w-[50%] flex flex-row gap-5 justify-end">
-            <Button className="rounded-none cursor-pointer">
-              <h3>تطبيق الفلتر</h3>
-              <Filter />
-            </Button>
-            <Button className="rounded-none cursor-pointer" variant={"outline"}>
-              <h3>فتلر افتراضي</h3>
-              <Repeat />
-            </Button>
-          </div>
-        </div>
+        <ProblemHeader onFilterChange={setFilters} />
 
-        {/* Table */}
+        {/* ✅ Table */}
         <div className="rounded-md border">
           <Table className="w-full">
-            <TableHeader className="rounded-none">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
+            <TableHeader>
+              {table.getHeaderGroups().map((group) => (
+                <TableRow key={group.id}>
+                  {group.headers.map((header) => (
                     <TableHead key={header.id} className="text-center font-bold">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   ))}
                 </TableRow>
@@ -298,9 +229,15 @@ export function ProblemsTable() {
             </TableHeader>
 
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="text-center">
+                    جاري التحميل...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="cursor-pointer">
+                  <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="text-center">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -310,8 +247,8 @@ export function ProblemsTable() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    لا يوجد نتائج
+                  <TableCell colSpan={columns.length} className="text-center">
+                    لا توجد نتائج
                   </TableCell>
                 </TableRow>
               )}
@@ -319,27 +256,26 @@ export function ProblemsTable() {
           </Table>
         </div>
 
-        {/* Pagination */}
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground" dir="rtl">
-            {table.getFilteredRowModel().rows.length - table.getFilteredRowModel().rows.length + 1} - {table.getFilteredRowModel().rows.length} من{" "} 
-            {/* {table.getFilteredRowModel().rows.length} سطر في الصفحة. */}
-            50 سطر من العدد الإجمالي.
+        {/* ✅ Pagination */}
+        <div className="flex justify-end items-center gap-4 py-4">
+          <div className="text-sm text-muted-foreground" dir="rtl">
+            {mappedData.length > 0 && `${page * size + 1} - ${page * size + mappedData.length}`} من{" "}
+            {totalPages * size} سطر
           </div>
           <div className="space-x-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+              onClick={() => setPage((p) => Math.max(p - 1, 0))}
+              disabled={page === 0}
             >
               السابق
             </Button>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page + 1 >= totalPages}
             >
               التالي
             </Button>
@@ -347,5 +283,24 @@ export function ProblemsTable() {
         </div>
       </div>
     </div>
-  )
+  );
 }
+
+
+const ConcernedGovCell = ({ categoryId }: { categoryId: number }) => {
+  const { data: category, isLoading: loadingCategory } = useCategory(categoryId);
+  const [govId, setGovId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (category?.govId) {
+      setGovId(category.govId);
+    }
+  }, [category]);
+
+  const { data: gov, isLoading: loadingGov } = useMinistryById(govId ?? -1);
+
+  if (loadingCategory || !category) return <div>جارٍ التحميل...</div>;
+  if (loadingGov || !gov) return <div>جارٍ التحميل...</div>;
+
+  return <div>{gov.name}</div>;
+};

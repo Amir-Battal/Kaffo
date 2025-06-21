@@ -172,7 +172,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
               <Badge className="rounded-none" variant="secondary">{address?.description}</Badge>
             </div>
 
-            {roles.includes("ROLE_GOV")
+            {roles.includes("ROLE_GOV") || roles.includes("ROLE_ADMIN")
               ?(
                 <div className="flex flex-col gap-5">
                   <div className="flex flex-col gap-5">

@@ -2,7 +2,7 @@ export const problemStatusMap = {
   PENDING_APPROVAL: "بانتظار الموافقة",
   APPROVED: "تمت الموافقة",
   REJECTED: "تم رفض الشكوى",
-  IN_PROGRESS: "جاري المعالجة",
+  WORK_IN_PROGRESS: "جاري المعالجة",
   RESOLVED: "تم حل المشكلة",
 };
 
