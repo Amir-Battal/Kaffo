@@ -12,32 +12,6 @@ type Category = {
   govId: number;
 };
 
-// إنشاء صنف جديد
-export const useCreateCategory = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation(
-    async (category: Category) => {
-      const response = await axios.post(`${API_BASE_URL}/api/v1/problem-categories`, category, {
-        headers: {
-          Authorization: `Bearer ${keycloak.token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      return response.data;
-    },
-    {
-      onSuccess: () => {
-        // toast.success("تم إنشاء الصنف بنجاح!");
-        queryClient.invalidateQueries("categories");
-      },
-      onError: (error: any) => {
-        toast.error(error.message || "حدث خطأ أثناء إنشاء الصنف.");
-      },
-    }
-  );
-};
-
 // جلب صنف عبر ID
 export const useCategory = (id: number, options = {}) => {
   return useQuery(
@@ -58,6 +32,7 @@ export const useCategory = (id: number, options = {}) => {
 };
 
 
+// جلب التصنيفات حسب الجهة المعنية
 export const useCategoriesByGovId = (govId?: number) => {
   return useQuery(
     ["categories", govId],
@@ -79,7 +54,7 @@ export const useCategoriesByGovId = (govId?: number) => {
 };
 
 
-// useAllCategories
+// جلب كافة التصنيفات
 export const useAllCategories = () => {
   return useQuery("categories", async () => {
     const response = await axios.get(`${API_BASE_URL}/api/v1/problem-categories`, {
@@ -90,7 +65,44 @@ export const useAllCategories = () => {
 };
 
 
-// تعديل صنف
+export interface CreateCategoryPayload {
+  name: string;
+  govId: number;
+}
+
+// إنشاء تصنيف
+export const useCreateCategory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async (data: CreateCategoryPayload) => {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/problem-categories`,
+        data, // ← بدون id
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    },
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries(["categories", variables.govId]);
+        toast.success("تمت إضافة التصنيف بنجاح");
+      },
+      onError: (error: any) => {
+        toast.error(error.message || "فشل في إضافة التصنيف");
+      },
+    }
+  );
+};
+
+
+
+// تعديل تصنيف
 export const useUpdateCategory = () => {
   const queryClient = useQueryClient();
 
@@ -116,6 +128,41 @@ export const useUpdateCategory = () => {
       onError: (error: any) => {
         toast.error(error.message || "حدث خطأ أثناء تحديث الصنف.");
       },
+    }
+  );
+};
+
+
+// حذف التصنيف
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    async ({ id }: { id: number }) => {
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/v1/problem-categories/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        }
+      );
+      return response.data;
+    },
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries(["categories", variables.govId]);
+        toast.success("تم حذف التصنيف");
+      },
+      onError: (error: any) => {
+        if (
+          error?.response?.data?.message?.includes("violates foreign key constraint")
+        ) {
+          toast.error("لا يمكن حذف التصنيف لأنه مستخدم في مشاكل حالية.");
+        } else {
+          toast.error("فشل في حذف التصنيف.");
+        }
+      }
     }
   );
 };

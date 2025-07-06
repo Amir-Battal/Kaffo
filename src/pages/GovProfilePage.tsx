@@ -10,12 +10,16 @@ import { toast } from "sonner";
 import { Check } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useGovById } from "@/hooks/use-gov";
+import keycloak from "@/lib/keycloak";
+import Categories from "@/components/Categories";
 
 
 const GovProfilePage = () => {
   const { govId } = useParams();
 
   const { currentUser } = govId ? useGovById(Number(govId)) : useGetMyUser();
+
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
 
   console.log(currentUser);
 
@@ -59,6 +63,12 @@ const GovProfilePage = () => {
             <h3 className="text-gray-400 my-5">يفضل إكمال البيانات لتعزيز المصداقية</h3>
             <SecondaryGovForm isMinistry={currentUser?.keycloakId ? false : true} userId={currentUser?.id} />
           </div>
+
+          {roles.includes("ROLE_ADMIN") && (
+            <Categories />
+          )}
+
+
         </div>
 
         <div className="w-[40%] h-full flex flex-col gap-30 justify-between items-center">
