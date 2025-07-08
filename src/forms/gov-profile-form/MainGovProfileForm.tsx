@@ -17,7 +17,8 @@ import { z } from "zod";
 
 const formSchema = z.object({
   firstName: z.string(),
-  governorate: z.string(),
+  lastName: z.string(),
+  // governorate: z.string(),
   phoneNumber: z.string(),
   email: z.string(),
   ministry: z.string(),
@@ -55,7 +56,8 @@ export function MainGovProfileForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
       firstName: "",
-      governorate: "",
+      lastName: "",
+      // governorate: "",
       phoneNumber: "",
       email: "",
       ministry: "",
@@ -71,7 +73,8 @@ export function MainGovProfileForm() {
       if(currentUser?.keycloakId){
         form.reset({
           firstName: currentUser.firstName || "",
-          governorate: currentUser.lastName || "",
+          lastName: currentUser.lastName || "",
+          // governorate: currentUser.lastName || "",
           phoneNumber: currentUser.phone || "",
           email: currentUser.email || "",
           ministry: ministry?.name || "", // استخدم optional chaining
@@ -99,7 +102,7 @@ export function MainGovProfileForm() {
   }, [currentUser, address, party, ministry, form]);
 
 
-  const userItems = ["firstName", "governorate", "phoneNumber", "email", "ministry", "concernedParty"]
+  const userItems = ["firstName", "lastName", "phoneNumber", "email", "ministry", "concernedParty"]
   const concernedPartyItems = ["firstName", "phoneNumber", "email", "ministry"]
   const ministryItems = ["firstName", "phoneNumber", "email"]
 
@@ -118,8 +121,9 @@ export function MainGovProfileForm() {
                     <FormItem>
                       <FormLabel>
                         {{
-                          firstName: "اسم الجهة",
-                          governorate: "المحافظة",
+                          firstName: "الاسم",
+                          lastName: "الكنية",
+                          // governorate: "المحافظة",
                           phoneNumber: "رقم الهاتف",
                           email: "البريد الإلكتروني",
                           ministry: "الوزارة",

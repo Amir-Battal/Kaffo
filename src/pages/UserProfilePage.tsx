@@ -4,50 +4,60 @@ import UserPhoto from "@/forms/user-profile-form/UserPhoto";
 import EditOverlay from "@/forms/user-profile-form/EditOverlay";
 import { SecondaryForm } from "@/forms/user-profile-form/SecondaryForm";
 import DeleteOverlay from "@/forms/user-profile-form/DeleteOverlay";
-import { useGetMyUser } from "@/hooks/use-user";
+import { useGetMyUser, useGetUserById } from "@/hooks/use-user";
 import { User } from "@/types";
 import UploadCvButton from "@/forms/user-profile-form/UploadCvButton";
 import { Check, FileText } from "lucide-react";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useParams } from "react-router-dom";
+import keycloak from "@/lib/keycloak";
 
 
 const UserProfilePage = () => {
 
-    const { currentUser, isLoading } = useGetMyUser();
+  const { userId } = useParams();
 
-    const isSecondaryDataComplete = (user: User | undefined): boolean => {
-      if (!user) return false;
-    
-      return (
-        !!user.dateOfBirth &&
-        !!user.collegeDegree &&
-        !!user.job &&
-        !!user.description &&
-        !!user.addressId
-      );
-    };
+  const { currentUser, isLoading } = useGetMyUser();
+  const { data: user } = useGetUserById(Number(userId));
+  
+  console.log(user);
 
-    useEffect(() => {
-      const toastMessage = sessionStorage.getItem("showToastEdit") || sessionStorage.getItem("showToastSecondaryEdit");
-      if (toastMessage) {
-        toast(toastMessage,{
-          style:{
-            display: 'flex',
-            flexDirection: 'row',
-            gap: '20px',
-            background: '#008c2f',
-            color: '#fff',
-            direction: 'rtl',
-            border: 'none',
-          },
-          icon: <Check />,
-          closeButton: true
-        })
-        sessionStorage.removeItem("showToastEdit");
-        sessionStorage.removeItem("showToastSecondaryEdit");
-      }
-    }, []);
+  const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
+
+  const isSecondaryDataComplete = (user: User | undefined): boolean => {
+    if (!user) return false;
+  
+    return (
+      !!user.dateOfBirth &&
+      !!user.collegeDegree &&
+      !!user.job &&
+      !!user.description &&
+      !!user.addressId
+    );
+  };
+
+  useEffect(() => {
+    const toastMessage = sessionStorage.getItem("showToastEdit") || sessionStorage.getItem("showToastSecondaryEdit");
+    if (toastMessage) {
+      toast(toastMessage,{
+        style:{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: '20px',
+          background: '#008c2f',
+          color: '#fff',
+          direction: 'rtl',
+          border: 'none',
+        },
+        icon: <Check />,
+        closeButton: true
+      })
+      sessionStorage.removeItem("showToastEdit");
+      sessionStorage.removeItem("showToastSecondaryEdit");
+    }
+  }, []);
       
   return (
     <div className="flex flex-col">
@@ -56,31 +66,31 @@ const UserProfilePage = () => {
           <div className="w-full">
             <div className="flex flex-row justify-between">
               <h1 className="text-3xl" >البيانات الشخصية</h1>
-              <EditOverlay user={currentUser} isLoading={isLoading} />
+              <EditOverlay user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
             </div>
             {/* // NOTE: phone number is required  */}
-            <MainProfileForm user={currentUser} isLoading={isLoading} />
+            <MainProfileForm user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
           </div>
 
           <Separator/>
           
           <div className="w-full my-5 py-5">
-            {!isSecondaryDataComplete(currentUser) && (
+            {!isSecondaryDataComplete(currentUser) || !isSecondaryDataComplete(user) && (
               <h3 className="text-gray-400">
                 يرجى إكمال البيانات الشخصية لتستطيع المشاركة في الأنشطة الخاصة بالمنصة
               </h3>
             )}
-            <SecondaryForm user={currentUser} isLoading={isLoading} />
+            <SecondaryForm user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
           </div>
         </div>
 
         <div className="w-[40%] h-full flex flex-col gap-30 justify-between items-center">
-          <UserPhoto photoUrl={currentUser?.photoUrl} />
+          <UserPhoto photoUrl={roles.includes("ROLE_ADMIN") ? user?.photoUrl : currentUser?.photoUrl} />
 
           <div className="flex flex-col gap-10 justify-center items-center pr-20">
-            {currentUser?.cvUrl && (
+            {currentUser?.cvUrl || user?.cvUrl && (
               <a
-                href={currentUser.cvUrl}
+                href={roles.includes("ROLE_ADMIN") ? user?.cvUrl : currentUser?.cvUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-black text-white w-full text-center px-4 py-2 rounded-lg hover:bg-zinc-800 underline flex flex-row justify-between"
@@ -89,12 +99,12 @@ const UserProfilePage = () => {
                 <FileText />
               </a>
             )}
-            <UploadCvButton userId={Number(currentUser?.id)} />
+            <UploadCvButton userId={Number(roles.includes("ROLE_ADMIN") ? user?.id : currentUser?.id)} />
           </div>
 
         </div>
       </div>
-      <DeleteOverlay userId={currentUser?.id} />
+      <DeleteOverlay userId={roles.includes("ROLE_ADMIN") ? user?.id : currentUser?.id} />
     </div>
   );
 };

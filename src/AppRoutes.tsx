@@ -83,11 +83,19 @@ const AppRoutes = () => {
           } />
         )
       }
-      {roles.includes("ROLE_ADMIN") && (
-        <Route path="/gov-profile/:govId" element={
-          <PrivateRoute><Layout><GovProfilePage /></Layout></PrivateRoute>
-        } />
-      )
+      {
+        roles.includes("ROLE_ADMIN") && (
+          <Route path="/gov-profile/:govId" element={
+            <PrivateRoute><Layout><GovProfilePage /></Layout></PrivateRoute>
+          } />
+        )
+      }
+      {
+        roles.includes("ROLE_ADMIN") && (
+          <Route path="/user-profile/:userId" element={
+            <PrivateRoute><Layout><UserProfilePage /></Layout></PrivateRoute>
+          } />
+        )
       }
       <Route path="/user-activities" element={
         <PrivateRoute><Layout><UserActivitiesPage /></Layout></PrivateRoute>

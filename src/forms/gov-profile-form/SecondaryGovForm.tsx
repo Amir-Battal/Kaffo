@@ -73,6 +73,7 @@ export function SecondaryGovForm({
     } else if (user) {
       form.reset({
         address: userAddress?.description || "",
+        governorate: userAddress?.city || "",
         about: user.description || "",
       });
     }
@@ -82,9 +83,12 @@ export function SecondaryGovForm({
     try {
       if (!cities) return;
 
+
       const matchedCity = isMinistry
         ? cities.find((c) => c.value === values.governorate)
-        : cities.find((c) => c.arabic === user?.lastName);
+        : cities.find((c) => c.value === values.governorate);
+
+        console.log(matchedCity);
 
       if (!matchedCity) {
         toast.error("لم يتم العثور على المدينة المطابقة.");
@@ -199,18 +203,35 @@ export function SecondaryGovForm({
               )}
             />
           ) : (
-            <FormField
-              control={form.control}
-              name="about"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>وصف عنك</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="قم بكتابة وصف عنك" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-col gap-5">
+              <FormField
+                control={form.control}
+                name="governorate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>المحافظة</FormLabel>
+                    <FormControl>
+                      <GovernorateSelect
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="about"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>وصف عنك</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="قم بكتابة وصف عنك" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           )}
           <Button
             type="submit"
@@ -252,18 +273,36 @@ export function SecondaryGovForm({
               )}
             />
           ) : (
-            <FormField
-              control={form.control}
-              name="about"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>وصف عنك</FormLabel>
-                  <FormControl>
-                    <Textarea disabled {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-col gap-5">
+              <FormField
+                control={form.control}
+                name="governorate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>المحافظة</FormLabel>
+                    <FormControl>
+                      <GovernorateSelect
+                        disabled
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="about"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>وصف عنك</FormLabel>
+                    <FormControl>
+                      <Textarea disabled {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           )}
           <Button
             type="button"

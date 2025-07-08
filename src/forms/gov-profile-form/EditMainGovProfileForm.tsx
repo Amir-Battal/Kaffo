@@ -29,7 +29,8 @@ import { useAddress, useCities } from "@/hooks/use-Address";
 
 const formSchema = z.object({
   firstName: z.string(),
-  governorate: z.string(),
+  lastName: z.string(),
+  // governorate: z.string(),
   email: z.string().email(),
   phoneNumber: z.string().min(10).max(10),
   concernedPartyId: z.number().optional(),
@@ -60,7 +61,8 @@ export function EditMainGovProfileForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: "",
-      governorate: "",
+      lastName: "",
+      // governorate: "",
       email: "",
       phoneNumber: "",
       concernedPartyId: 0,
@@ -76,7 +78,8 @@ export function EditMainGovProfileForm() {
 
     form.reset({
       firstName: currentUser.firstName || currentUser.name || "",
-      governorate: matchedGovernorate?.value || "",
+      lastName: currentUser.lastName || currentUser.name || "",
+      // governorate: matchedGovernorate?.value || "",
       email: currentUser.email || "",
       phoneNumber: currentUser.phone || "",
       concernedPartyId: currentUser.govId || 0,
@@ -130,7 +133,8 @@ export function EditMainGovProfileForm() {
       await updateUserBasicInfo({
         id: currentUser.id,
         firstName: values.firstName,
-        lastName: arabicCity,
+        lastName: values.lastName,
+        // lastName: arabicCity,
         phone: values.phoneNumber,
         email: values.email,
         govId: concernedPartyId,
@@ -149,15 +153,24 @@ export function EditMainGovProfileForm() {
           <FormField name="firstName" control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>الاسم الأول</FormLabel>
-              <FormControl><Input placeholder="الاسم الكامل" {...field} /></FormControl>
+              <FormControl><Input placeholder="الاسم" {...field} /></FormControl>
             </FormItem>
           )} />
 
-          {!isMinistry && !isConcernedParty && (
+          {/* {!isMinistry && !isConcernedParty && (
             <FormField name="governorate" control={form.control} render={({ field }) => (
               <FormItem>
                 <FormLabel>المحافظة</FormLabel>
                 <GovernorateSelect value={field.value} onChange={field.onChange} />
+              </FormItem>
+            )} />
+          )} */}
+
+          {!isMinistry && !isConcernedParty && (
+            <FormField name="lastName" control={form.control} render={({ field }) => (
+              <FormItem>
+                <FormLabel>الكنية</FormLabel>
+              <FormControl><Input placeholder="الكنية" {...field} /></FormControl>
               </FormItem>
             )} />
           )}

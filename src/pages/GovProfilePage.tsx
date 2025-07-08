@@ -21,8 +21,6 @@ const GovProfilePage = () => {
 
   const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
 
-  console.log(currentUser);
-
 
   useEffect(() => {
     const toastMessage = sessionStorage.getItem("showToastEdit") || sessionStorage.getItem("showToastSecondaryEdit");
