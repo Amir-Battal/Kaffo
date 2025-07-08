@@ -7,6 +7,7 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
   useReactTable,
+  ColumnFiltersState,
 } from "@tanstack/react-table"
 import { ChevronLeft, Filter, Plus, Repeat, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -48,16 +49,20 @@ export function GovsTable() {
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
 
-  // 1. Filtered data based on search
+  // 1. Filtered and reversed data
   const filteredGovs = useMemo(() => {
-    return allGovs.filter((gov) => {
+    const filtered = allGovs.filter((gov) => {
       const text = searchText.toLowerCase();
       return (
         gov.email?.toLowerCase().includes(text) ||
         gov.name?.toLowerCase().includes(text)
       );
     });
+
+    // عكس الترتيب لعرض الأحدث أولاً
+    return filtered.reverse();
   }, [allGovs, searchText]);
+
 
     // 2. Paginated data
   const paginatedData = useMemo(() => {

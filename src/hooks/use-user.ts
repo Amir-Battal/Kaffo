@@ -7,6 +7,16 @@ import { Check } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+
+export const useAllUsers = () => {
+  return useQuery("users", async () => {
+    const response = await axios.get(`${API_BASE_URL}/api/v1/users`, {
+      headers: { Authorization: `Bearer ${keycloak.token}` },
+    });
+    return response.data;
+  });
+};
+
 // ============= GET USER =============
 export const useGetMyUser = () => {
   const getMyUserRequest = async (): Promise<User> => {
