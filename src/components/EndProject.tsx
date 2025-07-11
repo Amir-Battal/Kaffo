@@ -31,7 +31,7 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
   const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
   const { mutate: updateProblemStatus } = useUpdateProblemStatus();
 
-  const {problem} = useGetProblemById(problemId);
+  const {problem} = useGetProblemById(Number(problemId));
   
 
 
@@ -86,6 +86,9 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
     setIsDateSet(false);
   };
 
+  console.log("isDateSet", isDateSet);
+  console.log("date", date);
+
 
   return (
     <div className="flex flex-col gap-5">
@@ -104,25 +107,29 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
       />
 
       {isDateSet && date ? (
-        <div className="flex flex-col gap-5">
-          {!isEditing ? (
-            <Button type="button" onClick={handleEditDate} className="w-[45%] h-[40px] flex flex-row gap-5 cursor-pointer">
-              <h3>تعديل التاريخ</h3>
-              <Edit />
-            </Button>
-          ) : (
-            <Button onClick={handleSubmitDate} className="w-[45%] h-[40px] cursor-pointer bg-green-600 hover:bg-green-800">
-              <h3>تأكيد التعديل</h3>
-              <Check />
-            </Button>
+        <div>
+          {problem?.status !== "RESOLVED" && (
+            <div className="flex flex-col gap-5">
+              {!isEditing ? (
+                <Button type="button" onClick={handleEditDate} className="w-[45%] h-[40px] flex flex-row gap-5 cursor-pointer">
+                  <h3>تعديل التاريخ</h3>
+                  <Edit />
+                </Button>
+              ) : (
+                <Button onClick={handleSubmitDate} className="w-[45%] h-[40px] cursor-pointer bg-green-600 hover:bg-green-800">
+                  <h3>تأكيد التعديل</h3>
+                  <Check />
+                </Button>
+              )}
+              <div>
+                <h3>
+                  تم تحديد التاريخ
+                  <span> من <span className="font-bold">{date.from.toString().split(' ', 4).join(' ')}</span></span>
+                  <span> إلى <span className="font-bold">{date.to.toString().split(' ', 4).join(' ')}</span></span>
+                </h3>
+              </div>
+            </div>
           )}
-          <div>
-            <h3>
-              تم تحديد التاريخ
-              <span> من <span className="font-bold">{date.from.toString().split(' ', 4).join(' ')}</span></span>
-              <span> إلى <span className="font-bold">{date.to.toString().split(' ', 4).join(' ')}</span></span>
-            </h3>
-          </div>
         </div>
       ) : (
         <Button onClick={handleSubmitDate} className="w-[45%] h-[40px] cursor-pointer ">

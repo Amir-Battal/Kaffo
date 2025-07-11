@@ -12,6 +12,7 @@ import { useGetUserById } from "@/hooks/use-user";
 import { useCategory } from "@/hooks/use-category";
 import { useAddress, useCities } from "@/hooks/use-Address";
 import { Link } from "react-router-dom";
+import { useMinistryById } from "@/hooks/use-gov";
 
 const formSchema = z.object({
   username: z.string(),
@@ -32,6 +33,10 @@ type ContributionCardProps = {
   isSelfSolv?: boolean;
   isMyContribution?: boolean;
   contributions?: boolean;
+  isEmployee?: boolean;
+  gov?: string;
+  ministry?: string;
+  userPhoto?: string;
 };
 
 const ContributionCard = ({
@@ -45,6 +50,10 @@ const ContributionCard = ({
   children,
   isSelfSolv,
   isMyContribution,
+  isEmployee,
+  gov,
+  ministry,
+  userPhoto
 }: ContributionCardProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,20 +96,27 @@ const ContributionCard = ({
       <form className="w-full flex flex-col gap-5 border-2 pb-5 p-4" dir="rtl">
         {/* Header */}
         <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            {!isSelfSolv && (
-              <Avatar className="w-10 h-10 rounded-none">
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>CN</AvatarFallback>
-              </Avatar>
-            )}
-            {isMyContribution 
-              ?(
-                <h3>{user?.firstName + " " + user?.lastName} - {problem?.submissionDate.split("T")[0]}</h3>
-              ):(
-                <h3>{username} - {date}</h3>
-              )
-            }
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              {!isSelfSolv && (
+                <Avatar className="w-10 h-10 rounded-none">
+                  <AvatarImage src={userPhoto} />
+                  <AvatarFallback>{username?.split("")[0]}</AvatarFallback>
+                </Avatar>
+              )}
+              {isMyContribution 
+                ?(
+                  <h3>{user?.firstName + " " + user?.lastName} - {problem?.submissionDate.split("T")[0]}</h3>
+                ):(
+                  <h3>{username} - {date}</h3>
+                )
+              }
+            </div>
+            <div>
+              {isEmployee && (
+                <h3>الجهة المعنية التابع لها: <span className="font-bold">{gov}, {ministry}</span></h3>
+              )}
+            </div>
           </div>
 
           {status && (

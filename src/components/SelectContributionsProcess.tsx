@@ -60,12 +60,14 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
           contribution={solution?.description}
           budget={solution?.estimatedCost}
         >
-          <div className="flex flex-row-reverse">
-            <Button onClick={handleUnSelect} variant="ghost" className="m-1 cursor-pointer">
-              <h3>حل آخر</h3>
-              <Edit />
-            </Button>
-          </div>
+          {props.isThereNotDonation && (
+            <div className="flex flex-row-reverse">
+              <Button onClick={handleUnSelect} variant="ghost" className="m-1 cursor-pointer">
+                <h3>حل آخر</h3>
+                <Edit />
+              </Button>
+            </div>
+          )}
         </ContributionCard>
       )}
       { !select && props.pendContributions && (
