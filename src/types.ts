@@ -58,4 +58,5 @@ export interface SolutionDTO {
   proposedByUserId?: number;
   forContribution?: boolean;
   acceptedByUserId?: number;
+  creationDate?: string;
 };

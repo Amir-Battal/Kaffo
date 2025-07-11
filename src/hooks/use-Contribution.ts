@@ -207,7 +207,6 @@ export const useGetAcceptedContribution = (problemId: number) => {
 
       const allSolutions: SolutionDTO[] = res.data;
 
-      console.log(allSolutions);
       const acceptedSolution = allSolutions.find((sol) => (sol.status === "APPROVED" || sol.status === "PENDING_FUNDING" || sol.status === "WORK_IN_PROGRESS" || sol.status === "RESOLVED") && sol.proposedByUserId !== sol.acceptedByUserId) ?? null;
 
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { Ban, Check } from "lucide-react";
@@ -51,8 +51,6 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   const submittedByUserId = problem?.submittedByUserId?.toString() ?? "";
 
   const { data: problemProgress } = useGetProblemProgress(numericProblemId);
-
-  console.log(problemProgress);
   
   
   //[/]|[\][/]|[\][/]|[\] CONTRIBUTIONS [/]|[\][/]|[\][/]|[\]
@@ -64,7 +62,6 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   const startDateObj = new Date(onlyAcceptedSolution?.startDate);
   const endDateObj = new Date(onlyAcceptedSolution?.endDate);
 
-  console.log(acceptedContribution);
   const diffInTime = endDateObj.getTime() - startDateObj.getTime(); // الفارق بالملي ثانية
   const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24)); // تحويله إلى أيام
   
@@ -147,6 +144,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   }, []);
 
 
+
   if (isProblemLoading) return <div>جاري تحميل التفاصيل...</div>;
   if (!problem) return <div>المشكلة غير موجودة</div>;
   if (userLoading) return <div>جاري تحميل بيانات المستخدم...</div>;
@@ -221,7 +219,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                           {acceptedContribution && proposedUser && (
                             <ContributionCard
                               username={`${proposedUser.firstName} ${proposedUser.lastName}`}
-                              date={acceptedContribution.startDate}
+                              date={acceptedContribution?.creationDate}
                               contribution={acceptedContribution.description}
                               budget={acceptedContribution.estimatedCost}
                             />

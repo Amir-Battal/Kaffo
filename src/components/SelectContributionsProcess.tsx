@@ -49,8 +49,6 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   // console.log("select", select);
   // console.log("solution", solution);
 
-  console.log(solution);
-
 
 
   return (

@@ -462,48 +462,50 @@ export const useDeleteProblem = () => {
 
 
 
+
+export const useSetProblemIsReal = () => {
+  return useMutation(async ({ problemId, isReal }: { problemId: number; isReal: boolean }) => {
+    const accessToken = keycloak.token;
+
+    const response = await axios.patch(
+      `${API_BASE_URL}/api/v1/problems/${problemId}`,
+      { isReal },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  });
+};
+
+
+
+
 // ============= APPROVE OR REJECT PROBLEM =============
 type ApproveProblemParams = {
   problemId?: number;
   isReal?: boolean;
   rejectionReason?: string;
-  approvedByUserId?: string;
   status?: string;
 };
 
 export const useApproveOrRejectProblem = () => {
   const queryClient = useQueryClient();
-  const { currentUser } = useGetMyUser();
 
   return useMutation(
-    async ({ problemId, isReal, rejectionReason }: ApproveProblemParams) => {
+    async (params: ApproveProblemParams) => {
       const accessToken = keycloak.token;
-      const userId = currentUser?.id;
 
-      // الخطوة 1: إذا كانت isReal مطلوبة وقيمتها true، نحدثها أولاً لوحدها
-      if (isReal) {
-        await axios.patch(
-          `${API_BASE_URL}/api/v1/problems/${problemId}`,
-          { isReal: true }, // فقط تحديث isReal
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      // الخطوة 2: تحديث حالة الشكوى
       const payload: ApproveProblemParams = {
-        isReal,
-        approvedByUserId: userId,
-        rejectionReason,
-        status: isReal ? "APPROVED" : "REJECTED",
+        ...params, // انسخ كل ما أرسله المستخدم
       };
 
       const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/problems/${problemId}`,
+        `${API_BASE_URL}/api/v1/problems/${params.problemId}`,
         payload,
         {
           headers: {
@@ -526,6 +528,7 @@ export const useApproveOrRejectProblem = () => {
     }
   );
 };
+
 
 
 

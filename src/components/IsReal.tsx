@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, } from "./ui/form";
 import { useApproveOrRejectProblem, useGetProblemById, useUpdateProblemForContribution, } from "@/hooks/use-problem";
 import { useGetAcceptedContribution } from "@/hooks/use-Contribution";
 import { useGetMyUser } from "@/hooks/use-user";
+import { toast } from "sonner";
 
 
 const formSchema = z.object({
@@ -16,22 +17,19 @@ const formSchema = z.object({
 });
 
 interface IsRealProps {
-  isReal: boolean | null;
-  setIsReal: (value: boolean | undefined) => void;
   problemId: number;
+  setIsStatusChanged: (status: boolean)=>void;
 }
 
-const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
-
-  const { currentUser } = useGetMyUser();
-
+const IsReal = ({ problemId, setIsStatusChanged }: IsRealProps): JSX.Element => {
   const { mutate: approveOrRejectProblem } = useApproveOrRejectProblem();
-  const { mutateAsync: updateForContribution } = useUpdateProblemForContribution();
-  const {data: acceptedContribution} = useGetAcceptedContribution(problemId);
-  
+  // const { mutateAsync: updateForContribution } = useUpdateProblemForContribution();
+  // const {data: acceptedContribution} = useGetAcceptedContribution(problemId);
   const { problem } = useGetProblemById(problemId);
-
   const [edit, setEdit] = useState<boolean>();
+
+  const [isReal, setIsReal] = useState<boolean>();
+  const [isReally, setIsReally] = useState<boolean>();
 
 
   useEffect(() => {
@@ -54,20 +52,23 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
   });
 
   const handleReal = () => {
-    if(acceptedContribution){
-      updateForContribution({ problemId: problemId, forContribution: true, isReal: true });
-      setIsReal(true);
-    } else{
+    // if(acceptedContribution){
+    //   updateForContribution({ problemId: problemId, forContribution: true, isReal: true });
+    //   setIsReal(true);
+    // } else{
       approveOrRejectProblem(
         {
           problemId,
-          isReal: true, 
+          isReal: true,
+          status: "APPROVED" 
         },
         {
           onSuccess: () => setIsReal(true),
         }
       );
-    }
+      setIsReally(true);
+      setIsStatusChanged(true);
+    // }
   };
 
   const handleNotReal = () => {
@@ -80,21 +81,25 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
         onSuccess: () => setIsReal(false),
       }
     );
+    setIsReally(false);
+    setIsStatusChanged(false);
   };
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    approveOrRejectProblem(
-      {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      approveOrRejectProblem({
         problemId,
         isReal: false,
         rejectionReason: values.comment,
-      },
-      {
-        onSuccess: () => setIsReal(false),
-      }
-    );
-    setEdit(false);
+      });
+
+      setIsReal(false);
+      setEdit(false);
+    } catch (error) {
+      toast.error("حدث خطأ أثناء رفض الشكوى");
+    }
   };
+
 
 
   const handleRejectEdit = () => {
@@ -105,7 +110,14 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
     <div className="flex flex-col gap-5">
       <h3>بعد التحقق من الشكوى من الشخص المعني وأرض الواقع</h3>
 
-      {isReal && (
+      {(
+        (isReal && problem?.status === "APPROVED") || 
+        isReally || 
+        (isReal && problem?.status === "WORK_IN_PROGRESS") ||  
+        (isReal && problem?.status === "PENDING_FUNDING") ||
+        (isReal && problem?.status === "RESOLVED")
+      ) 
+      && (
         <div className="w-[45%] flex flex-row gap-5">
           <Button
             disabled
@@ -117,7 +129,6 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
             <Check />
           </Button>
           <Button
-            disabled
             className="w-full h-[40px] cursor-pointer"
             type="button"
             onClick={handleNotReal}
@@ -128,10 +139,11 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
         </div>
       )}
 
-      {!isReal && (
+      {((isReal && problem?.status === "PENDING_APPROVAL" && !isReally) || !isReal) && (
         <div className="flex flex-col gap-5">
           <div className="w-[45%] flex flex-row gap-5">
             <Button
+              disabled={isReal ? false : true}
               className="w-full h-[40px] cursor-pointer"
               type="button"
               onClick={handleReal}
@@ -140,7 +152,7 @@ const IsReal = ({ isReal, setIsReal, problemId }: IsRealProps): JSX.Element => {
               <ChevronLeft />
             </Button>
             <Button
-              disabled
+              disabled={isReal ? true : false}
               className="w-full h-[40px] cursor-pointer bg-red-600 hover:bg-red-800"
               type="button"
               onClick={handleNotReal}

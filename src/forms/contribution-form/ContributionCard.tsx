@@ -80,8 +80,6 @@ const ContributionCard = ({
   const { data: cities } = useCities();
   const cityArabicName = cities?.find(c => c.value === address?.city)?.arabic ?? address?.city;
 
-  console.log(cityArabicName);
-
 
 
   return (

@@ -62,7 +62,8 @@ export function UsersTable() {
       const text = searchText.toLowerCase();
       return (
         user.email?.toLowerCase().includes(text) ||
-        user.firstName?.toLowerCase().includes(text)
+        user.firstName?.toLowerCase().includes(text) ||
+        user.lastName?.toLowerCase().includes(text)   
       );
     });
 

@@ -19,7 +19,9 @@ import { v4 as uuidv4 } from "uuid";
 
 
 const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
-  const [isReal, setIsReal] = useState<boolean>();
+
+  const [isStatusChanged, setIsStatusChanged] = useState<boolean>();
+  const [isDonorsChanged, setIsDonorsChanged] = useState<boolean>();
 
   //[/]|[\][/]|[\][/]|[\] CONTRIBUTIONS [/]|[\][/]|[\][/]|[\]
   //[/]|[\][/]|[\] ForContribution [/]|[\][/]|[\]
@@ -133,7 +135,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     if(!problem?.forContribution){
       setIsForContribution(false);
     }
-  }, [problem])
+  }, [problem?.status])
 
   useEffect(() => {
     if(problem?.forContribution ){
@@ -174,6 +176,20 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
       setPendContributions(elseContribution);
     }
   }, [pendingContribution])
+
+
+  useEffect(() => {
+  // إذا تغيّرت قائمة المتبرعين، نفعل شيء
+  // if (publicDonors && publicDonors.length > 0) {
+  //   setIsDonorsChanged(true);
+  // }
+  console.log("publicDonors", publicDonors);
+}, []);
+
+
+
+  console.log("STATUS change", isStatusChanged);
+  console.log("DONORS change", isDonorsChanged);
 
 
 
@@ -224,17 +240,23 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     }
   };
 
-  console.log(acceptedContribution);
-
 
   return (
     <div className="flex flex-col gap-10 mt-10">
       <div className="flex flex-col gap-8">
         <h1 className="text-xl">وضع الشكوى</h1>
 
-        <IsReal setIsReal={setIsReal} isReal={isReal} problemId={problemId} />
+        <IsReal problemId={problemId} setIsStatusChanged={setIsStatusChanged} />
 
-        {isReal && (
+
+
+        {(
+          (problem?.status === "APPROVED") || 
+          isStatusChanged || 
+          (problem?.status === "WORK_IN_PROGRESS") || 
+          (problem?.status === "PENDING_FUNDING") ||
+          (problem?.status === "RESOLVED")
+        ) && (
           <div className="flex flex-col gap-8">
             <IsForContribution
               isForContribution={isForContribution}
@@ -306,7 +328,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                 />
 
                 {/* {isForDonation || problem?.forDonation ? ( */}
-                {isForDonation ? (
+                {(isForDonation || isDonorsChanged) ? (
                   <div className="flex flex-col gap-5">
                     {publicDonors?.content?.map((donation) => (
                       <h3 className="text-lg">تم التبرع بمبلغ <b>{donation.amount}</b> من قبل  <b>{donation.firstName + " " + donation.lastName}</b> بتاريخ <b>{donation.donationDate.split("T")[0]}</b></h3>

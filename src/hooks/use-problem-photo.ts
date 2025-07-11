@@ -39,17 +39,23 @@ export const useGetProblemPhotos = (problemId: number) => {
 
 
 export const usePresignedUpload = () => {
+  // تعديل الدالة لتستقبل progressId
   const getPresignedUrls = async (
     problemId: number,
     count: number,
-    contentType?: string // أصبح اختياريًا
-  ): Promise<{ presignedUrl: string; s3Key: string }[]> => {
+    contentType?: string,
+    progressId?: number // ✅ جديد
+  ): Promise<{ presignedUrl: string; s3Key: string; photoId: number }[]> => {
     const accessToken = keycloak.token;
 
     const url = new URL(`${API_BASE_URL}/api/v1/problem/${problemId}/photos`);
     url.searchParams.append("count", count.toString());
     if (contentType) {
       url.searchParams.append("contentType", contentType);
+    }
+
+    if (progressId) {
+      url.searchParams.append("progressId", progressId.toString()); // ✅ إرسال progressId
     }
 
     const response = await fetch(url.toString(), {
@@ -65,6 +71,7 @@ export const usePresignedUpload = () => {
 
     return response.json();
   };
+
 
   const uploadFileToS3 = async (url: string, file: File): Promise<void> => {
     const res = await fetch(url, {
@@ -113,6 +120,39 @@ export const useDeleteProblemPhoto = () => {
 
   return mutation;
 };
+
+
+
+
+
+
+// hooks/use-progress.ts
+export const useUpdateProblemProgress = () => {
+  return useMutation(
+    async (progress: {
+      id: number;
+      comment: string;
+      percentage: number;
+      progressDate: string;
+      problemId: number;
+      solutionId: number;
+      photoIds: number[];
+    }) => {
+      const accessToken = keycloak.token;
+      const response = await axios.put(
+        `${API_BASE_URL}/api/v1/problem/${progress.problemId}/progress/${progress.id}`,
+        progress,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      return response.data;
+    }
+  );
+};
+
 
 
 // ============= DELETE ALL PHOTOS FOR A PROBLEM =============
