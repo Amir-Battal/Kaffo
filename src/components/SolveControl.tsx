@@ -85,7 +85,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const { data: publicDonors = [] } = useGetPublicDonors(problemId);
   const donationMutation = useCreateDonation(problemId);
 
-  const publicDonrosLength = publicDonors.content.length
+  const publicDonrosLength = publicDonors?.content.length
   
 
   const successfulDonations = donations.filter(d => d.status === "SUCCESS");

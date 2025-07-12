@@ -7,11 +7,12 @@ import EditGovOverlay from "@/forms/gov-profile-form/EditGovOverlay";
 import { useGetMyUser } from "@/hooks/use-user";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { Check } from "lucide-react";
+import { Check, FileText } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useGovById } from "@/hooks/use-gov";
 import keycloak from "@/lib/keycloak";
 import Categories from "@/components/Categories";
+import UploadCvButton from "@/forms/user-profile-form/UploadCvButton";
 
 
 const GovProfilePage = () => {
@@ -43,6 +44,8 @@ const GovProfilePage = () => {
     }
   }, []);
 
+  console.log("currentUser", currentUser);
+
   return (
     <div className={`flex flex-col ${currentUser?.keycloakId ? 'gap-10' : 'gap-40'}`}>
       <div className="w-full flex flex-row justify-between px-10 gap-10">
@@ -71,6 +74,23 @@ const GovProfilePage = () => {
 
         <div className="w-[40%] h-full flex flex-col gap-30 justify-between items-center">
           <UserPhoto photoUrl={currentUser?.photoUrl}  />
+
+          {currentUser?.keycloakId && (
+            <div className="flex flex-col gap-10 justify-center items-center pr-20">
+              {(currentUser?.cvUrl) && (
+                <a
+                  href={currentUser?.cvUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-black text-white w-full text-center px-4 py-2 rounded-lg hover:bg-zinc-800 underline flex flex-row justify-between"
+                >
+                  <h3>عرض السيرة الذاتية</h3>
+                  <FileText />
+                </a>
+              )}
+              <UploadCvButton userId={currentUser?.id} />
+            </div>
+          )}
         </div>
       </div>
       <DeleteOverlay userId={currentUser?.id} />

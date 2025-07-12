@@ -195,10 +195,11 @@ export function EditMainGovProfileForm() {
             <div className="flex flex-col gap-2">
               <FormLabel>الوزارة</FormLabel>
               <MinistriesSelect
-                value={ministryName}
+                value={ministryName && ministryName !== "" ? ministryName : undefined}
                 setMinistry={(name, id) => {
                   setMinistryId(id);
                   setConcernedPartyId(null);
+                  setMinistryName(name ?? "");
                 }}
               />
             </div>

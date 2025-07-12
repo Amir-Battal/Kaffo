@@ -12,6 +12,9 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
 import keycloak from "@/lib/keycloak";
+import MainEmployeeForm from "@/forms/user-profile-form/MainEmployeeForm";
+import SecondaryEmployeeForm from "@/forms/user-profile-form/SecondaryEmployeeForm";
+import EditGovOverlay from "@/forms/gov-profile-form/EditGovOverlay";
 
 
 const UserProfilePage = () => {
@@ -66,10 +69,22 @@ const UserProfilePage = () => {
           <div className="w-full">
             <div className="flex flex-row justify-between">
               <h1 className="text-3xl" >البيانات الشخصية</h1>
-              <EditOverlay user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
+              {user?.govId
+                ?(
+                  <EditGovOverlay isEmployee />
+                ):(
+                  <EditOverlay user={currentUser} isLoading={isLoading} />
+                )
+              }
             </div>
             {/* // NOTE: phone number is required  */}
-            <MainProfileForm user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
+            {user?.govId 
+              ? (
+                <MainEmployeeForm />
+              ):(
+                <MainProfileForm user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
+              )
+            }
           </div>
 
           <Separator/>
@@ -80,7 +95,13 @@ const UserProfilePage = () => {
                 يرجى إكمال البيانات الشخصية لتستطيع المشاركة في الأنشطة الخاصة بالمنصة
               </h3>
             )}
-            <SecondaryForm user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
+            {user?.govId
+              ?(
+                <SecondaryEmployeeForm userId={user.id} />
+              ):(
+                <SecondaryForm user={currentUser} isLoading={isLoading} />
+              )
+            }
           </div>
         </div>
 
@@ -88,7 +109,7 @@ const UserProfilePage = () => {
           <UserPhoto photoUrl={roles.includes("ROLE_ADMIN") ? user?.photoUrl : currentUser?.photoUrl} />
 
           <div className="flex flex-col gap-10 justify-center items-center pr-20">
-            {currentUser?.cvUrl || user?.cvUrl && (
+            {(user?.cvUrl || currentUser?.cvUrl) && (
               <a
                 href={roles.includes("ROLE_ADMIN") ? user?.cvUrl : currentUser?.cvUrl}
                 target="_blank"

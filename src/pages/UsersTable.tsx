@@ -29,6 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useAllUsers } from "@/hooks/use-user"
 import { useMemo, useState } from "react"
 import { useAddress, useCities } from "@/hooks/use-Address"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import GovernorateSelect from "@/components/GovernorateSelect"
 
 export type User = {
   id: string
@@ -52,23 +54,40 @@ export function UsersTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
+  const [roleFilter, setRoleFilter] = useState<string | null>(null);
+  const [governorateFilter, setGovernorateFilter] = useState<string | null>(null);
+
+  // console.log(governorateFilter);
   // Pagination
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
+
+  
 
   // 1. Filtered data based on search
   const filteredUsers = useMemo(() => {
     const filtered = allUsers.filter((user) => {
       const text = searchText.toLowerCase();
-      return (
+      const matchesSearch =
         user.email?.toLowerCase().includes(text) ||
         user.firstName?.toLowerCase().includes(text) ||
-        user.lastName?.toLowerCase().includes(text)   
-      );
+        user.lastName?.toLowerCase().includes(text);
+
+      const matchesRole = !roleFilter
+        ? true
+        : roleFilter === "موظف"
+        ? Boolean(user.govId)
+        : !user.govId;
+
+
+
+
+      return matchesSearch && matchesRole;
     });
 
     return filtered.reverse();
-  }, [allUsers, searchText]);
+  }, [allUsers, searchText, roleFilter, governorateFilter]);
+
 
   // 2. Paginated data
   const paginatedData = useMemo(() => {
@@ -111,7 +130,6 @@ export function UsersTable() {
       accessorKey: "governorate",
       header: "المحافظة",
       cell: ({ row }) => {
-        console.log(row);
         const addressId = row.original.addressId
         const { data: address } = useAddress(addressId)
         const { data: cities } = useCities()
@@ -130,12 +148,15 @@ export function UsersTable() {
     {
       accessorKey: "details",
       header: "التفاصيل",
-      cell: ({row}) => (
-        <Link to={`/user-profile/${row.original.id}`} className="w-full h-[30px] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2  hover:bg-gray-800">
-          <h3 className="text-[14px]">تفاصيل</h3>
-          <ChevronLeft />
-        </Link>
-      ),
+      cell: ({row}) => {
+        const govId = row.original.govId
+        return (
+          <Link to={`/user-profile/${row.original.id}`} className="w-full h-[30px] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2  hover:bg-gray-800">
+            <h3 className="text-[14px]">تفاصيل</h3>
+            <ChevronLeft />
+          </Link>
+        )
+      },
     },
   ]
 
@@ -166,30 +187,68 @@ export function UsersTable() {
     <div className="w-full flex flex-col items-center">
       <div className="w-[90%] flex flex-col gap-5">
 
-        <Link to='/user-profile' className="w-[12%] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2 rounded-[10px] hover:bg-gray-800">
-          <h3 className="text-sm">مستخدم جديد</h3>
-          <Plus size={17} />
-        </Link>
+        <div className="flex flex-row justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-2xl">المستخدمين</h1>
+            <h3 className="text-sm text-neutral-600 font-light">تستطيع إيجاد كل المستخدمين والتعديل عليهم</h3>
+          </div>
 
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl">المستخدمين</h1>
-          <h3 className="text-sm text-neutral-600 font-light">تستطيع إيجاد كل المستخدمين والتعديل عليهم</h3>
+          <Link to='/manage/new-account' className="w-[18%] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2 hover:bg-gray-800">
+            <h3 className="text-[17px]">مستخدم جديد</h3>
+            <Plus size={20} />
+          </Link>
         </div>
 
         {/* Filters */}
-        <div className="w-full flex flex-row justify-between">
-            <div className="w-full flex flex-row items-center">
+          <div className="w-full flex flex-row items-center gap-5 justify-between">
+            <div className="flex flex-row gap-5 items-center w-[60%]">
               <Search />
               <Input
                 placeholder="تبحث عن مستخدم ما..."
                 value={searchText}
                 onChange={(e) => {
                   setSearchText(e.target.value);
-                  setPageIndex(0); // إعادة أول صفحة عند تغيير البحث
+                  setPageIndex(0);
                 }}
               />
             </div>
-        </div>
+
+            <div className="flex flex-row gap-5 w-[40%]">
+
+
+              {/* المحافظة */}
+              <GovernorateSelect
+                value={governorateFilter ?? ""}
+                onChange={(val) => {
+                  setGovernorateFilter(val === "" ? null : val);
+                  setPageIndex(0);
+                }}
+                // لا نحتاج returnArabicName
+              />
+
+              {/* نوع الحساب */}
+              <Select
+                dir="rtl"
+                value={roleFilter ?? "all"}
+                onValueChange={(val) => {
+                  setRoleFilter(val === "all" ? null : val);
+                  setPageIndex(0);
+                }}
+              >
+                <SelectTrigger
+                  className={`w-full border-0 bg-none border-b-2 border-b-gray-300 disabled:border-b-zinc-500 disabled:opacity-100 disabled:text-zinc-600 rounded-none cursor-pointer hover:bg-accent`}
+                >
+                  <SelectValue placeholder="صفة الحساب" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">اختر الصفة</SelectItem>
+                  <SelectItem value="موظف">موظف</SelectItem>
+                  <SelectItem value="مستخدم عادي">مستخدم عادي</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
 
         {/* Table */}
         <div className="rounded-md border">
