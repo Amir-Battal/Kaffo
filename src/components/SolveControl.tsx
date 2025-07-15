@@ -84,6 +84,8 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const { data: donations = [], isLoading: isLoadingDonations, isError } = useGetProblemDonations(problemId);
   const { data: publicDonors = [] } = useGetPublicDonors(problemId);
   const donationMutation = useCreateDonation(problemId);
+
+  const publicDonrosLength = publicDonors?.content.length
   
 
   const successfulDonations = donations.filter(d => d.status === "SUCCESS");
@@ -240,6 +242,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     }
   };
 
+  console.log("publicDonros",publicDonors);
 
   return (
     <div className="flex flex-col gap-10 mt-10">
@@ -301,6 +304,8 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                   pendContributions={pendContributions}
                   elseContribution={elseContribution}
 
+                  isThereNotDonation={(publicDonors.content.length === 0 ) ? true : false}
+
                 />
               ) : (
                 <SolutionForm
@@ -330,15 +335,47 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                 {/* {isForDonation || problem?.forDonation ? ( */}
                 {(isForDonation || isDonorsChanged) ? (
                   <div className="flex flex-col gap-5">
-                    {publicDonors?.content?.map((donation) => (
-                      <h3 className="text-lg">تم التبرع بمبلغ <b>{donation.amount}</b> من قبل  <b>{donation.firstName + " " + donation.lastName}</b> بتاريخ <b>{donation.donationDate.split("T")[0]}</b></h3>
-                    ))}
+                    {publicDonors?.content?.length > 0 ? (
+                      <div>
+                        <h1 className="text-2xl font-semibold mb-2">الأشخاص المتبرعين لحل المشكلة</h1>
+                        <div className="overflow-x-auto rounded-lg shadow border">
+                          <table className="min-w-full bg-white text-sm text-right">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="py-3 px-4 border-b font-semibold">الاسم</th>
+                                <th className="py-3 px-4 border-b font-semibold">المبلغ $</th>
+                                <th className="py-3 px-4 border-b font-semibold">تاريخ التبرع</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {publicDonors.content.map((donation, idx) => (
+                                <tr key={idx} className="hover:bg-gray-50">
+                                  <td className="py-3 px-4 border-b">
+                                    {donation.firstName} {donation.lastName}
+                                  </td>
+                                  <td className="py-3 px-4 border-b">
+                                    {donation.amount} $
+                                  </td>
+                                  <td className="py-3 px-4 border-b">
+                                    {donation.donationDate.split("T")[0]}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-gray-500">لا يوجد متبرعين حتى الآن.</div>
+                    )}
+
                     <div className="text-lg font-semibold text-green-700">
                       تم جمع {totalDonated} / {acceptedContribution?.estimatedCost}
                     </div>
-                    {remainingAmount >=0 && !donationDone && (
+
+                    {remainingAmount >= 0 && !donationDone && (
                       <div className="flex flex-col gap-5">
-                        <div>المبلغ المتبقي: {remainingAmount}</div>
+                        <div className="text-base font-medium">المبلغ المتبقي: {remainingAmount}</div>
                         <Button
                           className="w-[50%] h-[60px] flex flex-col cursor-pointer"
                           onClick={() => handleGovPay(remainingAmount)}
@@ -349,23 +386,30 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                         </Button>
                       </div>
                     )}
+
                     {remainingAmount <= 0 && (
                       <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
                     )}
+
                     {donationDone && (
                       <div className="flex flex-col gap-5">
-                        <EndProject 
-                          setIsEndProject={setIsEndProject} 
-                          contributionId={acceptedContribution?.id!}  
+                        <EndProject
+                          setIsEndProject={setIsEndProject}
+                          contributionId={acceptedContribution?.id!}
                           problemId={problemId}
-
                           startDate={onlyAcceptedSolution?.startDate}
                           endDate={onlyAcceptedSolution?.endDate}
                         />
-                        {isEndProject && <ProblemProgress problemId={problemId} solutionId={acceptedContribution?.id} />}
+                        {isEndProject && (
+                          <ProblemProgress
+                            problemId={problemId}
+                            solutionId={acceptedContribution?.id}
+                          />
+                        )}
                       </div>
                     )}
                   </div>
+
                 ) : selfFounded ? (
                   <div className="flex flex-col gap-10">
                     <EndProject 

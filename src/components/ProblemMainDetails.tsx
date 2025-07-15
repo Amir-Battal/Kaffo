@@ -1,7 +1,7 @@
 import { use, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Ban, Check } from "lucide-react";
+import { Ban, Check, MessageSquareWarning } from "lucide-react";
 
 import { Badge } from "./ui/badge";
 import MapPicker from "./MapPicker";
@@ -219,7 +219,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                           {acceptedContribution && proposedUser && (
                             <ContributionCard
                               username={`${proposedUser.firstName} ${proposedUser.lastName}`}
-                              date={acceptedContribution?.creationDate}
+                              date={acceptedContribution.creationDate}
                               contribution={acceptedContribution.description}
                               budget={acceptedContribution.estimatedCost}
                             />
@@ -278,6 +278,16 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                           ):(<div></div>)
                         }
                       </div>
+
+                      {problem.status === "REJECTED" && (
+                        <div className="flex flex-col gap-5">
+                          <div className="flex flex-row gap-2">
+                            <MessageSquareWarning size={40} />
+                            <h1 className="text-2xl">سبب رفض المشكلة:</h1>
+                          </div>
+                          <p className="text-xl">{problem.rejectionReason}</p>
+                        </div>
+                      )}
         
                       <div className="flex flex-col gap-10">
                         <div>
@@ -290,6 +300,10 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                                 date={acceptedContribution?.creationDate}
                                 contribution={acceptedContribution?.description}
                                 budget={acceptedContribution?.estimatedCost}
+                                isEmployee={proposedUser?.govId ? true : false}
+                                gov={govMinistry?.name}
+                                ministry={parentMinistry?.name}
+                                userPhoto={proposedUser?.photoUrl}
                               />
                             </div>
                           )}
@@ -325,16 +339,47 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                           {(problem.isReal && problem.forDonation) && publicDonors &&
                             <div className="flex flex-col gap-5">
                               <h1 className="text-2xl font-semibold">الأشخاص المتبرعين لحل المشكلة</h1>
-                              {publicDonors?.content?.map((donation) => (
-                                <h3 className="text-lg">تم التبرع بمبلغ <b>{donation.amount}</b> من قبل السيد/ة <b>{donation.firstName + donation.lastName}</b> بتاريخ <b>{donation.donationDate.split("T")[0]}</b></h3>
-                              ))}
+
+                              {publicDonors?.content?.length > 0 ? (
+                                <div className="overflow-x-auto rounded-lg shadow border">
+                                  <table className="min-w-full bg-white text-sm text-right">
+                                    <thead className="bg-gray-100">
+                                      <tr>
+                                        <th className="py-3 px-4 border-b font-semibold">الاسم</th>
+                                        <th className="py-3 px-4 border-b font-semibold">المبلغ $</th>
+                                        <th className="py-3 px-4 border-b font-semibold">تاريخ التبرع</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {publicDonors.content.map((donation, idx) => (
+                                        <tr key={idx} className="hover:bg-gray-50">
+                                          <td className="py-3 px-4 border-b">
+                                            {donation.firstName} {donation.lastName}
+                                          </td>
+                                          <td className="py-3 px-4 border-b">
+                                            {donation.amount} $
+                                          </td>
+                                          <td className="py-3 px-4 border-b">
+                                            {donation.donationDate.split("T")[0]}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <div className="text-gray-500">لا يوجد متبرعين حتى الآن.</div>
+                              )}
+
                               <div className="text-lg font-semibold text-green-700">
                                 تم جمع {totalDonated} / {acceptedContribution?.estimatedCost} {acceptedContribution?.currency}
                               </div>
+
                               {remainingAmount <= 0 && (
                                 <div className="text-red-600 font-bold">تم جمع كامل المبلغ المطلوب</div>
                               )}
                             </div>
+
                           }
                         </div>
                       </div>

@@ -26,6 +26,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useAllParties } from "@/hooks/use-gov"
 import { useAddress, useCities } from "@/hooks/use-Address"
 import NewGovOverlay from "@/forms/gov-profile-form/NewGovOverlay"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export type Gov = {
   id: string
@@ -45,6 +46,9 @@ export function GovsTable() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
+  const [govRoleFilter, setGovRoleFilter] = useState<string | null>(null);
+
+
   // Pagination
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
@@ -53,15 +57,23 @@ export function GovsTable() {
   const filteredGovs = useMemo(() => {
     const filtered = allGovs.filter((gov) => {
       const text = searchText.toLowerCase();
-      return (
+
+      const matchesSearch =
         gov.email?.toLowerCase().includes(text) ||
-        gov.name?.toLowerCase().includes(text)
-      );
+        gov.name?.toLowerCase().includes(text);
+
+      const matchesRole = !govRoleFilter
+        ? true
+        : govRoleFilter === "جهة معنية"
+        ? Boolean(gov.parentGovId)
+        : !gov.parentGovId;
+
+      return matchesSearch && matchesRole;
     });
 
-    // عكس الترتيب لعرض الأحدث أولاً
     return filtered.reverse();
-  }, [allGovs, searchText]);
+  }, [allGovs, searchText, govRoleFilter]);
+
 
 
     // 2. Paginated data
@@ -156,20 +168,43 @@ export function GovsTable() {
         </div>
 
 
-        {/* Filters */}
         <div className="w-full flex flex-row justify-between">
-            <div className="w-full flex flex-row items-center">
-              <Search />
-              <Input
-                placeholder="تبحث عن جهة أو بريد إلكتروني ..."
-                value={searchText}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                  setPageIndex(0); // إعادة أول صفحة عند تغيير البحث
-                }}
-              />
-            </div>
+          <div className="w-[65%] flex flex-row items-center gap-4">
+            <Search />
+            <Input
+              placeholder="تبحث عن جهة أو بريد إلكتروني ..."
+              value={searchText}
+              onChange={(e) => {
+                setSearchText(e.target.value);
+                setPageIndex(0);
+              }}
+            />
+          </div>
+
+          {/* فلتر صفة الحساب */}
+          <div className="w-[30%]">
+            <Select
+              dir="rtl"
+              value={govRoleFilter ?? "all"}
+              onValueChange={(val) => {
+                setGovRoleFilter(val === "all" ? null : val);
+                setPageIndex(0);
+              }}
+            >
+              <SelectTrigger
+                className={`w-full border-0 bg-none border-b-2 border-b-gray-300 disabled:border-b-zinc-500 disabled:opacity-100 disabled:text-zinc-600 rounded-none cursor-pointer hover:bg-accent`}
+              >
+                <SelectValue placeholder="صفة الحساب" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">اختر الصفة</SelectItem>
+                <SelectItem value="وزارة">وزارة</SelectItem>
+                <SelectItem value="جهة معنية">جهة معنية</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
 
         {/* Table */}
         <div className="rounded-md border">

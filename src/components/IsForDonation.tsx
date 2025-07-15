@@ -90,7 +90,7 @@ const IsForDonation = ({...prop}): JSX.Element => {
             </Button>
           </div>
         // ):(prop.selfFounded) || (!problem?.forDonation) || !isForDonation
-        ):!isForDonation
+        ):!isForDonation && problem?.status !== "RESOLVED" 
         ?(
           <div className="w-[45%] flex flex-row gap-5">
             <Button className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleSelfFounded}>
@@ -98,6 +98,18 @@ const IsForDonation = ({...prop}): JSX.Element => {
               <Check />
             </Button>
             <Button className="w-full h-[40px] cursor-pointer" type="button" onClick={handleForDonation}>
+              <h3>تفويض التكلفة للتبرع</h3>
+              <ChevronLeft />
+            </Button>
+          </div>
+        ):!isForDonation && problem?.status === "RESOLVED" 
+        ?(
+          <div className="w-[45%] flex flex-row gap-5">
+            <Button disabled className="w-full h-[40px] cursor-pointer bg-green-600 hover:bg-green-800" type="button" onClick={handleSelfFounded}>
+              <h3>تغطية التكاليف</h3>
+              <Check />
+            </Button>
+            <Button disabled className="w-full h-[40px] cursor-pointer" type="button" onClick={handleForDonation}>
               <h3>تفويض التكلفة للتبرع</h3>
               <ChevronLeft />
             </Button>

@@ -21,10 +21,19 @@ const MinistriesSelect = ({
 
   const { data: ministries, isLoading } = useAllMinistries();
 
+  // const handleChange = (selectedName: string) => {
+  //   const selectedMinistry = ministries?.find((gov) => gov.name === selectedName);
+  //   setMinistry(selectedName, selectedMinistry?.id ?? null);
+  // };
   const handleChange = (selectedName: string) => {
     const selectedMinistry = ministries?.find((gov) => gov.name === selectedName);
-    setMinistry(selectedName, selectedMinistry?.id ?? null);
+    if (selectedMinistry) {
+      setMinistry(selectedMinistry.name, selectedMinistry.id);
+    } else {
+      setMinistry("", null);
+    }
   };
+
 
   return (
     <Select dir="rtl" name="ministry" onValueChange={handleChange} value={value}>

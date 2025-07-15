@@ -6,6 +6,7 @@ interface ImageGalleryProps {
 
 export default function ImageGallery({ images }: ImageGalleryProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [dialogImage, setDialogImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (images.length > 0) {
@@ -39,9 +40,24 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
         <img
           src={selectedImage}
           alt="Selected"
-          className="max-h-[350px] max-w-full object-contain rounded-lg shadow"
+          className="max-h-[350px] max-w-full object-contain rounded-lg shadow cursor-pointer"
+          onClick={() => setDialogImage(selectedImage)}
         />
       </div>
+
+      {/* Dialog */}
+      {dialogImage && (
+        <div
+          onClick={() => setDialogImage(null)}
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+        >
+          <img
+            src={dialogImage}
+            alt="Enlarged"
+            className="max-w-[90%] max-h-[90%] rounded-lg shadow-lg"
+          />
+        </div>
+      )}
     </div>
   );
 }

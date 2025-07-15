@@ -7,9 +7,11 @@ import {
 } from "@/components/ui/dialog"
 import { Edit } from "lucide-react";
 import { EditMainGovProfileForm } from "./EditMainGovProfileForm";
+import { JSX } from "react";
+import EditMainEmployeeProfileForm from "../user-profile-form/EditMainEmployeeProfileForm";
 
 
-const EditGovOverlay = () => {
+const EditGovOverlay = ({...props}):JSX.Element => {
   return (
     <div>
       <Dialog>
@@ -21,7 +23,13 @@ const EditGovOverlay = () => {
           <DialogHeader className="flex flex-row-reverse">
             <DialogTitle>تعديل البيانات الأساسية</DialogTitle>
           </DialogHeader>
-          <EditMainGovProfileForm />
+          {props.isEmployee
+            ?(
+              <EditMainEmployeeProfileForm />
+            ):(
+              <EditMainGovProfileForm />
+            )
+          }
         </DialogContent>
       </Dialog>
     </div>

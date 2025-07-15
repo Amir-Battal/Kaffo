@@ -72,29 +72,29 @@ export function MainGovProfileForm() {
     if (currentUser) {
       if(currentUser?.keycloakId){
         form.reset({
-          firstName: currentUser.firstName || "",
-          lastName: currentUser.lastName || "",
-          // governorate: currentUser.lastName || "",
-          phoneNumber: currentUser.phone || "",
-          email: currentUser.email || "",
+          firstName: currentUser?.firstName || "",
+          lastName: currentUser?.lastName || "",
+          // governorate: currentUser?.lastName || "",
+          phoneNumber: currentUser?.phone || "",
+          email: currentUser?.email || "",
           ministry: ministry?.name || "", // استخدم optional chaining
           concernedParty: party?.name || "",
         });
       } else if(!currentUser?.parentGovId) {
         form.reset({
-          firstName: currentUser.name || "",
+          firstName: currentUser?.name || "",
           // governorate: cityArabicName || "",
-          phoneNumber: currentUser.phone || "",
-          email: currentUser.email || "",
+          phoneNumber: currentUser?.phone || "",
+          email: currentUser?.email || "",
           // ministry: currentUser?.name || "", // استخدم optional chaining
           // concernedParty: party?.name || "",
         });
       } else {
         form.reset({
-          firstName: currentUser.name || "",
+          firstName: currentUser?.name || "",
           // governorate: cityArabicName || "",
-          phoneNumber: currentUser.phone || "",
-          email: currentUser.email || "",
+          phoneNumber: currentUser?.phone || "",
+          email: currentUser?.email || "",
           ministry: govMinistry?.name || "", // استخدم optional chaining
         });
       }

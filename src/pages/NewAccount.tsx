@@ -18,7 +18,7 @@ const NewAccount = () => {
 
         <div className="w-full flex flex-col gap-5 items-center">
           <Link to='/gov-profile' className="w-full h-[100px] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
-            <h3 className="text-xl">حساب جهة معنية</h3>
+            <h3 className="text-xl">حساب موظف</h3>
             <Briefcase />
           </Link>
         </div>
