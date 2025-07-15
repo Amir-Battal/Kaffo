@@ -318,3 +318,62 @@ export const useUpdateGovUserInfo = () => {
 
   return useMutation(updateRequest);
 };
+
+// ============= GET STATISTICS BY YEAR =============
+export type StatisticItem = {
+  title: string;
+  ar_title: string;
+  label: string;
+  number: number;
+  color: string;
+  fill: string;
+  path: string;
+};
+
+export const useUserStatisticsByYear = (year: number) => {
+  return useQuery<StatisticItem[]>({
+    queryKey: ["userStatistics", year],
+    queryFn: async () => {
+      const response = await axios.get(`${API_BASE_URL}/api/v1/users/statistics?year=${year}`, {
+        headers: {
+          Authorization: `Bearer ${keycloak.token}`,
+        },
+      });
+
+      const data = response.data;
+
+      return [
+        {
+          title: "issues",
+          ar_title: "الشكاوي",
+          label: "الشكاوي المقدمة من قبلك",
+          number: data.issues,
+          color: "red",
+          fill: "bg-red-600",
+          path: "/problems",
+        },
+        {
+          title: "contributions",
+          ar_title: "المساهمات",
+          label: "المساهمات التي قمت بها",
+          number: data.contributions,
+          color: "green",
+          fill: "bg-green-600",
+          path: "/volunteering/contributions",
+        },
+        {
+          title: "donations",
+          ar_title: "التبرعات",
+          label: "التبرعات التي قمت بها",
+          number: data.donations,
+          color: "purple",
+          fill: "bg-purple-600",
+          path: "/volunteering/donations",
+        },
+      ];
+
+      // return Stats;
+    },
+    enabled: !!year,
+  });
+};

@@ -151,7 +151,7 @@ export function StatisticsChart({...props}): JSX.Element {
       :
         {
           complaints: { label: 'الشكاوي', color: "red" },
-          activities: { label: "الأنشطة التطوعية", color: "blue" },
+          // activities: { label: "الأنشطة التطوعية", color: "blue" },
           contributions: { label: "المساهمات", color: "green" },
           donations: { label: "التبرعات", color: "purple" },
         }

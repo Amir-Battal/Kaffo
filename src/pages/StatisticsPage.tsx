@@ -1,7 +1,8 @@
 import { MainChart } from "@/components/MainChart";
 import { StatisticsChart } from "@/components/StatisticsChart";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import keycloak from "@/lib/keycloak";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 
@@ -17,16 +18,16 @@ const StatisticsData = [
     path: '/problems',
     activityNum: 10
   },
-  {
-    title: 'volunteering',
-    ar_title: 'الأنشطة التطوعية',
-    label: 'الأنشطة التطوعية التي قمت بها',
-    number: 25,
-    color: 'blue',
-    fill: 'bg-blue-600',
-    path: '/volunteering',
-    activityNum: 10
-  },
+  // {
+  //   title: 'volunteering',
+  //   ar_title: 'الأنشطة التطوعية',
+  //   label: 'الأنشطة التطوعية التي قمت بها',
+  //   number: 25,
+  //   color: 'blue',
+  //   fill: 'bg-blue-600',
+  //   path: '/volunteering',
+  //   activityNum: 10
+  // },
   {
     title: 'contributions',
     ar_title: 'المساهمات',
@@ -130,9 +131,29 @@ const StatisticsPage = ({...props}): JSX.Element => {
 
   const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
 
-
   const [isGov, setIsGov] = useState<Boolean>(false);
   const [isAdmin, setIsAdmin] = useState<Boolean>(false);
+
+  //حالة لتخزين السنة المختارة
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  
+  //إنشاء قائمة السنوات
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i);
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [statsData, setStatsData] = useState<typeof StatisticsData>([]);
+
+  // const { data: statsData = [], isLoading } = useStatisticsByYear(selectedYear);
+
+  useEffect(() => { //هنا استدعاء البيانات من السيرفر
+    setIsLoading(true);
+    // Simulate API call delay
+    setTimeout(() => {
+      setStatsData(StatisticsData); // بدلها لاحقاً باستدعاء فعلي من السيرفر
+      setIsLoading(false);
+    }, 1000);
+  }, [selectedYear]);
 
   return (
     <div>
@@ -227,30 +248,49 @@ const StatisticsPage = ({...props}): JSX.Element => {
                 <h1 className="text-xl">إحصائيات الأنشطة الخاصة بك</h1>
                 <h3>هنا تستطيع أن تجد كل الإحصائيات الخاصة  بالمشاركات التي قمت بها</h3>
               </div>
-              <h3 className="pl-40">إحصائيات عام 2025</h3>
+              {/* <h3 className="pl-40">إحصائيات عام 2025</h3> */}
+              <div>
+                <Select onValueChange={(val) => setSelectedYear(Number(val))}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="اختر السنة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {StatisticsData.map((item) => (
-              <div className="flex flex-row gap-5 justify-between">
-                <div className="flex flex-row gap-5">
-                  <Link to={`${item.path}`} className="w-[200px] h-[200px] flex flex-col text-xl justify-center items-center cursor-pointer text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
-                    <h3>{item.ar_title}</h3>
-                    <h3>+{item.number}</h3>
-                  </Link>
-                  <h3>{item.label} خلال السنة</h3>
-                </div>
-                <div className="w-[50%]">
-                  <StatisticsChart
-                    title={item.title}
-                    ar_title={item.ar_title}
-                    label={item.label}
-                    number={item.number}
-                    color={item.color}
-                    fill={item.fill}
-                  />
-                </div>
-              </div>
-            ))}
+            {isLoading ? (
+              <p>جاري تحميل الإحصائيات...</p>
+              ) : (
+                statsData.map((item) => (
+                  <div className="flex flex-row gap-5 justify-between">
+                    <div className="flex flex-row gap-5">
+                      <Link to={`${item.path}`} className="w-[200px] h-[200px] flex flex-col text-xl justify-center items-center cursor-pointer text-white bg-black p-2  rounded-[10px] hover:bg-gray-800">
+                        <h3>{item.ar_title}</h3>
+                        <h3>+{item.number}</h3>
+                      </Link>
+                      <h3>{item.label} خلال السنة</h3>
+                    </div>
+                    <div className="w-[50%]">
+                      <StatisticsChart
+                        title={item.title}
+                        ar_title={item.ar_title}
+                        label={item.label}
+                        number={item.number}
+                        color={item.color}
+                        fill={item.fill}
+                      />
+                    </div>
+                  </div>
+                ))
+              )
+            }
             <div className="flex flex-row justify-between">
               <h1 className="text-xl">نسبة توزيعات الأنشطة التي قمت بها خلال شهر</h1>
               <MainChart data={StatisticsData} />
@@ -260,6 +300,7 @@ const StatisticsPage = ({...props}): JSX.Element => {
               <StatisticsChart data={StatisticsData} isTotal />
             </div>
           </div>
+
         )
       }
     </div>
