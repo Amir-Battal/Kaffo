@@ -26,16 +26,16 @@ const StatisticsData = [
     path: '/problems',
     activityNum: 10
   },
-  {
-    title: 'volunteering',
-    ar_title: 'الأنشطة التطوعية',
-    label: 'الأنشطة التطوعية التي قمت بها',
-    number: 25,
-    color: 'blue',
-    fill: 'bg-blue-600',
-    path: '/volunteering',
-    activityNum: 10
-  },
+  // {
+  //   title: 'volunteering',
+  //   ar_title: 'الأنشطة التطوعية',
+  //   label: 'الأنشطة التطوعية التي قمت بها',
+  //   number: 25,
+  //   color: 'blue',
+  //   fill: 'bg-blue-600',
+  //   path: '/volunteering',
+  //   activityNum: 10
+  // },
   {
     title: 'contributions',
     ar_title: 'المساهمات',
@@ -98,7 +98,7 @@ export function MainChart({...props}): React.JSX.Element {
       {
         activityNum: { lable: "عدد الأنشطة" },
         complaints: { label: 'الشكاوي', color: "red" },
-        activities: { label: "الأنشطة التطوعية", color: "blue" },
+        // activities: { label: "الأنشطة التطوعية", color: "blue" },
         contributions: { label: "المساهمات", color: "green" },
         donations: { label: "التبرعات", color: "purple" },
       }

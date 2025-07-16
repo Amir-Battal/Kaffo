@@ -8,7 +8,7 @@ import { Check } from "lucide-react";
 
 const MyAucationsPage = () => {
   const [page, setPage] = useState(0);
-    const [criteria, setCriteria] = useState({});
+  const [criteria, setCriteria] = useState({});
 
   useEffect(() => {
     setPage(0); // كلما تغيّر الفلتر، نرجع لأول صفحة
