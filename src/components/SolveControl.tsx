@@ -304,7 +304,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                   pendContributions={pendContributions}
                   elseContribution={elseContribution}
 
-                  isThereNotDonation={(publicDonors.content.length === 0 ) ? true : false}
+                  isThereNotDonation={(publicDonors?.content.length === 0 ) ? true : false}
 
                 />
               ) : (

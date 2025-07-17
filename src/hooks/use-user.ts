@@ -377,3 +377,14 @@ export const useUserStatisticsByYear = (year: number) => {
     enabled: !!year,
   });
 };
+
+
+export const useAssociateUserToGov = () => {
+  return useMutation({
+    mutationFn: async ({ userId, govId }: { userId: string; govId: number }) => {
+      const res = await axios.post(`/api/v1/users/${userId}/associate-user?govId=${govId}`)
+      return res.data
+    }
+  })
+}
+

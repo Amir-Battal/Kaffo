@@ -20,6 +20,7 @@ import MyContributionsPage from "./pages/MyContributionsPage";
 import MyDonationsPage from "./pages/MyDonationsPage";
 import PrivateRoute from "./PrivateRoute";
 import keycloak from "./lib/keycloak";
+import { AssignGovRole } from "./pages/AssignGovRole";
 
 const AppRoutes = () => {
 
@@ -94,6 +95,13 @@ const AppRoutes = () => {
         roles.includes("ROLE_ADMIN") && (
           <Route path="/user-profile/:userId" element={
             <PrivateRoute><Layout><UserProfilePage /></Layout></PrivateRoute>
+          } />
+        )
+      }
+      {
+        roles.includes("ROLE_ADMIN") && (
+          <Route path="/assign-role" element={
+            <PrivateRoute><Layout><AssignGovRole /></Layout></PrivateRoute>
           } />
         )
       }

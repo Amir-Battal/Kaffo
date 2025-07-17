@@ -99,7 +99,7 @@ const UserProfilePage = () => {
               ?(
                 <SecondaryEmployeeForm userId={user.id} />
               ):(
-                <SecondaryForm user={currentUser} isLoading={isLoading} />
+                <SecondaryForm user={roles.includes("ROLE_ADMIN") ? user : currentUser} isLoading={isLoading} />
               )
             }
           </div>
