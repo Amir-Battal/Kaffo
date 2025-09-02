@@ -85,7 +85,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   const { data: publicDonors = [] } = useGetPublicDonors(problemId);
   const donationMutation = useCreateDonation(problemId);
 
-  const publicDonrosLength = publicDonors?.content.length
+  const publicDonrosLength = publicDonors?.content?.length ?? 0;
   
 
   const successfulDonations = donations.filter(d => d.status === "SUCCESS");
@@ -337,7 +337,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                   <div className="flex flex-col gap-5">
                     {publicDonors?.content?.length > 0 ? (
                       <div>
-                        <h1 className="text-2xl font-semibold mb-2">الأشخاص المتبرعين لحل المشكلة</h1>
+                        <h1 className="text-2xl font-semibold mb-2">الأشخاص المتبرعين لحل الشكوى</h1>
                         <div className="overflow-x-auto rounded-lg shadow border">
                           <table className="min-w-full bg-white text-sm text-right">
                             <thead className="bg-gray-100">

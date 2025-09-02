@@ -3,7 +3,6 @@ import axios from "axios";
 import { toast } from "sonner";
 import keycloak from "@/lib/keycloak";
 import { User } from "@/types";
-import { Check } from "lucide-react";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -379,12 +378,40 @@ export const useUserStatisticsByYear = (year: number) => {
 };
 
 
+// export const useAssociateUserToGov = () => {
+//   return useMutation({
+//     mutationFn: async ({ userId, govId }: { userId: string; govId: number }) => {
+//       const res = await axios.post(
+//         `${API_BASE_URL}/api/v1/users/${userId}/associate-user?govId=${govId}`,
+//         {}
+//       )
+//       if (res.status === 200 || res.status === 204) {
+//         return true // نجاح
+//       }
+//       throw new Error("لم يتم الربط")
+//     }
+//   })
+// }
+
 export const useAssociateUserToGov = () => {
   return useMutation({
     mutationFn: async ({ userId, govId }: { userId: string; govId: number }) => {
-      const res = await axios.post(`/api/v1/users/${userId}/associate-user?govId=${govId}`)
-      return res.data
-    }
-  })
-}
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/users/${userId}/associate-user?govId=${govId}`,
+        {}, // body فارغ
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        }
+      );
+
+      if (response.status === 200 || response.status === 204) {
+        return true; // نجاح
+      }
+      throw new Error("لم يتم الربط");
+    },
+  });
+};
+
 

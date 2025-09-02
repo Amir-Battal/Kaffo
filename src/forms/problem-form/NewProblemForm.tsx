@@ -32,7 +32,7 @@ const formSchema = z.object({
   title: z.string().min(1, "العنوان مطلوب"),
   address: z.string().min(1, "العنوان التفصيلي مطلوب"),
   description: z.string().min(1, "الوصف مطلوب"),
-  categoryId: z.number().min(1, "صنف المشكلة مطلوب"),
+  categoryId: z.number().min(1, "صنف الشكوى مطلوب"),
   governorate: z.string().min(1, "المحافظة مطلوبة"),
   lat: z.number(),
   lng: z.number(),
@@ -126,7 +126,7 @@ export function NewProblemForm() {
         return;
       }
 
-      // 2. إنشاء المشكلة بدون صور
+      // 2. إنشاء الشكوى بدون صور
       const newProblem = await createProblem({
         title: data.title,
         description: data.description,
@@ -140,7 +140,7 @@ export function NewProblemForm() {
       });
 
       if (!newProblem?.id) {
-        toast.error("فشل في إنشاء المشكلة");
+        toast.error("فشل في إنشاء الشكوى");
         return;
       }
 
@@ -160,7 +160,7 @@ export function NewProblemForm() {
 
         const photoUrls = presignedData.map((item) => item.s3Key);
 
-        // تحديث المشكلة بالصور
+        // تحديث الشكوى بالصور
         await updateProblem({
           id: newProblem.id,
           data: {
@@ -183,7 +183,7 @@ export function NewProblemForm() {
       sessionStorage.setItem("showToastNewProblem", "تم إنشاء الشكوى بنجاح");
       window.location.replace(`http://localhost:5173/problems/${newProblem.id}`);
     } catch (err) {
-      toast.error("فشل في إنشاء المشكلة");
+      toast.error("فشل في إنشاء الشكوى");
       console.error(err);
     }
   };
@@ -198,7 +198,7 @@ export function NewProblemForm() {
               name="title"
               render={({ field }) => (
                 <FormItem className="gap-2">
-                  <FormLabel className="font-semibold">المشكلة</FormLabel>
+                  <FormLabel className="font-semibold">الشكوى</FormLabel>
                   <FormControl>
                     <Input placeholder="رصيف مكسور" {...field} />
                   </FormControl>
@@ -232,7 +232,7 @@ export function NewProblemForm() {
               name="categoryId"
               render={({ field }) => (
                 <FormItem className="gap-2">
-                  <FormLabel className="font-semibold">صنف المشكلة</FormLabel>
+                  <FormLabel className="font-semibold">صنف الشكوى</FormLabel>
                   <FormControl>
                     <ProblemCategorySelect
                       value={field.value}
@@ -261,7 +261,7 @@ export function NewProblemForm() {
               name="address"
               render={({ field }) => (
                 <FormItem className="gap-2">
-                  <FormLabel className="font-semibold">عنوان المشكلة</FormLabel>
+                  <FormLabel className="font-semibold">عنوان الشكوى</FormLabel>
                   <FormControl>
                     <Input placeholder="حلب، العزيزية" {...field} />
                   </FormControl>
@@ -308,7 +308,7 @@ export function NewProblemForm() {
           <Button type="submit" className="cursor-pointer mt-5" disabled={isLoading}>
             {isLoading ? "جاري الإرسال..." : (
               <>
-                <h3>رفع المشكلة</h3>
+                <h3>رفع الشكوى</h3>
                 <Plus />
               </>
             )}

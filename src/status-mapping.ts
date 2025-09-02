@@ -3,7 +3,7 @@ export const problemStatusMap = {
   APPROVED: "تمت الموافقة",
   REJECTED: "تم رفض الشكوى",
   WORK_IN_PROGRESS: "جاري المعالجة",
-  RESOLVED: "تم حل المشكلة",
+  RESOLVED: "تم حل الشكوى",
 };
 
 export const arabicToEnglishStatus = Object.entries(problemStatusMap).reduce((acc, [key, value]) => {

@@ -55,7 +55,7 @@ const ProblemHeader = ({ onFilterChange, myAucation, noNew }: ProblemHeaderProps
       <div className="w-full flex flex-row items-center gap-2">
         <Search />
         <Input
-          placeholder="تبحث عن مشكلة معينة ..."
+          placeholder="تبحث عن شكوى معينة ..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />

@@ -190,10 +190,10 @@ const SolutionForm: React.FC<Props> = ({
               name="contribution"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>حل المشكلة</FormLabel>
+                  <FormLabel>حل الشكوى</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="استطيع حل المشكلة من خلال..."
+                      placeholder="استطيع حل الشكوى من خلال..."
                       {...field}
                       ref={field.ref}
                     />

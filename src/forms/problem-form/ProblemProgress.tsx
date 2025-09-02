@@ -152,7 +152,7 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
               />
 
               <div className="w-full flex flex-col gap-2">
-                <FormLabel className="font-semibold">صور المشكلة</FormLabel>
+                <FormLabel className="font-semibold">صور الشكوى</FormLabel>
                 <FileUploader onFilesChange={setSelectedFiles} />
                 {selectedFiles.length > 0 && (
                   <ul className="list-disc pr-4 text-right text-sm text-gray-600">

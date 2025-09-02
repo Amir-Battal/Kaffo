@@ -74,8 +74,8 @@ const NotificationCard = ({...props}): JSX.Element => {
           {props.pending
             ? "جاري المعالجة"
             : props.reject
-            ? "تم رفض المشكلة"
-            : "تم حل المشكلة"}
+            ? "تم رفض الشكوى"
+            : "تم حل الشكوى"}
         </div>
         <div className="error__close"><svg xmlns="http://www.w3.org/2000/svg" width={20} viewBox="0 0 20 20" height={20}><path fill="#393a37" d="m15.8333 5.34166-1.175-1.175-4.6583 4.65834-4.65833-4.65834-1.175 1.175 4.65833 4.65834-4.65833 4.6583 1.175 1.175 4.65833-4.6583 4.6583 4.6583 1.175-1.175-4.6583-4.6583z" /></svg></div>
       </div>

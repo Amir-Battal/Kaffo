@@ -34,6 +34,9 @@ export default function MapPicker({
     });
     return null;
   }
+  const safeLat = lat ?? 0;  // 0 يعني خط الاستواء
+  const safeLng = lng ?? 0;  // 0 يعني غرينتش
+
 
   const markerIcon = divIcon({
     html: ReactDOMServer.renderToString(<MapPin size={32} />),
@@ -61,7 +64,7 @@ export default function MapPicker({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {!disableMap && <MapClickHandler />}
-      <Marker position={[markerPosition.lat, markerPosition.lng]} icon={markerIcon} />
+      <Marker position={[markerPosition.lat ?? safeLat, markerPosition.lng ?? safeLng]} icon={markerIcon} />
     </MapContainer>
   );
 }

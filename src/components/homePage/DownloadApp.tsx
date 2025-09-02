@@ -32,7 +32,7 @@ const DownloadApp = () => {
 
           <div className="relative z-0 mt-10">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">حمّل التطبيق الآن وارفع الشكوى الخاصة بك</h2>
-            <p className="text-zinc-500">انضم إلينا الآن وابدأ في تقديم الشكاوى بسهولة وسرعة عبر التطبيق</p>
+            <p className="text-zinc-500">انضم إلينا الآن وابدأ في تقديم الشكاوي بسهولة وسرعة عبر التطبيق</p>
           </div>
 
           <div className="flex gap-4 mt-4 flex-wrap justify-center relative z-0">

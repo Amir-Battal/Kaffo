@@ -147,6 +147,7 @@ const StatisticsPage = ({...props}): JSX.Element => {
   // const { data: statsData = [], isLoading } = useStatisticsByYear(selectedYear);
 
   useEffect(() => { //هنا استدعاء البيانات من السيرفر
+    if(roles.includes("ROLE_ADMIN")) setIsAdmin(true);
     setIsLoading(true);
     // Simulate API call delay
     setTimeout(() => {
@@ -165,7 +166,21 @@ const StatisticsPage = ({...props}): JSX.Element => {
                 <h1 className="text-xl">إحصائيات الأنشطة الخاصة بالمنصة</h1>
                 <h3>هنا تستطيع أن تجد كل الإحصائيات الخاصة  الخاصة بالمنصة</h3>
               </div>
-              <h3 className="pl-40">إحصائيات عام 2025</h3>
+              {/* <h3 className="pl-40">إحصائيات عام 2025</h3> */}
+              <div>
+                <Select onValueChange={(val) => setSelectedYear(Number(val))}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="اختر السنة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {AdminStatisticsData.map((item) => (
@@ -207,7 +222,21 @@ const StatisticsPage = ({...props}): JSX.Element => {
                 <h1 className="text-xl">إحصائيات الأنشطة</h1>
                 <h3>هنا تستطيع أن تجد كل الإحصائيات الخاصة  بالجهة المعنية</h3>
               </div>
-              <h3 className="pl-40">إحصائيات عام 2025</h3>
+              {/* <h3 className="pl-40">إحصائيات عام 2025</h3> */}
+              <div>
+                <Select onValueChange={(val) => setSelectedYear(Number(val))}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="اختر السنة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {GovStatisticsData.map((item) => (

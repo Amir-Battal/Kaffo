@@ -5,13 +5,23 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import { useGetAllProblemsNumber } from "@/hooks/use-problem";
 import { Building2, ChartArea, ChartNoAxesGantt, Check, Copy, DollarSign, Folder, HandHeart, Heart, Home, Inbox, MessageSquare, User, Users } from "lucide-react";
+import { useState } from "react";
 
 type BreadcrumbProps = {
   name: string;
 }
 
+
 const BreadcrumbComp = (prop : BreadcrumbProps) => {
+
+  const [problemsNumber, setProblemsNumber] = useState();
+
+  useGetAllProblemsNumber().then(problems => {
+    setProblemsNumber(problems.totalElements);
+  });
+
 
   return (
     <div>
@@ -33,7 +43,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
             <BreadcrumbItem>
               <BreadcrumbLink className="flex flex-row items-center gap-2">
                 <Inbox />
-                <h3>المشكلات (100)</h3>
+                <h3>الشكاوي ({problemsNumber})</h3>
               </BreadcrumbLink>
             </BreadcrumbItem>
           )
@@ -55,7 +65,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
               <BreadcrumbItem>
                 <BreadcrumbLink className="flex flex-row items-center gap-2" href="/problems">
                   <Inbox />
-                  <h3>المشكلات</h3>
+                  <h3>الشكاوي</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -74,7 +84,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
               <BreadcrumbItem>
                 <BreadcrumbLink className="flex flex-row items-center gap-2" href="/problems">
                   <Inbox />
-                  <h3>المشكلات</h3>
+                  <h3>الشكاوي</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -83,7 +93,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
               <BreadcrumbItem>
               {/*TODO: fix that accept anything :) */}
                 <BreadcrumbLink>
-                  <h3>مشكلة رقم {prop.name.split('/problems/')}</h3>
+                  <h3>شكوى رقم {prop.name.split('/problems/')}</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               </div>
@@ -144,7 +154,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
               <BreadcrumbItem>
               {/*TODO: fix that accept anything :) */}
                 <BreadcrumbLink>
-                  <h3>مشكلة رقم {prop.name.split('/volunteering/contributions/')}</h3>
+                  <h3>شكوى رقم {prop.name.split('/volunteering/contributions/')}</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </div>
@@ -193,7 +203,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
               <BreadcrumbItem>
               {/*TODO: fix that accept anything :) */}
                 <BreadcrumbLink>
-                  <h3>مشكلة رقم {prop.name.split('/volunteering/donations/')}</h3>
+                  <h3>شكوى رقم {prop.name.split('/volunteering/donations/')}</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </div>
@@ -314,7 +324,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
           )
         }
           {/* <BreadcrumbItem>
-            <BreadcrumbLink href="/">المشكلات</BreadcrumbLink>
+            <BreadcrumbLink href="/">الشكاوي</BreadcrumbLink>
           </BreadcrumbItem> */}
 
           {/* <BreadcrumbSeparator />

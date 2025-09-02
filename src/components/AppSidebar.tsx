@@ -40,7 +40,7 @@ const UserItems = [
     icon: Home,
   },
   {
-    title: "المشكلات",
+    title: "الشكاوي",
     url: "/problems",
     icon: Inbox,
   },
@@ -127,7 +127,7 @@ const subGovItems = [
 
 const AdminItems = [
   {
-    title: "المشكلات",
+    title: "الشكاوي",
     url: "/manage/problems",
     icon: Building2,
   },
@@ -164,11 +164,11 @@ export function AppSidebar() {
     // console.log(roles);
 
   return (
-    <Sidebar side="right">
+    <Sidebar side="right" className="h-full">
 
       <SidebarContent className="overflow-x-hidden">
 
-        <SidebarHeader className="hover:bg-gray-100 rounded-[10px]">
+        <SidebarHeader className="hover:bg-gray-100">
           <SidebarHeaderElements roles={roles}/>
         </SidebarHeader>
         

@@ -58,7 +58,7 @@ export function MultiImageUploader({
         onClick={() => inputRef.current?.click()}
         className="border p-2 rounded mb-3"
       >
-        اختر صور المشكلة 📷
+        اختر صور الشكوى 📷
       </button>
 
       {/* معاينة الصور */}

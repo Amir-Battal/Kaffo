@@ -32,7 +32,7 @@ export const useGetProblemPhotos = (problemId: number) => {
     enabled: !!problemId,
   });
 
-  if (error) toast.error("حدث خطأ أثناء جلب صور المشكلة");
+  if (error) toast.error("حدث خطأ أثناء جلب صور الشكوى");
 
   return { photos: data ?? [], isLoading };
 };
@@ -168,7 +168,7 @@ export const useDeleteAllProblemPhotos = () => {
     },
     {
       onError: () => {
-        toast.error("فشل في حذف صور المشكلة");
+        toast.error("فشل في حذف صور الشكوى");
       },
     }
   );

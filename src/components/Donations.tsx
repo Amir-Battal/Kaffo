@@ -97,11 +97,11 @@ const Donations = ({...props}): JSX.Element => {
         {donationProceed
           ?(
             <div>
-              <h3 className="text-xl">الأشخاص المتبرعين لحل المشكلة</h3>
+              <h3 className="text-xl">الأشخاص المتبرعين لحل الشكوى</h3>
               <div className="flex flex-col gap-10">
                 <div className="flex flex-col gap-2">
                   {Donations.map((item) => (
-                    <h3>تم التبرع لحل هذه المشكلة بقيمة 
+                    <h3>تم التبرع لحل هذه الشكوى بقيمة 
                       <span className="font-bold"> {item.donate} ليرة سورية </span>من قبل 
                       <span className="font-bold"> {item.username} </span>بتاريخ: 
                       <span className="font-bold"> {item.date}</span>
@@ -116,7 +116,7 @@ const Donations = ({...props}): JSX.Element => {
             <div className="flex flex-col gap-10">
               <div className="flex flex-col gap-2">
                 {Donations.map((item) => (
-                    <h3>تم التبرع لحل هذه المشكلة بقيمة 
+                    <h3>تم التبرع لحل هذه الشكوى بقيمة 
                       <span className="font-bold"> {item.donate} ليرة سورية </span>من قبل 
                       <span className="font-bold"> {item.username} </span>بتاريخ: 
                       <span className="font-bold"> {item.date}</span>

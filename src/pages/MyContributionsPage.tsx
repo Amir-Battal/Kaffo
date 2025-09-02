@@ -1,10 +1,12 @@
 // import PaginationComp from "@/components/PaginationComp";
 import ContributionCard from "@/forms/contribution-form/ContributionCard";
 import { useGetMyContributions } from "@/hooks/use-Contribution";
+import { useGetMyUser } from "@/hooks/use-user";
 
 const MyContributionsPage = () => {
 
     const { data: contribution = [], isLoading } = useGetMyContributions();
+    const currentUser = useGetMyUser();
 
     console.log(contribution)
     // const [isMyContribution, setIsMyContribution] = useState<boolean>(true);
@@ -29,6 +31,8 @@ const MyContributionsPage = () => {
                         budget={item.estimatedCost}
                         status={item.status}
                         isMyContribution
+                        userPhoto={currentUser.currentUser?.photoUrl}
+                        username={currentUser.currentUser?.firstName + " " + currentUser.currentUser?.lastName}
                     />
                     ))
                 )}

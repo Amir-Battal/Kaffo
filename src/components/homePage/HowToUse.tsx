@@ -13,7 +13,7 @@ const HowToUse = () => {
 
       <div className="w-full flex flex-row gap-5 justify-between">
         <PhoneCard title="انتظر الرد" content="رد الجهة المعنية"/>
-        <PhoneCard title="أرفع المشكلة" content="المشكلة" />
+        <PhoneCard title="أرفع الشكوى" content="الشكوى" />
         <PhoneCard title="قم بتسجيل الدخول" content="الحساب الشخصي" />
       </div>
     </div>

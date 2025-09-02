@@ -105,11 +105,11 @@ const ContributionCard = ({
             }
 
             <div className="flex flex-col gap-2 pt-6">
-              <FormLabel>{isSelfSolv ? "حل المشكلة" : "المساهمة في حل المشكلة"}</FormLabel>
+              <FormLabel>{isSelfSolv ? "حل الشكوى" : "المساهمة في حل الشكوى"}</FormLabel>
               <Textarea
                 className="w-full"
                 value={contribution}
-                placeholder="استطيع حل المشكلة من خلال ..."
+                placeholder="استطيع حل الشكوى من خلال ..."
                 disabled
               />
             </div>

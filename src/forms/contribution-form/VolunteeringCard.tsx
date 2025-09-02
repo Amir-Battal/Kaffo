@@ -41,7 +41,7 @@ const VolunteeringCard = (prop: VolunteeringCardProp) => {
             </div>
               <Textarea
                 className="w-full"
-                placeholder="أستطيع حل المشكلة خلال اقل من 24 ساعة حيث أنني سوق أقوم بما يلي:"
+                placeholder="أستطيع حل الشكوى خلال اقل من 24 ساعة حيث أنني سوق أقوم بما يلي:"
                 disabled 
               />
           </div>

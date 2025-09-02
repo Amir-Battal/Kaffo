@@ -79,6 +79,7 @@ const ProblemsPage = () => {
     }
   }, []);
 
+
   if (isGov && !govId) {
     return <p className="text-center">جارٍ تحميل الجهة المعنية...</p>;
   }
@@ -92,7 +93,9 @@ const ProblemsPage = () => {
           <p>جاري التحميل...</p>
         ) : (
           problems.map((problem) => (
-            <ProblemCard key={problem.id} problem={problem} />
+            problem.isReal && (
+              <ProblemCard key={problem.id} problem={problem} />
+            )
           ))
         )}
       </div>

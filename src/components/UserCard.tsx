@@ -11,6 +11,7 @@ type UserCardProps = {
   address?: String;
   phoneNumber?: String;
   email?: String;
+  photoUrl?: String;
 
   isGov?: Boolean;
 }
@@ -22,7 +23,7 @@ const UserCard = (prop: UserCardProps) => {
       <div className="flex flex-row justify-between gap-5">
         <div className="w-[20%] mt-[-20px]">
           <Avatar className="w-[100px] h-[100px] rounded-none">
-            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarImage src={String(prop.photoUrl)} />
             <AvatarFallback>أب</AvatarFallback>
           </Avatar>
         </div>

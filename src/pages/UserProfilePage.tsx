@@ -90,11 +90,11 @@ const UserProfilePage = () => {
           <Separator/>
           
           <div className="w-full my-5 py-5">
-            {!isSecondaryDataComplete(currentUser) || !isSecondaryDataComplete(user) && (
+            {/* {!isSecondaryDataComplete(currentUser) || !isSecondaryDataComplete(user) && (
               <h3 className="text-gray-400">
                 يرجى إكمال البيانات الشخصية لتستطيع المشاركة في الأنشطة الخاصة بالمنصة
               </h3>
-            )}
+            )} */}
             {user?.govId
               ?(
                 <SecondaryEmployeeForm userId={user.id} />

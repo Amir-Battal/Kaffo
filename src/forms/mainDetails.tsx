@@ -148,7 +148,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
 
   if (isProblemLoading) return <div>جاري تحميل التفاصيل...</div>;
-  if (!problem) return <div>المشكلة غير موجودة</div>;
+  if (!problem) return <div>الشكوى غير موجودة</div>;
   if (userLoading) return <div>جاري تحميل بيانات المستخدم...</div>;
   if (isLoadingDonations) return <p>جاري تحميل التبرعات...</p>;
   if (isError) return <p>حدث خطأ أثناء تحميل التبرعات</p>;
@@ -158,7 +158,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
     <div className="flex flex-col gap-5">
       <div className="flex flex-row gap-10 px-10">
         <div className="w-[60%] flex flex-col gap-15">
-          {/* عنوان ووصف المشكلة */}
+          {/* عنوان ووصف الشكوى */}
           <div className="flex flex-col gap-5">
             <h1 className="text-2xl">{problem.title}</h1>
             <p className="w-[80%] text-xl text-black">{problem.description}</p>
@@ -210,14 +210,14 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                   {prop.contribution 
                     ? (
                       <div className="flex flex-col gap-10">
-                        <h1 className="text-2xl">شارك في حل المشكلة وقدم اقتراحًا لحلها</h1>
+                        <h1 className="text-2xl">شارك في حل الشكوى وقدم اقتراحًا لحلها</h1>
                         <ContributionForm problemId={numericProblemId} />
                         {/* <PaginationComp /> */}
                       </div>
                     ):prop.donation ? (
                       <div className="flex flex-col gap-20">
                         <div className="flex flex-col gap-5">
-                          <h1 className="text-2xl">شارك في حل المشكلة وقم بالتبرع</h1>
+                          <h1 className="text-2xl">شارك في حل الشكوى وقم بالتبرع</h1>
                           {acceptedContribution && proposedUser && (
                             <ContributionCard
                               username={`${proposedUser.firstName} ${proposedUser.lastName}`}
@@ -326,7 +326,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                           }      
                           {(problem.isReal && problem.forDonation) && publicDonors &&
                             <div className="flex flex-col gap-5">
-                              <h1 className="text-2xl font-semibold">الأشخاص المتبرعين لحل المشكلة</h1>
+                              <h1 className="text-2xl font-semibold">الأشخاص المتبرعين لحل الشكوى</h1>
                               {publicDonors?.content?.map((donation) => (
                                 <h3 className="text-lg">تم التبرع بمبلغ <b>{donation.amount}</b> من قبل السيد/ة <b>{donation.firstName + donation.lastName}</b> بتاريخ <b>{donation.donationDate.split("T")[0]}</b></h3>
                               ))}
@@ -376,7 +376,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
       {!roles.includes("ROLE_GOV") && (!prop.donation && !prop.contribution) && problemProgress && (
         <div className="flex flex-col gap-10 px-10 ml-10">
-          <h1 className="text-2xl font-semibold">تقدم حل المشكلة</h1>
+          <h1 className="text-2xl font-semibold">تقدم حل الشكوى</h1>
           <ProgressPreview 
             problemId={numericProblemId}
           />

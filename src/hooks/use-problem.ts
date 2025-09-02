@@ -77,6 +77,21 @@ export const useGetAllProblems = (
 };
 
 
+export const useGetAllProblemsNumber = () => {
+  const accessToken = keycloak.token;
+
+  return axios.get(`${API_BASE_URL}/api/v1/problems`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    }
+  }).then(res => res.data);
+};
+
+
+
+
+
 // ============= GET ALL GOV RELATED PROBLEMS =============
 
 export const useGetAllGovRelatedProblems = (
@@ -371,7 +386,7 @@ export const useCreateProblem = () => {
     reset,
   } = useMutation(createProblemRequest, {
     onSuccess: () => {
-      // toast.success("تم إنشاء المشكلة بنجاح!");
+      // toast.success("تم إنشاء الشكوى بنجاح!");
       queryClient.invalidateQueries("fetchProblems");
     },
   });
@@ -414,7 +429,7 @@ export const useUpdateProblem = () => {
     reset,
   } = useMutation(updateProblemRequest, {
     onSuccess: () => {
-      // toast.success("تم تحديث المشكلة بنجاح!");
+      // toast.success("تم تحديث الشكوى بنجاح!");
       queryClient.invalidateQueries("fetchProblems");
     },
     onError: (error) => {
@@ -448,7 +463,7 @@ export const useDeleteProblem = () => {
     error,
   } = useMutation(deleteProblemRequest, {
     onSuccess: () => {
-      // toast.success("تم حذف المشكلة بنجاح");
+      // toast.success("تم حذف الشكوى بنجاح");
       queryClient.invalidateQueries("fetchProblems");
     },
   });
@@ -591,7 +606,7 @@ export const rejectAllProblems = async (contributions: any, problemId: number) =
           ...c,
           status: "REJECTED",
           acceptedByUserId: null,
-          acceptedReason: "تم رفض المساهمة بسبب التكفل الذاتي بحل المشكلة",
+          acceptedReason: "تم رفض المساهمة بسبب التكفل الذاتي بحل الشكوى",
         },
         {
           headers: {
@@ -617,7 +632,7 @@ export const pendingAllProblems = async (contributions: any, problemId: number) 
           ...c,
           status: "PENDING_APPROVAL",
           acceptedByUserId: null,
-          acceptedReason: "تم رفض المساهمة بسبب التكفل الذاتي بحل المشكلة",
+          acceptedReason: "تم رفض المساهمة بسبب التكفل الذاتي بحل الشكوى",
         },
         {
           headers: {
@@ -726,7 +741,7 @@ export const useUpdateProblemStatus = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries("problems");
-        toast.success("تم تعديل حالة المشكلة بنجاح");
+        toast.success("تم تعديل حالة الشكوى بنجاح");
       },
       onError: (error: any) => {
         toast.error("حدث خطأ أثناء تعديل 'problem status': " + error.message);

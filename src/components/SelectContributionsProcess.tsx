@@ -3,6 +3,7 @@ import { SolutionDTO } from "@/types";
 import { Check, Edit } from "lucide-react";
 import { JSX, useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import { useGetUserById } from "@/hooks/use-user";
 
 const SelectContributionsProcess = ({...props}): JSX.Element => {
 
@@ -10,6 +11,9 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   const [solution, setSolution] = useState<SolutionDTO>(); 
 
   // console.log("pendContributions" ,props.pendContributions);
+
+  const user = useGetUserById(String(solution?.proposedByUserId));
+
 
 
   const handleSelect = (contribution: SolutionDTO) => {
@@ -59,6 +63,7 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
           date={solution?.creationDate}
           contribution={solution?.description}
           budget={solution?.estimatedCost}
+          userPhoto={user?.data?.photoUrl}
         >
           {props.isThereNotDonation && (
             <div className="flex flex-row-reverse">

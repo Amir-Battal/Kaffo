@@ -28,18 +28,19 @@ const Navbar = () => {
 
         <NavigationMenuItem >
           <Link 
+            dir="rtl"
             to="/" 
-            className='text-2xl'
+            className='text-2xl font-bold'
           >
-            Kaffo
+            صوتك يصلنا ...
           </Link>
         </NavigationMenuItem>
 
-        <NavigationMenuItem className="hover:bg-gray-300 p-1 rounded-[100%]">
+        {/* <NavigationMenuItem className="hover:bg-gray-300 p-1 rounded-[100%]">
           <Link to="/user-profile">
             <BellRing size={30} />
           </Link>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
 
       </NavigationMenuList>
 

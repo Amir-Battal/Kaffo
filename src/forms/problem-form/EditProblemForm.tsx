@@ -129,7 +129,7 @@ export function EditProblemForm({ problemId }: EditProp) {
         longitude: values.lng,
       });
 
-      // تحديث المشكلة
+      // تحديث الشكوى
       await updateProblem({
         id: problem.id,
         data: {
@@ -143,7 +143,7 @@ export function EditProblemForm({ problemId }: EditProp) {
     // toast.success("تم حفظ التعديلات");
     } catch (error) {
       console.error("فشل تحديث الشكوى:", error);
-      toast.error("فشل تحديث المشكلة");
+      toast.error("فشل تحديث الشكوى");
     } finally {
       sessionStorage.setItem("showToastProblemEdit", "تم تعديل الشكوى بنجاح");
     }
@@ -164,7 +164,7 @@ export function EditProblemForm({ problemId }: EditProp) {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>المشكلة</FormLabel>
+                  <FormLabel>الشكوى</FormLabel>
                   <FormControl>
                     <Input placeholder="مثلاً: رصيف مكسور" {...field} />
                   </FormControl>
@@ -178,7 +178,7 @@ export function EditProblemForm({ problemId }: EditProp) {
                 <FormItem>
                   <FormLabel>تفاصيل</FormLabel>
                   <FormControl>
-                    <Input placeholder="وصف إضافي للمشكلة" {...field} />
+                    <Input placeholder="وصف إضافي للشكوى" {...field} />
                   </FormControl>
                 </FormItem>
               )}

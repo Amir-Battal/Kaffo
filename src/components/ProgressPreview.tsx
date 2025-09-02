@@ -14,7 +14,7 @@ const ProgressPreview = ({ problemId }: ProgressPreviewProps): JSX.Element => {
   const { photos, isLoading: isPhotosLoading } = useGetProblemPhotos(problemId);
 
   if (isProgressLoading || isPhotosLoading) return <div>جاري تحميل البيانات...</div>;
-
+  
   if (!Array.isArray(progressList) || progressList.length === 0) {
     return <div>لا توجد بيانات تقدم لعرضها.</div>;
   }

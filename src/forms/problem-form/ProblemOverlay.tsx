@@ -30,7 +30,7 @@ const ProblemOverlay = ({ status, isMyAucation, problemId }: EditProp) => {
       // 1. حذف الصور
       await deleteAllPhotos(problemId);
 
-      // 2. حذف المشكلة
+      // 2. حذف الشكوى
       await deleteProblem(problemId);
 
       sessionStorage.setItem("showToastProblemDelete", "تم حذف الشكوى بنجاح");
@@ -63,7 +63,7 @@ const ProblemOverlay = ({ status, isMyAucation, problemId }: EditProp) => {
 
             <DialogContent className="min-w-[50%] h-[94%] overflow-y-scroll">
               <DialogHeader className="h-[10%] flex flex-row-reverse">
-                <DialogTitle>تعديل بيانات المشكلة</DialogTitle>
+                <DialogTitle>تعديل بيانات الشكوى</DialogTitle>
               </DialogHeader>
 
               <EditProblemForm problemId={problemId} />
@@ -78,7 +78,7 @@ const ProblemOverlay = ({ status, isMyAucation, problemId }: EditProp) => {
             <DialogContent>
               <DialogHeader className="h-[10%] flex flex-row-reverse">
                 <DialogTitle>
-                  هل أنت متأكد من أنك تريد حذف المشكلة؟
+                  هل أنت متأكد من أنك تريد حذف الشكوى؟
                 </DialogTitle>
               </DialogHeader>
 

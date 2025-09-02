@@ -61,7 +61,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
           {isPhotoLoading ? (
             <div className="h-full flex justify-center items-center text-white">جارٍ التحميل...</div>
           ) : photoUrl ? (
-            <img src={photoUrl} alt="صورة المشكلة" className="w-full h-full object-cover" />
+            <img src={photoUrl} alt="صورة الشكوى" className="w-full h-full object-cover" />
           ) : (
             <div className="h-full flex justify-center items-center">
               <Image className="text-white" size={50} />
@@ -89,16 +89,16 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
               }`}>
               <h1>
                 {problem.status === "RESOLVED"
-                  ? "تم حل المشكلة"
+                  ? "تم حل الشكوى"
                   : problem.status === "REJECTED"
-                  ? "تم رفض المشكلة"
+                  ? "تم رفض الشكوى"
                   : problem.status === "PENDING_APPROVAL"
                   ? "بانتظار الموافقة"
                   : problem.status === "APPROVED"
-                  ? "تم قبول المشكلة"
+                  ? "تم قبول الشكوى"
                   : problem.status === "PENDING_FUNDING"
                   ? "بانتظار التمويل"
-                  : "جاري حل المشكلة"
+                  : "جاري حل الشكوى"
                 }
               </h1>
             </Badge>
@@ -141,7 +141,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
             to={`/volunteering/contributions/${problem.id}`}
             className="w-[80%] flex flex-row justify-around cursor-pointer text-white bg-black p-2 mt-10 rounded-[10px] hover:bg-gray-800"
           >
-            <h3>المساهمة في حل المشكلة</h3>
+            <h3>المساهمة في حل الشكوى</h3>
             <ChevronLeft />
           </Link>
         ) : donation ? (
@@ -149,7 +149,7 @@ const ProblemCard = ({ problem, contribution, donation, myAucation }: ProblemCar
             to={`/volunteering/donations/${problem.id}`}
             className="w-[80%] flex flex-row justify-around cursor-pointer text-white bg-black p-2 mt-10 rounded-[10px] hover:bg-gray-800"
           >
-            <h3>التبرع لحل المشكلة</h3>
+            <h3>التبرع لحل الشكوى</h3>
             <ChevronLeft />
           </Link>
         ) : (

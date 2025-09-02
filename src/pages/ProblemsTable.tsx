@@ -102,7 +102,7 @@ const columns = [
         "جاري التحقق": "bg-blue-600",
         "جاري المعالجة": "bg-orange-600",
         "تم الرفض": "bg-red-600",
-        "تم حل المشكلة": "bg-green-600",
+        "تم حل الشكوى": "bg-green-600",
         "جديدة": "bg-gray-500",
       }[status];
       return <Badge className={`w-[80%] h-[30px] ${color}`}>{status}</Badge>;
@@ -174,7 +174,7 @@ export function ProblemsTable() {
           : p.status === "PENDING_APPROVAL"
           ? "جاري التحقق"
           : p.status === "RESOLVED"
-          ? "تم حل المشكلة"
+          ? "تم حل الشكوى"
           : p.status === "REJECTED"
           ? "تم الرفض"
           : "جاري المعالجة",
@@ -207,8 +207,8 @@ export function ProblemsTable() {
         {/* ✅ Problem Header */}
 
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl">المشكلات (الشكاوي)</h1>
-          <h3 className="text-sm text-neutral-600 font-light">يمكنك الاطلاع والتعديل على جميع المشكلات</h3>
+          <h1 className="text-2xl">الشكاوي (الشكاوي)</h1>
+          <h3 className="text-sm text-neutral-600 font-light">يمكنك الاطلاع والتعديل على جميع الشكاوي</h3>
         </div>
 
         <ProblemHeader onFilterChange={setFilters} />

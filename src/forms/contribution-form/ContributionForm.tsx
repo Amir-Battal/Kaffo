@@ -115,10 +115,10 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
         name="contribution"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>ساهم في حل المشكلة</FormLabel>
+            <FormLabel>ساهم في حل الشكوى</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="أقترح حل المشكلة عبر..."
+                placeholder="أقترح حل الشكوى عبر..."
                 {...field}
                 ref={field.ref}
               />
@@ -162,6 +162,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
         date={userContribution.creationDate || ""}
         contribution={userContribution.description || ""}
         budget={userContribution.estimatedCost || 0}
+        userPhoto={userCotnributionDetails?.photoUrl}
       >
         <div className={` text-white text-sm flex justify-center items-center w-[30%] h-[50px]
           ${userContribution?.status === "REJECTED"
@@ -200,6 +201,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
           date={c.creationDate}
           contribution={c.description}
           budget={c.estimatedCost}
+          userPhoto={c.user.photoUrl}
         />
       ));
 

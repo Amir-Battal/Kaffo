@@ -106,7 +106,7 @@ const ContributionCard = ({
               )}
               {isMyContribution 
                 ?(
-                  <h3>{user?.firstName + " " + user?.lastName} - {problem?.submissionDate.split("T")[0]}</h3>
+                  <h3>{username} - {problem?.submissionDate.split("T")[0]}</h3>
                 ):(
                   <h3>{username} - {date}</h3>
                 )
@@ -150,11 +150,11 @@ const ContributionCard = ({
             }
 
             <div className="flex flex-col gap-2 pt-6">
-              <FormLabel>{isSelfSolv ? "حل المشكلة" : "المساهمة في حل المشكلة"}</FormLabel>
+              <FormLabel>{isSelfSolv ? "حل الشكوى" : "المساهمة في حل الشكوى"}</FormLabel>
               <Textarea
                 className="w-full"
                 value={contribution}
-                placeholder="استطيع حل المشكلة من خلال ..."
+                placeholder="استطيع حل الشكوى من خلال ..."
                 disabled
               />
             </div>

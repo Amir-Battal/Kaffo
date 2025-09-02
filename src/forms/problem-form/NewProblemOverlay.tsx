@@ -16,13 +16,13 @@ const NewProblemOverlay = () => {
       <Dialog>
         <DialogTrigger className=" flex flex-col items-center cursor-pointer">
           <Button className="cursor-pointer">
-            <h3>مشكلة جديدة</h3>
+            <h3>شكوى جديدة</h3>
             <Plus />
           </Button>
         </DialogTrigger>
         <DialogContent className="min-w-[50%] h-[94%] overflow-y-scroll">
           <DialogHeader className="h-[10%] flex flex-row-reverse">
-            <DialogTitle>إنشاء مشكلة جديدة</DialogTitle>
+            <DialogTitle>إنشاء شكوى جديدة</DialogTitle>
           </DialogHeader>
           <NewProblemForm />
         </DialogContent>
