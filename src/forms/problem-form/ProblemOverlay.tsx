@@ -12,7 +12,7 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useDeleteProblem } from "@/hooks/use-problem";
 import { useDeleteAllProblemPhotos } from "@/hooks/use-problem-photo";
 import { toast } from "sonner";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type EditProp = {
   status: string;
@@ -24,9 +24,13 @@ const ProblemOverlay = ({ status, isMyAucation, problemId }: EditProp) => {
   const { mutateAsync: deleteAllPhotos } = useDeleteAllProblemPhotos();
   const { deleteProblem, isLoading } = useDeleteProblem();
 
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleDelete = async () => {
     if (!problemId) return;
     try {
+      setIsDeleting(true);
+
       // 1. حذف الصور
       await deleteAllPhotos(problemId);
 
@@ -42,6 +46,8 @@ const ProblemOverlay = ({ status, isMyAucation, problemId }: EditProp) => {
     } catch (err) {
       toast.error("حدث خطأ أثناء حذف الشكوى");
       console.error("Delete failed:", err);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -82,21 +88,30 @@ const ProblemOverlay = ({ status, isMyAucation, problemId }: EditProp) => {
                 </DialogTitle>
               </DialogHeader>
 
-              <DialogPrimitive.Close className="flex flex-row w-full justify-between px-20 mt-4">
-                <Button className="w-[40%] h-[40px] cursor-pointer">
-                  <h3>لا</h3>
-                  <X />
-                </Button>
-                <Button
-                  className="w-[40%] h-[40px] cursor-pointer"
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={isLoading}
-                >
-                  <h3>نعم</h3>
-                  <Check />
-                </Button>
-              </DialogPrimitive.Close>
+              {/* <DialogPrimitive.Close className="flex flex-row w-full justify-between px-20 mt-4"> */}
+              <div className="flex flex-row w-full justify-between px-20 mt-4">
+                  <Button className="w-[40%] h-[40px] cursor-pointer">
+                    <h3>لا</h3>
+                    <X />
+                  </Button>
+                  <Button
+                    className="w-[40%] h-[40px] cursor-pointer"
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isLoading}
+                  >
+                    {isDeleting 
+                      ? (<h3>جاري الحذف...</h3>) 
+                      : (
+                        <div className="flex flex-row items-center gap-2">
+                          <h3>نعم</h3>
+                          <Check />
+                        </div>
+                      )
+                    }
+                  </Button>
+                </div>
+              {/* </DialogPrimitive.Close> */}
             </DialogContent>
           </div>
         )}

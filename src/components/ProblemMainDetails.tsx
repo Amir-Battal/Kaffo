@@ -277,7 +277,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                       </div>
                     ) : (
                     <div className="flex flex-col gap-5">
-                      <div>
+                      {/* <div>
                         {(currentUser?.id === problem?.submittedByUserId) && (!problem.isReal) && (problem.status !== "REJECTED") ? (
                             <div className="flex flex-row gap-5">
                               <ProblemOverlay problemId={numericProblemId} status="edit" />
@@ -285,7 +285,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                             </div>
                           ):(<div></div>)
                         }
-                      </div>
+                      </div> */}
 
                       {problem.status === "REJECTED" && (
                         <div className="flex flex-col gap-5">
@@ -442,7 +442,17 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
           }
 
           <div className="w-[100%] flex flex-col gap-2 z-0">
-            <MapPicker disableMap lat={address?.latitude} lng={address?.longitude} onLocationSelect={() => {}} />
+            {/* <MapPicker disableMap lat={address?.latitude} lng={address?.longitude} onLocationSelect={() => {}} /> */}
+            {address?.latitude && address?.longitude ? (
+              <MapPicker
+                disableMap
+                lat={address.latitude}
+                lng={address.longitude}
+                onLocationSelect={() => {}}
+              />
+            ) : (
+              <div>📍 لم يتم تحديد موقع</div>
+            )}
             <h3>{address ? `${cityArabicName}، ${address.description}` : "الموقع غير معروف"}</h3>
           </div>
         </div>

@@ -9,25 +9,51 @@ export function MultiImageUploader({
   const [files, setFiles] = useState<File[]>([])
 
   // عند اختيار ملفات جديدة من input
+  // داخل handleFileChange
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return
 
-    // دمج الملفات الجديدة مع القديمة (أو استبدال حسب رغبتك)
     const newFiles = Array.from(e.target.files)
+
+    // ✅ 1. السماح فقط بالصور (jpg, jpeg, png, webp)
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
+
+    // ✅ 2. الحد الأقصى لحجم الملف (مثلاً 5MB)
+    const maxSize = 5 * 1024 * 1024 // 5 ميغابايت
+
+    // ✅ 3. الحد الأقصى لعدد الصور (مثلاً 5 صور)
+    const maxFiles = 5
+
+    const validFiles = newFiles.filter((file) => {
+      if (!allowedTypes.includes(file.type)) {
+        alert(`الملف ${file.name} غير مسموح. الرجاء رفع صور فقط (JPG, PNG, WEBP).`)
+        return false
+      }
+      if (file.size > maxSize) {
+        alert(`حجم الصورة ${file.name} يتجاوز 5MB.`)
+        return false
+      }
+      return true
+    })
+
     setFiles((prev) => {
-      // لتجنب تكرار الملفات (حسب الاسم وحجم الملف)
+      // منع تكرار الملفات
       const merged = [...prev]
-      newFiles.forEach((newFile) => {
-        if (!merged.some(f => f.name === newFile.name && f.size === newFile.size)) {
-          merged.push(newFile)
+      validFiles.forEach((newFile) => {
+        if (!merged.some((f) => f.name === newFile.name && f.size === newFile.size)) {
+          if (merged.length < maxFiles) {
+            merged.push(newFile)
+          } else {
+            alert(`يمكنك رفع ${maxFiles} صور كحد أقصى.`)
+          }
         }
       })
       return merged
     })
 
-    // تنظيف قيمة input حتى نتمكن من اختيار نفس الملف مرة أخرى إذا أردنا
     e.target.value = ""
   }
+
 
   // حذف صورة معينة من القائمة
   const handleRemoveFile = (index: number) => {

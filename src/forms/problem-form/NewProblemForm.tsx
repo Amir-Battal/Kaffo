@@ -34,8 +34,8 @@ const formSchema = z.object({
   description: z.string().min(1, "الوصف مطلوب"),
   categoryId: z.number().min(1, "صنف الشكوى مطلوب"),
   governorate: z.string().min(1, "المحافظة مطلوبة"),
-  lat: z.number(),
-  lng: z.number(),
+  lat: z.number().refine(val => val !== 0, "الموقع مطلوب"),
+  lng: z.number().refine(val => val !== 0, "الموقع مطلوب"),
   images: z.array(z.instanceof(File)).optional(),
 })
 
@@ -62,6 +62,9 @@ export function NewProblemForm() {
   const [selectedImages, setSelectedImages] = useState<File[]>([])
 
   const [ministryId, setMinistryId] = useState<number | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
 
   // if(roles.includes("ROLE_GOV")){
   //   setMinistryId(ministry?.id)
@@ -113,6 +116,8 @@ export function NewProblemForm() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
+      setIsSubmitting(true)
+
       // 1. إنشاء العنوان أولًا
       const newAddress = await createAddress({
         city: data.governorate,
@@ -185,6 +190,8 @@ export function NewProblemForm() {
     } catch (err) {
       toast.error("فشل في إنشاء الشكوى");
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -305,8 +312,8 @@ export function NewProblemForm() {
         </div>
 
         {/* <DialogPrimitive.Close> */}
-          <Button type="submit" className="cursor-pointer mt-5" disabled={isLoading}>
-            {isLoading ? "جاري الإرسال..." : (
+          <Button type="submit" className="cursor-pointer mt-5" disabled={isSubmitting}>
+            {isSubmitting ? "⏳ جاري الإرسال..." : (
               <>
                 <h3>رفع الشكوى</h3>
                 <Plus />
