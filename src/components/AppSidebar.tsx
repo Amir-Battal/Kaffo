@@ -30,6 +30,8 @@ import SidebarHeaderElements from "./SidebarHeaderElements"
 import { Separator } from "./ui/separator"
 import LogoutDialog from "./LogoutDialog"
 import keycloak from "@/lib/keycloak"
+import { User } from "@/types"
+import { useGetMyUser } from "@/hooks/use-user"
 
 
 // Menu items.
@@ -161,6 +163,20 @@ const AdminItems = [
 export function AppSidebar() {
 
     const roles = keycloak.tokenParsed?.resource_access?.["react-client"].roles || []
+
+    const {currentUser} = useGetMyUser();
+
+    const isSecondaryDataComplete = (user: User | undefined): boolean => {
+      if (!user) return false;
+    
+      return (
+        !!user.dateOfBirth &&
+        !!user.collegeDegree &&
+        !!user.job &&
+        !!user.description &&
+        !!user.addressId
+      );
+    };
     // console.log(roles);
 
   return (
@@ -247,7 +263,7 @@ export function AppSidebar() {
                   UserItems.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       {/* {item.title === 'الأنشطة'  */}
-                      {item.title === 'مشاركاتي' 
+                      {item.title === 'مشاركاتي' && isSecondaryDataComplete(currentUser)
                       ?(
                         <div>
                           <SidebarMenuButton asChild>
@@ -269,12 +285,19 @@ export function AppSidebar() {
                           ))}
                         </SidebarMenu>
                         </div>
+                        ) : item.title === "الرئيسية" || item.title === "الشكاوي" ? (
+                          <SidebarMenuButton asChild>
+                            <a href={item.url}>
+                              <item.icon />
+                              <span>{item.title}</span>
+                            </a>
+                          </SidebarMenuButton>
                       ):item.title === 'تسجيل الخروج'
                       ?(
                         <SidebarMenuButton asChild>
                           <LogoutDialog />
                         </SidebarMenuButton>
-                      ):(
+                      ): isSecondaryDataComplete(currentUser) && (
                         <SidebarMenuButton asChild>
                           <a href={item.url}>
                             <item.icon />
@@ -288,6 +311,20 @@ export function AppSidebar() {
 
                 )
               }
+              {!isSecondaryDataComplete(currentUser) && (
+                <div className="p-4 m-3 text-sm text-center bg-yellow-50 border border-yellow-200 rounded-xl">
+                  <p className="text-yellow-800 mb-2">
+                    ⚠️ يرجى إكمال الحساب الشخصي حتى تستطيع استخدام ميزات المنصة
+                  </p>
+                  <a
+                    href="http://localhost:5173/user-profile"
+                    className="text-blue-600 underline hover:text-blue-800"
+                  >
+                    الانتقال إلى الملف الشخصي
+                  </a>
+                </div>
+              )}
+
             </SidebarMenu>
           </SidebarGroupContent>
           
