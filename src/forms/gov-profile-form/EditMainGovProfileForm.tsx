@@ -26,13 +26,15 @@ import {
 } from "@/hooks/use-gov";
 import { useGetMyUser, useUpdateUserBasicInfo } from "@/hooks/use-user";
 import { useAddress, useCities } from "@/hooks/use-Address";
+import { PhoneInput } from "@/components/PhoneInput";
 
 const formSchema = z.object({
   firstName: z.string(),
   lastName: z.string(),
   // governorate: z.string(),
   email: z.string().email(),
-  phoneNumber: z.string().min(10).max(10),
+  countryCode: z.string().min(1, { message: "اختر رمز الدولة" }),
+  phone: z.string().min(1, { message: "أدخل رقم الهاتف" }).regex(/^[0-9]+$/, { message: "أرقام فقط" }),
   concernedPartyId: z.number().optional(),
 });
 
@@ -62,11 +64,11 @@ export function EditMainGovProfileForm() {
     defaultValues: {
       firstName: "",
       lastName: "",
-      // governorate: "",
       email: "",
-      phoneNumber: "",
+      countryCode: "",
+      phone: "",
       concernedPartyId: 0,
-    },
+    }
   });
 
   useEffect(() => {
@@ -76,12 +78,24 @@ export function EditMainGovProfileForm() {
       (gov) => gov.arabic === (currentUser.lastName || address?.city)
     );
 
+    let countryCode = ""
+    let phone = currentUser.phone || ""
+
+    if (phone.startsWith("+")) {
+      const match = phone.match(/^(\+\d{1,4})(\d+)$/)
+      if (match) {
+        countryCode = match[1]
+        phone = match[2]
+      }
+    }
+
     form.reset({
       firstName: currentUser.firstName || currentUser.name || "",
       lastName: currentUser.lastName || currentUser.name || "",
       // governorate: matchedGovernorate?.value || "",
       email: currentUser.email || "",
-      phoneNumber: currentUser.phone || "",
+      countryCode,
+      phone,
       concernedPartyId: currentUser.govId || 0,
     });
 
@@ -104,6 +118,8 @@ export function EditMainGovProfileForm() {
   }, [currentUser, parties, ministries, cities, address, form, hasUpdated]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const fullPhone = `${values.countryCode}${values.phone}`
+    
     const selectedCity = cities?.find((c) => c.value === values.governorate);
     const arabicCity = selectedCity?.arabic || "";
 
@@ -114,14 +130,14 @@ export function EditMainGovProfileForm() {
         id: currentUser.id,
         name: values.firstName,
         email: values.email,
-        phone: values.phoneNumber,
+        phone: fullPhone,
       });
     } else if (isConcernedParty) {
       await updateGovInfo({
         id: currentUser.id,
         name: values.firstName,
         email: values.email,
-        phone: values.phoneNumber,
+        phone: fullPhone,
         parentGovId: ministryId ?? currentUser.parentGovId,
       });
     } else {
@@ -135,7 +151,7 @@ export function EditMainGovProfileForm() {
         firstName: values.firstName,
         lastName: values.lastName,
         // lastName: arabicCity,
-        phone: values.phoneNumber,
+        phone: fullPhone,
         email: values.email,
         govId: concernedPartyId,
       });
@@ -149,7 +165,7 @@ export function EditMainGovProfileForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-10 py-10" dir="rtl">
-        <div className="grid grid-cols-2 gap-5">
+        <div className="flex flex-col gap-5">
           <FormField name="firstName" control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>الاسم الأول</FormLabel>
@@ -175,19 +191,27 @@ export function EditMainGovProfileForm() {
             )} />
           )}
 
-          <FormField name="phoneNumber" control={form.control} render={({ field }) => (
+          {/* <FormField name="phoneNumber" control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>رقم الهاتف</FormLabel>
               <FormControl><Input placeholder="0999999999" {...field} /></FormControl>
             </FormItem>
-          )} />
+          )} /> */}
+          <FormField
+            control={form.control}
+            name="phone"
+            render={() => (
+              <PhoneInput />
+            )}
+          />
 
-          <FormField name="email" control={form.control} render={({ field }) => (
+
+          {/* <FormField name="email" control={form.control} render={({ field }) => (
             <FormItem>
               <FormLabel>البريد الإلكتروني</FormLabel>
               <FormControl><Input placeholder="email@example.com" {...field} /></FormControl>
             </FormItem>
-          )} />
+          )} /> */}
         </div>
 
         {!isMinistry && (

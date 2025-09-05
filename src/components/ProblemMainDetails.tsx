@@ -204,7 +204,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                 </div>
               ):(
                 <div className="flex flex-col gap-5">
-                  {problem.submittedByUserId === currentUser?.id && (
+                  {problem.submittedByUserId === currentUser?.id && (problem.status === "PENDING_APPROVAL") && (
                       <div className="flex flex-row gap-5">
                         <ProblemOverlay problemId={numericProblemId} status="edit" />
                         <ProblemOverlay problemId={numericProblemId} status="delete" />

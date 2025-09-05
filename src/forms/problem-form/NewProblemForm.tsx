@@ -304,7 +304,7 @@ export function NewProblemForm() {
           <MultiImageUploader onFilesSelected={setSelectedImages} />
         </div>
 
-        <DialogPrimitive.Close>
+        {/* <DialogPrimitive.Close> */}
           <Button type="submit" className="cursor-pointer mt-5" disabled={isLoading}>
             {isLoading ? "جاري الإرسال..." : (
               <>
@@ -313,7 +313,7 @@ export function NewProblemForm() {
               </>
             )}
           </Button>
-        </DialogPrimitive.Close>
+        {/* </DialogPrimitive.Close> */}
       </form>
     </Form>
   )

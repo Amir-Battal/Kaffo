@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Check, ChevronLeft } from "lucide-react"
 import { useUpdateUserBasicInfo } from "@/hooks/use-user"
 import { toast } from "sonner"
+import { PhoneInput } from "@/components/PhoneInput"
 
 const formSchema = z.object({
   firstName: z.string().min(2, {
@@ -23,9 +24,12 @@ const formSchema = z.object({
   lastName: z.string().min(2, {
     message: "يجب أن تحتوي الكنية على حرفين على الأقل.",
   }),
-  phone: z.string().min(1, {
-    message: "رقم الهاتف مطلوب.",
+  countryCode: z.string().min(1, {
+    message: "اختر رمز الدولة" 
   }),
+  phone: z.string().min(1, { 
+    message: "أدخل رقم الهاتف" 
+  }).regex(/^[0-9]+$/, { message: "أرقام فقط" }),
   email: z.string(),
 })
 
@@ -43,6 +47,7 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
     defaultValues: {
       firstName: "",
       lastName: "",
+      countryCode: "",
       phone: "",
       email: "",
     },
@@ -50,10 +55,22 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
 
   useEffect(() => {
     if (user) {
+      let countryCode = ""
+      let phone = user.phone || ""
+
+      if (phone.startsWith("+")) {
+        const match = phone.match(/^(\+\d{1,4})(\d+)$/) // +963999999999
+        if (match) {
+          countryCode = match[1]
+          phone = match[2]
+        }
+      }
+
       form.reset({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
-        phone: user.phone || "",
+        countryCode,
+        phone,
         email: user.email || "",
       })
     }
@@ -64,11 +81,13 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
   try {
+    const fullPhone = `${values.countryCode}${values.phone}`
+
     await updateUserBasicInfo({
       id: user?.id,
       firstName: values.firstName,
       lastName: values.lastName,
-      phone: values.phone,
+      phone: fullPhone,
       email: values.email,
     });
 
@@ -86,7 +105,7 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8 w-full grid grid-cols-2 gap-6 pt-5"
+        className="space-y-8 w-full flex flex-col gap-3 pt-5"
         dir="rtl"
       >
         <FormField
@@ -117,7 +136,7 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="phone"
           render={({ field }) => (
@@ -129,9 +148,17 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
               <FormMessage />
             </FormItem>
           )}
+        /> */}
+        <FormField
+          control={form.control}
+          name="phone"
+          render={() => (
+            <PhoneInput />
+          )}
         />
 
-        <FormField
+
+        {/* <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
@@ -143,7 +170,7 @@ export function EditMainForm({ user, isLoading, onSuccess }: EditMainFormProps):
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <div className="col-span-2 flex justify-center">
           <Button type="submit" className="w-[60%] cursor-pointer">
