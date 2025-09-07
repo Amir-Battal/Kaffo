@@ -311,7 +311,7 @@ export function AppSidebar() {
 
                 )
               }
-              {!isSecondaryDataComplete(currentUser) && (
+              {!isSecondaryDataComplete(currentUser) && (!roles.includes("ROLE_ADMIN") && !roles.includes("ROLE_GOV")) && (
                 <div className="p-4 m-3 text-sm text-center bg-yellow-50 border border-yellow-200 rounded-xl">
                   <p className="text-yellow-800 mb-2">
                     ⚠️ يرجى إكمال الحساب الشخصي حتى تستطيع استخدام ميزات المنصة

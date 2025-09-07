@@ -88,6 +88,38 @@ export const useGetAllProblemsNumber = () => {
   }).then(res => res.data);
 };
 
+export const useGetAllContributedProblemsNumber = () => {
+  const accessToken = keycloak.token;
+
+  return axios.get(`${API_BASE_URL}/api/v1/problems`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    params: {
+      forContribution: true,
+    }
+  }).then(res => res.data);
+};
+
+export const useGetAllDonatedProblemsNumber = () => {
+  const accessToken = keycloak.token;
+
+  return axios.get(`${API_BASE_URL}/api/v1/problems`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    params: {
+      forDonation: true,
+    }
+  }).then(res => res.data);
+};
+
+
+
+
+
 
 
 

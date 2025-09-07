@@ -27,6 +27,7 @@ import {
 } from "../../hooks/use-Contribution";
 import { toast } from "sonner";
 import { useGetUserById } from "@/hooks/use-user";
+import { useGetAllProblemProgress } from "@/hooks/use-progress";
 
 
 
@@ -49,6 +50,9 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
 
   const { data: userCotnributionDetails } = useGetUserById(userContribution?.proposedByUserId);
 
+  // console.log(contributions);
+
+  const AvailableApprovedContribution = contributions?.filter((c) => c.status === "APPROVED");
 
 
   const methods = useForm<FormData>({
@@ -163,8 +167,9 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
         contribution={userContribution.description || ""}
         budget={userContribution.estimatedCost || 0}
         userPhoto={userCotnributionDetails?.photoUrl}
+        status={userContribution.status}
       >
-        <div className={` text-white text-sm flex justify-center items-center w-[30%] h-[50px]
+        {/* <div className={` text-white text-sm flex justify-center items-center w-[30%] h-[50px]
           ${userContribution?.status === "REJECTED"
             ? "bg-red-600"
             : userContribution?.status === "PENDING_APPROVAL"
@@ -179,7 +184,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
               : "تم قبول المساهمة"
             }
           </h1>
-        </div>
+        </div> */}
         {userContribution.status === "PENDING_APPROVAL" && (
           <div className="flex flex-row-reverse gap-2 mt-2">
             <Button onClick={() => setIsEditing(true)} variant="ghost">
@@ -202,14 +207,17 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
           contribution={c.description}
           budget={c.estimatedCost}
           userPhoto={c.user.photoUrl}
+          // status={c.status}
         />
       ));
+
+      // console.log("test", userContribution);
 
   return (
     <FormProvider {...methods}>
       <div className="flex flex-col gap-6" dir="rtl">
     
-        {(!userContribution || isEditing) ? renderForm() : renderUserContribution()}
+        {((!userContribution || isEditing) && (AvailableApprovedContribution.length === 0)) ? renderForm() : renderUserContribution()}
         <div className="flex flex-col gap-4">
           {renderOtherContributions()}
         </div>

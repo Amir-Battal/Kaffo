@@ -56,6 +56,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
   //[/]|[\][/]|[\][/]|[\] CONTRIBUTIONS [/]|[\][/]|[\][/]|[\]
   const { data: acceptedContribution } = useGetAcceptedContribution(numericProblemId,);
 
+
   const { data: onlyAcceptedSolution } = useGetSolutionById(numericProblemId, acceptedContribution?.id);
 
 
@@ -77,6 +78,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
 
   const { data: proposedUser } = useGetUserById(proposedUserId, { enabled: !!proposedUserId });
+
 
 
   //[/]|[\][/]|[\][/]|[\] DONATIONS [/]|[\][/]|[\][/]|[\]
@@ -193,10 +195,12 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
                   <div>
                     {/* {problem.submittedByUserId === currentUser?.id && ( */}
+                    {roles.includes("ROLE_ADMIN") && (
                       <div className="flex flex-row gap-5">
                         <ProblemOverlay problemId={numericProblemId} status="edit" />
                         <ProblemOverlay problemId={numericProblemId} status="delete" />
                       </div>  
+                    )}
                     {/* )} */}
                     <SolveControl problemId={numericProblemId} />
                   </div>

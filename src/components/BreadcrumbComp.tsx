@@ -5,9 +5,9 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import { useGetAllProblemsNumber } from "@/hooks/use-problem";
+import { useGetAllContributedProblemsNumber, useGetAllDonatedProblemsNumber, useGetAllProblemsNumber, useGetProblemsForContribution } from "@/hooks/use-problem";
 import { Building2, ChartArea, ChartNoAxesGantt, Check, Copy, DollarSign, Folder, HandHeart, Heart, Home, Inbox, MessageSquare, User, Users } from "lucide-react";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 type BreadcrumbProps = {
   name: string;
@@ -17,10 +17,31 @@ type BreadcrumbProps = {
 const BreadcrumbComp = (prop : BreadcrumbProps) => {
 
   const [problemsNumber, setProblemsNumber] = useState();
+  const [contributedProblemsNumber, setCotnributedProblemsNumber] = useState();
+  const [donatedProblemsNumber, setDonatedProblemsNumber] = useState();
 
-  useGetAllProblemsNumber().then(problems => {
-    setProblemsNumber(problems.totalElements);
-  });
+
+  useEffect(() => {
+    useGetAllProblemsNumber().then(problems => {
+      // console.log(problems);
+      setProblemsNumber(problems.totalElements);
+    });
+  }, [])
+
+  useEffect(() => {
+    useGetAllContributedProblemsNumber().then(contributedProblems => {
+      // console.log(contributedProblems);
+      setCotnributedProblemsNumber(contributedProblems.totalElements);
+    });
+  }, [])
+
+  useEffect(() => {
+    useGetAllDonatedProblemsNumber().then(donatedProblems => {
+      // console.log(donatedProblems);
+      setDonatedProblemsNumber(donatedProblems.totalElements);
+    });
+  }, [])
+  
 
 
   return (
@@ -106,7 +127,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
             <BreadcrumbItem>
               <BreadcrumbLink className="flex flex-row items-center gap-2" href="/volunteering">
                 <Users />
-                <h3>التطوع (100)</h3>
+                <h3>التطوع</h3>
               </BreadcrumbLink>
             </BreadcrumbItem>
           )
@@ -125,7 +146,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
               <BreadcrumbItem>
                 <BreadcrumbLink className="flex flex-row items-center gap-2">
                   <MessageSquare />
-                  <h3>المساهمات (100)</h3>
+                  <h3>المساهمات ({contributedProblemsNumber})</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </div>
@@ -174,7 +195,7 @@ const BreadcrumbComp = (prop : BreadcrumbProps) => {
               <BreadcrumbItem>
                 <BreadcrumbLink className="flex flex-row items-center gap-2">
                   <DollarSign />
-                  <h3>التبرعات (100)</h3>
+                  <h3>التبرعات ({donatedProblemsNumber})</h3>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </div>

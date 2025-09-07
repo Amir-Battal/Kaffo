@@ -10,9 +10,10 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   const [select, setSelect] = useState<boolean>();
   const [solution, setSolution] = useState<SolutionDTO>(); 
 
-  // console.log("pendContributions" ,props.pendContributions);
+  console.log("pendContributions" ,props.pendContributions);
 
   const user = useGetUserById(String(solution?.proposedByUserId));
+
 
 
 
@@ -86,6 +87,10 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
                 date={c.creationDate}
                 contribution={c.description}  
                 budget={c.estimatedCost}
+                problemId={c.problemId}
+                proposedByUserId={c.proposedByUserId}
+                suggestionContributions
+                
               >
                 <div className="flex flex-row-reverse">
                   <Button onClick={() => handleSelect(c)} variant="ghost" className="m-1 cursor-pointer">

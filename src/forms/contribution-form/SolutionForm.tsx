@@ -29,6 +29,7 @@ import keycloak from "@/lib/keycloak";
 
 import axios from "axios";
 import { useGetMyUser, useGetUserById } from "@/hooks/use-user";
+import { useGetAllProblemProgress } from "@/hooks/use-progress";
 
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -55,6 +56,10 @@ const SolutionForm: React.FC<Props> = ({
   setIsSelected,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
+
+  const ProblemProgress = useGetAllProblemProgress(problemId);
+
+  // console.log(ProblemProgress);
 
 
   // جلب مساهمة المستخدم الحالي
@@ -251,16 +256,18 @@ const SolutionForm: React.FC<Props> = ({
                 تعديل <Edit />
               </Button>
 
-              <DeleteDialog
-                onConfirm={onDelete}
-                title="حذف الحل"
-                description="هل أنت متأكد من حذف هذا الحل؟ لا يمكن التراجع عن هذه العملية."
-                trigger={
-                  <Button variant="ghost" className="text-red-500 flex items-center gap-1">
-                    حذف <Trash2 />
-                  </Button>
-                }
-              />
+              {ProblemProgress.progressList.length === 0 && 
+                <DeleteDialog
+                  onConfirm={onDelete}
+                  title="حذف الحل"
+                  description="هل أنت متأكد من حذف هذا الحل؟ لا يمكن التراجع عن هذه العملية."
+                  trigger={
+                    <Button variant="ghost" className="text-red-500 flex items-center gap-1">
+                      حذف <Trash2 />
+                    </Button>
+                  }
+                />
+              }
             </div>
           </ContributionCard>
         )}

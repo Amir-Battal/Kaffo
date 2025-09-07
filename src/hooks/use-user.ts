@@ -54,7 +54,7 @@ export const useGetUserById = (userId: string, options = {}) => {
       const accessToken = keycloak.token;
 
       const response = await axios.get(`${API_BASE_URL}/api/v1/users/${userId}`, {
-        headers: {
+        headers: {  
           Authorization: `Bearer ${accessToken}`,
         },
       });
