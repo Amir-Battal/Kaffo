@@ -50,7 +50,6 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
 
   const { data: userCotnributionDetails } = useGetUserById(userContribution?.proposedByUserId);
 
-  // console.log(contributions);
 
   const AvailableApprovedContribution = contributions?.filter((c) => c.status === "APPROVED");
 

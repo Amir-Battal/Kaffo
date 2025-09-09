@@ -79,6 +79,8 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
 
   const { data: proposedUser } = useGetUserById(proposedUserId, { enabled: !!proposedUserId });
 
+  // console.log(proposedUser);
+
 
 
   //[/]|[\][/]|[\][/]|[\] DONATIONS [/]|[\][/]|[\][/]|[\]
@@ -463,7 +465,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
       </div>
 
 
-      {!roles.includes("ROLE_GOV") && (!prop.donation && !prop.contribution) && problemProgress && (
+      { (!prop.donation && !prop.contribution) && problemProgress && (
         <div className="flex flex-col gap-10 px-10 ml-10">
           <h1 className="text-2xl font-semibold">تقدم حل الشكوى</h1>
           <ProgressPreview 

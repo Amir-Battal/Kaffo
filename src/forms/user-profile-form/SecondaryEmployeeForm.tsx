@@ -88,17 +88,17 @@ const SecondaryEmployeeForm = ({...props}): JSX.Element => {
       setEditable(false);
       window.location.reload();
     } catch (error) {
-      console.error("خطأ أثناء التحديث:", error);
-      toast("حدث خطأ أثناء التحديث", {
-        style: {
-          background: "#cc1100",
-          color: "#fff",
-          direction: "rtl",
-          border: "none",
-        },
-        icon: <Ban />,
-        closeButton: true,
-      });
+      // console.error("خطأ أثناء التحديث:", error);
+      // toast("حدث خطأ أثناء التحديث", {
+      //   style: {
+      //     background: "#cc1100",
+      //     color: "#fff",
+      //     direction: "rtl",
+      //     border: "none",
+      //   },
+      //   icon: <Ban />,
+      //   closeButton: true,
+      // });
     }
   };
 

@@ -1,6 +1,6 @@
-import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useCreateDonation } from "@/hooks/use-donation";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
@@ -13,8 +13,7 @@ type DonationFormProps = {
 };
 
 const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFormProps) => {
-  const initialValue = Math.min(Math.floor(max / 2), max);
-  const [value, setValue] = useState<number>(initialValue);
+  const [value, setValue] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
 
@@ -22,7 +21,12 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
 
   const handleSubmit = async (amount: number) => {
     if (amount <= 0) {
-      toast.warning("الرجاء اختيار مبلغ صالح للتبرع.");
+      toast.warning("الرجاء إدخال مبلغ صالح للتبرع.");
+      return;
+    }
+
+    if (amount > max) {
+      toast.warning(`أقصى مبلغ متاح للتبرع هو ${max} ل.ل`);
       return;
     }
 
@@ -30,8 +34,8 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
     try {
       const response = await donationMutation.mutateAsync({
         amount,
-        currency: "USD",
-        paymentMethod: 'STRIPE',
+        currency: "LBP", // ✅ تغيير العملة
+        paymentMethod: "STRIPE",
         isAnonymous,
         successUrl: window.location.href,
         cancelUrl: window.location.href,
@@ -58,22 +62,23 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-6">
-      <div className="flex flex-col gap-4 items-center">
-        <div className="w-full flex flex-col">
-          <div className="flex flex-row-reverse gap-3 items-center">
-            <h3 className="text-xl">0</h3>
-            <Slider
-              defaultValue={[value]}
-              min={0}
-              max={max}
-              onValueChange={(vals) => setValue(vals[0])}
-              disabled={isLoading}
-            />
-            <h3 className="text-xl">{max}</h3>
-          </div>
-          <p className="text-center text-[18px]">تم تحديد مبلغ {value} ليرة سورية</p>
-        </div>
+    <div className="flex flex-col gap-6 pb-6 items-center">
+      <div className="w-full flex flex-col gap-4 items-center">
+        <label className="w-full text-right font-semibold">أدخل مبلغ التبرع (ل.ل)</label>
+        <Input
+          type="number"
+          min={1}
+          max={max}
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+          disabled={isLoading}
+          className="w-full text-right"
+          placeholder={`الحد الأقصى: ${max} ل.ل`}
+        />
+
+        <p className="text-center text-[16px] text-gray-600">
+          أقصى مبلغ متاح للتبرع: {max} ل.ل
+        </p>
 
         <label className="flex gap-2 items-center">
           <input
@@ -100,7 +105,7 @@ const DonationForm = ({ max, setDonation, setIsDonated, problemId }: DonationFor
         disabled={isLoading || max <= 0}
       >
         <h3>التبرع بكامل المبلغ</h3>
-        <h3 className="text-[12px]">المبلغ هو {max} ليرة سورية</h3>
+        <h3 className="text-[12px]">المبلغ هو {max} ل.ل</h3>
       </Button>
     </div>
   );

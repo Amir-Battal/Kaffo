@@ -415,3 +415,19 @@ export const useAssociateUserToGov = () => {
 };
 
 
+export function useAddRole() {
+  return useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      const res = await axios.put(
+        `${API_BASE_URL}/api/v1/users/${userId}/add-role?newRole=${role}`,
+        {}, // body فارغ
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        }
+      )
+      return res.data
+    },
+  })
+}

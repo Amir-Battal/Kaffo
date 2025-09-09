@@ -5,6 +5,7 @@ import ProblemCard from "@/components/ProblemCard";
 import {
   useGetAllGovRelatedProblems,
   useGetAllProblems,
+  useGetRealProblems,
   useGetResolvedGovProblems,
 } from "@/hooks/use-problem";
 import ProblemHeader from "@/components/ProblemHeader";
@@ -49,14 +50,19 @@ const ProblemsPage = () => {
           criteria,
           govId
         )
-    : useGetAllProblems(
+    : useGetRealProblems(
         { page, size: 6, sort: "submissionDate,desc" },
         isCompletedView ? { ...criteria, status: "RESOLVED" } : criteria
       );
 
+      console.log("problems", problems);
+      
+
   useEffect(() => {
     setPage(0); // إعادة التصفير عند تغيير الفلاتر
   }, [criteria]);
+
+  console.log("problems", problems);
 
 
   useEffect(() => {
@@ -81,7 +87,10 @@ const ProblemsPage = () => {
 
 
   if (isGov && !govId) {
-    return <p className="text-center">جارٍ تحميل الجهة المعنية...</p>;
+    return <div className="flex flex-col gap-5">
+      <p className="text-center">جارٍ تحميل الجهة المعنية...</p>
+      {!govId && <p className="text-center">أنت لا تتبع لجهة معنية، قم بإبلاغ الإدارة</p>}
+    </div>;
   }
 
   return (
@@ -93,9 +102,9 @@ const ProblemsPage = () => {
           <p>جاري التحميل...</p>
         ) : (
           problems.map((problem) => (
-            problem.isReal && (
+            // problem.isReal && (
               <ProblemCard key={problem.id} problem={problem} />
-            )
+            // )
           ))
         )}
       </div>

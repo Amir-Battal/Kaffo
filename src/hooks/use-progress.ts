@@ -120,28 +120,59 @@ export const useGetSingleProgress = (problemId: number, progressId: number) => {
 };
 
 // ✅ DELETE Progress
-export const useDeleteProblemProgress = (problemId: number) => {
-  const queryClient = useQueryClient();
+// export const useDeleteProblemProgress = (problemId: number) => {
+//   const queryClient = useQueryClient();
 
-  const mutation = useMutation(
-    async (progressId: number) => {
-      const accessToken = keycloak.token;
-      await axios.delete(`${API_BASE_URL}/api/v1/problem/${problemId}/progress/${progressId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+//   const mutation = useMutation(
+//     async (progressId: number) => {
+//       const accessToken = keycloak.token;
+//       await axios.delete(`${API_BASE_URL}/api/v1/problem/${problemId}/progress/${progressId}`, {
+//         headers: {
+//           Authorization: `Bearer ${accessToken}`,
+//         },
+//       });
+//     },
+//     {
+//       onSuccess: () => {
+//         queryClient.invalidateQueries(["problemProgress", problemId]);
+//         toast.success("تم حذف التقدم بنجاح");
+//       },
+//       onError: () => {
+//         toast.error("فشل في حذف التقدم");
+//       },
+//     }
+//   );
+
+//   return mutation;
+// };
+
+
+
+
+export function useDeleteProblemProgress(problemId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (progressId: number) => {
+      await axios.delete(`${API_BASE_URL}/api/v1/problem/${problemId}/progress/${progressId}`)
     },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries(["problemProgress", problemId]);
-        toast.success("تم حذف التقدم بنجاح");
-      },
-      onError: () => {
-        toast.error("فشل في حذف التقدم");
-      },
-    }
-  );
+    onSuccess: () => {
+      queryClient.invalidateQueries(["problem-progress", problemId])
+    },
+  })
+}
 
-  return mutation;
-};
+export function useUpdateProblemProgress(problemId: number) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: any) => {
+      const res = await axios.put(
+        `${API_BASE_URL}/api/v1/problem/${problemId}/progress/${data.id}`,
+        data
+      )
+      return res.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["problem-progress", problemId])
+    },
+  })
+}

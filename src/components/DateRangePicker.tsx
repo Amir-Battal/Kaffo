@@ -66,7 +66,7 @@ export default function DateRangePicker({...props}): React.JSX.Element {
             ):(
             <PopoverTrigger dir="ltr">
               <Button
-                id="date"
+                id="date" 
                 type="button"
                 variant={"outline"}
                 className="w-full bg-inherit border-0 border-b-2 border-b-gray-300 rounded-none text-gray-400 flex flex-row justify-between cursor-pointer hover:bg-accent"

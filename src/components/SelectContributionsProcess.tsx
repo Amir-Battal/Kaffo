@@ -10,10 +10,19 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   const [select, setSelect] = useState<boolean>();
   const [solution, setSolution] = useState<SolutionDTO>(); 
 
+  const [user, setUser] = useState();
+
   console.log("pendContributions" ,props.pendContributions);
 
-  const user = useGetUserById(String(solution?.proposedByUserId));
 
+
+  // const user = useGetUserById(solution?.proposedByUserId);
+
+  useEffect(() => {
+    if(solution){
+      setUser(useGetUserById(solution?.proposedByUserId));
+    }
+  }, [])
 
 
 

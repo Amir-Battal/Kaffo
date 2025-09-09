@@ -224,14 +224,13 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     try {
       const response = await donationMutation.mutateAsync({
         amount,
-        currency: "USD",
-        paymentMethod: 'STRIPE',
+        currency: "LBP", // ✅ تغيير العملة إلى الليرة اللبنانية
+        paymentMethod: "STRIPE",
         isAnonymous: false,
         successUrl: window.location.href,
         cancelUrl: window.location.href,
         idempotencyKey: uuidv4(),
       });
-
 
       if (response.sessionUrl) {
         window.location.href = response.sessionUrl;
@@ -242,6 +241,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
       setIsPayLoading(false);
     }
   };
+
 
   console.log("publicDonros",publicDonors);
 

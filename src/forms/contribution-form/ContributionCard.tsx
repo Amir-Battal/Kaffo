@@ -88,7 +88,7 @@ const ContributionCard = ({
 
   const { problem} = useGetProblemById(problemId);
   // const { data: user } = useGetUserById(Number(problem?.submittedByUserId));
-  const { data: user } = useGetUserById(Number(problem?.submittedByUserId));
+  const { data: user } = useGetUserById(problem?.submittedByUserId);
   const { data: address } = useAddress(Number(problem?.addressId));
   const { data: category } = useCategory(problem?.categoryId);
 
@@ -98,6 +98,7 @@ const ContributionCard = ({
   const {data: contributor} = useGetUserById(proposedByUserId);
   const {data: contributorAddress} = useAddress(contributor?.addressId);
   const cityOfContributor = cities?.find(c => c.value === contributorAddress?.city)?.arabic ?? contributorAddress?.city;
+
 
   // const ContributorDetails = (user: ContributionCardProps | undefined): boolean => {
   //   if (!user) return false;
@@ -144,7 +145,7 @@ const ContributionCard = ({
               { suggestionContributions && (
                 <div>
                   <h3 className="text-[14px]"><span className="font-bold text-[14px]">البريد الإلكتروني: </span>{contributor?.email}</h3>
-                  <h3 className="text-[14px]"><span className="font-bold text-[14px]">رقم الهاتف: </span>{contributor?.phone}</h3>
+                  <h3 className="text-[14px]"><span className="font-bold text-[14px]">رقم الهاتف: </span><span dir="ltr">{contributor?.phone}</span></h3>
                   <h3 className="text-[14px]"><span className="font-bold text-[14px]">العنوان: </span>{cityOfContributor}, {contributorAddress?.description}</h3>
                 </div>
               )}

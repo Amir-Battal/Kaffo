@@ -26,7 +26,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAllUsers } from "@/hooks/use-user"
+import { useAddRole, useAllUsers } from "@/hooks/use-user"
 import { useMemo, useState } from "react"
 import { useAddress, useCities } from "@/hooks/use-Address"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -142,20 +142,22 @@ export function AssignGovRole() {
       },
     },
     {
-      accessorKey: "role",
-      header: "صفة الحساب",
-      cell: ({ row }) => {
-        const govId = row.original.govId
-        return <div>{govId ? "موظف" : "مستخدم عادي"}</div>
-      },
-    },
-    {
       accessorKey: "association",
       header: "ربط الجهة",
       cell: ({ row }) => {
         const [open, setOpen] = useState(false)
         const user = row.original
         const isAssociated = Boolean(user.govId)
+
+        const addRole = useAddRole()
+
+        const handleAssigned = async () => {
+          try {
+            await addRole.mutateAsync({ userId: user.id, role: "ROLE_GOV" })
+          } catch (err) {
+            console.error("فشل في إضافة الدور:", err)
+          }
+        }
 
         return (
           <>
@@ -172,6 +174,7 @@ export function AssignGovRole() {
                 userId={user.id}
                 initialGovId={user.govId}
                 onClose={() => setOpen(false)}
+                onAssigned={handleAssigned} // 👈 تمرير الدالة الجديدة
               />
             )}
           </>
