@@ -149,7 +149,7 @@ const AdminItems = [
     icon: ChartArea,
   },
   {
-    title: "إنشاء حساب",
+    title: "تعيين موظف",
     url: "/manage/new-account",
     icon: UserPlus,
   },
@@ -222,6 +222,14 @@ export function AppSidebar() {
                             ))}
                         </SidebarMenu>
                         </div>
+                      ):item.title === 'المناقصات'
+                      ?(
+                        <SidebarMenuButton asChild disabled>
+                          <a href={item.url} aria-disabled>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </a>
+                        </SidebarMenuButton>
                       ):item.title === 'تسجيل الخروج'
                       ?(
                         <SidebarMenuButton asChild>

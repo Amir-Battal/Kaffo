@@ -5,9 +5,14 @@ import {
   NavigationMenuList,
 } from "../components/ui/navigation-menu"
 import { BellRing } from "lucide-react";
+import { useGetMyUser } from "@/hooks/use-user";
+import keycloak from "@/lib/keycloak";
 
 
 const Navbar = () => {
+
+
+
   return (
     // <div className="border-b-2 py-6">
     //   <div className="container mx-auto flex justify-between items-center">
@@ -26,7 +31,7 @@ const Navbar = () => {
 
         
 
-        <NavigationMenuItem >
+        <NavigationMenuItem>
           <Link 
             dir="rtl"
             to="/" 

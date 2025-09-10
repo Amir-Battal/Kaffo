@@ -20,14 +20,30 @@ import { useAddress, useCreateAddress } from "@/hooks/use-Address"
 import { useUpdateUserBasicInfo } from "@/hooks/use-user"
 import { toast } from "sonner"
 
+
 const formSchema = z.object({
   governorate: z.string(),
   address: z.string(),
-  birth: z.string(),
+  birth: z.string().refine((val) => {
+    const birthDate = new Date(val)
+    if (isNaN(birthDate.getTime())) return false
+
+    const today = new Date()
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const m = today.getMonth() - birthDate.getMonth()
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--
+    }
+
+    return age >= 18 && age <= 80
+  }, {
+    message: "العمر يجب أن يكون بين 18 و 80 سنة"
+  }),
   study: z.string(),
   work: z.string(),
   about: z.string(),
 })
+
 
 const tDate: Date = new Date(2010, 0, 10);
 const birthDate = tDate.toLocaleDateString('en-US', 

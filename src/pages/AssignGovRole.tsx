@@ -229,10 +229,10 @@ export function AssignGovRole() {
             <h3 className="text-sm text-neutral-600 font-light">تستطيع إيجاد كل المستخدمين والتعديل عليهم</h3>
           </div>
 
-          <Link to='/manage/new-account' className="w-[18%] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2 hover:bg-gray-800">
+          {/* <Link to='/manage/new-account' className="w-[18%] flex flex-row justify-around items-center cursor-pointer text-white bg-black p-2 hover:bg-gray-800">
             <h3 className="text-[17px]">مستخدم جديد</h3>
             <Plus size={20} />
-          </Link>
+          </Link> */}
         </div>
 
         {/* Filters */}
@@ -253,14 +253,14 @@ export function AssignGovRole() {
 
 
               {/* المحافظة */}
-              <GovernorateSelect
+              {/* <GovernorateSelect
                 value={governorateFilter ?? ""}
                 onChange={(val) => {
                   setGovernorateFilter(val === "" ? null : val);
                   setPageIndex(0);
                 }}
                 // لا نحتاج returnArabicName
-              />
+              /> */}
 
               {/* نوع الحساب */}
               <Select

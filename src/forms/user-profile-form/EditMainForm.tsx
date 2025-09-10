@@ -17,21 +17,38 @@ import { useUpdateUserBasicInfo } from "@/hooks/use-user"
 import { toast } from "sonner"
 import { PhoneInput } from "@/components/PhoneInput"
 
-const formSchema = z.object({
-  firstName: z.string().min(2, {
-    message: "يجب أن يحتوي الاسم الأول على حرفين على الأقل.",
-  }),
-  lastName: z.string().min(2, {
-    message: "يجب أن تحتوي الكنية على حرفين على الأقل.",
-  }),
-  countryCode: z.string().min(1, {
-    message: "اختر رمز الدولة" 
-  }),
-  phone: z.string().min(1, { 
-    message: "أدخل رقم الهاتف" 
-  }).regex(/^[0-9]+$/, { message: "أرقام فقط" }),
-  email: z.string(),
-})
+
+const formSchema = z
+  .object({
+    firstName: z.string().min(2, {
+      message: "يجب أن يحتوي الاسم الأول على حرفين على الأقل.",
+    }),
+    lastName: z.string().min(2, {
+      message: "يجب أن تحتوي الكنية على حرفين على الأقل.",
+    }),
+    countryCode: z.string().min(1, {
+      message: "اختر رمز الدولة",
+    }),
+    phone: z
+      .string()
+      .min(1, { message: "أدخل رقم الهاتف" })
+      .regex(/^[0-9]+$/, { message: "أرقام فقط" }),
+    email: z.string(),
+  })
+  .refine(
+    (data) => {
+      if (data.countryCode === "+963") {
+        // سوريا: 9 أرقام فقط بدون صفر
+        return /^\d{9}$/.test(data.phone)
+      }
+      return true
+    },
+    {
+      message: "الرقم السوري يجب أن يتكون من 9 أرقام فقط بدون صفر",
+      path: ["phone"], // الخطأ يظهر عند حقل الهاتف
+    }
+  )
+
 
 type EditMainFormProps = {
   user: any

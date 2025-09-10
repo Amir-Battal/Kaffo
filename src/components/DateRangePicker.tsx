@@ -96,6 +96,7 @@ export default function DateRangePicker({...props}): React.JSX.Element {
             selected={date}
             onSelect={handleSelect}
             numberOfMonths={2}
+            disabled={{ before: new Date() }} // ✅ منع اختيار أي تاريخ قبل اليوم
           />
         </PopoverContent>
       </Popover>

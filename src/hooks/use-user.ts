@@ -431,3 +431,80 @@ export function useAddRole() {
     },
   })
 }
+
+
+export function useRemoveRole() {
+  return useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
+      const res = await axios.put(
+        `${API_BASE_URL}/api/v1/users/${userId}/remove-role?role=${role}`,
+        {}, // body فارغ
+        {
+          headers: {
+            Authorization: `Bearer ${keycloak.token}`,
+          },
+        }
+      )
+
+      console.log(res.data);
+      return res.data
+    },
+  })
+}
+
+
+
+
+
+// ============= CLEAR GOV ID (Unassign Gov) =============
+type UserBasicInfo = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  enabled: boolean;
+  roles: string[];
+  govId?: number | null;
+};
+
+export const useClearGovId = () => {
+  const clearGovIdRequest = async (user: UserBasicInfo) => {
+    const accessToken = keycloak.token;
+
+    const response = await axios.put(
+      `${API_BASE_URL}/api/v1/users/${user.id}`,
+      {
+        ...user,
+        govId: null, // أو 0 حسب ما الـ API يرجع
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  };
+
+  const {
+    mutateAsync: clearGovId,
+    isLoading,
+    isSuccess,
+    error,
+    reset,
+  } = useMutation(clearGovIdRequest);
+
+  if (isSuccess) {
+    toast.success("تم إزالة الجهة المعنية بنجاح");
+  }
+
+  if (error) {
+    toast.error("تعذّر إزالة الجهة: " + (error as Error).message);
+    reset();
+  }
+
+  return { clearGovId, isLoading };
+};

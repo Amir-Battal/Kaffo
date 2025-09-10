@@ -16,7 +16,7 @@ const Hero = () => {
       
       <div className="flex flex-col items-center gap-10 mt-[15%]">
         <h1 className="text-6xl leading-24 w-[50%] text-center font-bold">
-          منصة تنظيم وإدارة الشكاوي للوزارات السورية
+          منصة تنظيم وإدارة الشكاوي الخدمية للوزارات السورية
         </h1>
         <h3 className="text-2xl text-zinc-400">
           قم بتقديم الشكوى الخاصة بك بكل أمان وسهولة

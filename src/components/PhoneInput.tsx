@@ -73,9 +73,14 @@ export function PhoneInput() {
 
                 {/* قائمة الدول */}
                 {filteredCountries.map((country) => (
-                  <SelectItem key={`${country.code}-${country.dial_code}`} value={country.dial_code}>
+                  <SelectItem
+                    key={`${country.code}-${country.dial_code}`}
+                    value={country.dial_code}
+                  >
                     <div className="flex items-center gap-2">
-                      <span>{country.name} ({country.dial_code})</span>
+                      <span>
+                        {country.name} ({country.dial_code})
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
@@ -96,9 +101,9 @@ export function PhoneInput() {
             <FormControl dir="ltr">
               <Input
                 placeholder="999999999"
+                maxLength={9}
                 {...field}
                 onChange={(e) => {
-                  // السماح فقط بالأرقام
                   const val = e.target.value.replace(/\D/g, "")
                   field.onChange(val)
                 }}

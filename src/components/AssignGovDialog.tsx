@@ -5,15 +5,19 @@ import MinistriesSelect from "@/components/MinistriesSelect"
 import ConcernedPartySelect from "@/components/ConcernedPartySelect"
 import { useAddRole, useAssociateUserToGov } from "@/hooks/use-user"
 
-export default function AssignGovDialog({
-  userId,
-  initialGovId,
-  onClose
-}: {
+
+type Props = {
   userId: string
   initialGovId?: string
   onClose: () => void
-}) {
+  // onAssigned?: () => void   // 👈 إضافة prop جديدة
+}
+
+export default function AssignGovDialog({
+  userId,
+  initialGovId,
+  onClose,
+} : Props) {
   const [ministryId, setMinistryId] = useState<number | null>(null)
   const [partyId, setPartyId] = useState<number | null>(initialGovId ? Number(initialGovId) : null)
 

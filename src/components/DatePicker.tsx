@@ -70,15 +70,15 @@ export default function DatePicker({ ...props }): React.JSX.Element {
             selected={date}
             onSelect={(selectedDate) => {
               if (selectedDate) {
-                selectedDate.setHours(12); // Fix timezone issue
-                setDate(selectedDate);
-                props.setNewDate(selectedDate); // Update parent state
-                field.onChange(selectedDate.toISOString()); // ✅ Sync with React Hook Form
+                selectedDate.setHours(12)
+                setDate(selectedDate)
+                props.setNewDate(selectedDate)
+                field.onChange(selectedDate.toISOString())
               }
             }}
             captionLayout="dropdown"
-            fromYear={1900}
-            toYear={new Date().getFullYear()}
+            fromYear={new Date().getFullYear() - 80}  // أقدم عمر 80
+            toYear={new Date().getFullYear() - 18}   // أصغر عمر 18
             initialFocus
             classNames={{
               caption: "flex justify-center pt-1 relative items-center gap-2",

@@ -175,3 +175,36 @@ export const useDeleteAllProblemPhotos = () => {
 
   return mutation;
 };
+
+
+
+
+// ============= DELETE PROGRESS PHOTO =============
+export const useDeleteProgressPhoto = () => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation(
+    async ({ problemId, progressId, photoId }: { problemId: number; progressId: number; photoId: number }) => {
+      const accessToken = keycloak.token;
+      await axios.delete(
+        `${API_BASE_URL}/api/v1/problem/${problemId}/progress/${progressId}/photos/${photoId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    },
+    {
+      onSuccess: (_, { problemId }) => {
+        queryClient.invalidateQueries(["progress", problemId]); // ✅ تحديث الكاش
+        toast.success("تم حذف صورة التقدم بنجاح");
+      },
+      onError: () => {
+        toast.error("فشل في حذف صورة التقدم");
+      },
+    }
+  );
+
+  return mutation;
+};
