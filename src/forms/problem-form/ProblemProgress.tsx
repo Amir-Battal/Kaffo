@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check } from "lucide-react";
+import { Check, Trash2 } from "lucide-react";
 
 import FileUploader from "@/components/FileUploader";
 import { Button } from "@/components/ui/button";
@@ -11,24 +11,36 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 
 import { toast } from "sonner";
-import { useCreateProblemProgress, useGetProblemProgress } from "@/hooks/use-progress";
+import {
+  useCreateProblemProgress,
+  useGetProblemProgress,
+  useDeleteProblemProgress,
+} from "@/hooks/use-progress";
 import { usePresignedUpload } from "@/hooks/use-problem-photo";
-import { useUpdateSolutionStatus } from "@/hooks/use-Contribution";
+// import { useUpdateSolutionStatus } from "@/hooks/use-Contribution";
 
 const formSchema = z.object({
   comment: z.string().min(1, "الرجاء إضافة تعليق"),
   progress: z.number().min(0).max(100),
 });
 
-const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutionId: number }) => {
+const ProblemProgress = ({
+  problemId,
+  solutionId,
+}: {
+  problemId: number;
+  solutionId: number;
+}) => {
   const [value, setValue] = useState<number>(0);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [lastPercentage, setLastPercentage] = useState(0);
 
   const createProgress = useCreateProblemProgress(problemId);
   const { getPresignedUrls, uploadFileToS3 } = usePresignedUpload();
-  const { data: lastProgress, isLoading: isProgressLoading } = useGetProblemProgress(problemId);
-  const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
+  const { data: lastProgress, isLoading: isProgressLoading } =
+    useGetProblemProgress(problemId);
+  // const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
+  // const deleteProgress = useDeleteProblemProgress(problemId); // ✅ إضافة الهوك
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,79 +57,121 @@ const ProblemProgress = ({ problemId, solutionId }: { problemId: number; solutio
     }
   }, [lastProgress]);
 
-const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  values.progress = value;
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    values.progress = value;
 
-  try {
-    let photoIds: number[] = [];
+    try {
+      let photoIds: number[] = [];
 
-    // 1. أنشئ التقدم أولاً بدون صور واحصل على progressId
-    const progress = await createProgress.mutateAsync({
-      comment: values.comment,
-      percentage: value,
-      progressDate: new Date().toISOString(),
-      problemId,
-      solutionId,
-      photoIds: [],
-    });
-
-    // 2. ارفع الصور باستخدام progress.id
-    if (selectedFiles.length > 0) {
-      const presigned = await Promise.all(
-        selectedFiles.map((file) =>
-          getPresignedUrls(problemId, 1, file.type || "application/octet-stream", progress.id).then(
-            (urls) => urls[0]
-          )
-        )
-      );
-
-      for (let i = 0; i < selectedFiles.length; i++) {
-        await uploadFileToS3(presigned[i].presignedUrl, selectedFiles[i]);
-        photoIds.push(presigned[i].photoId);
-      }
-
-      // ⛔️ لا تعيد استدعاء createProgress مرة ثانية
-      // ✅ الصور ستكون مربوطة تلقائيًا بالـ progress.id
-    }
-
-    if (value === 100) {
-      updateSolutionStatus({
+      // 1. إنشاء التقدم بدون صور أولاً
+      const progress = await createProgress.mutateAsync({
+        comment: values.comment,
+        percentage: value,
+        progressDate: new Date().toISOString(),
         problemId,
         solutionId,
-        status: "RESOLVED",
+        photoIds: [],
       });
-    }
 
-    toast.success("تم إضافة التقدم بنجاح");
-    form.reset();
-    setValue(lastPercentage);
-    setSelectedFiles([]);
-  } catch (error) {
-    toast.error("حدث خطأ أثناء إضافة التقدم");
-    console.error(error);
-  }
-};
+      // 2. رفع الصور
+      if (selectedFiles.length > 0) {
+        const presigned = await Promise.all(
+          selectedFiles.map((file) =>
+            getPresignedUrls(
+              problemId,
+              1,
+              file.type || "application/octet-stream",
+              progress.id
+            ).then((urls) => urls[0])
+          )
+        );
+
+        for (let i = 0; i < selectedFiles.length; i++) {
+          await uploadFileToS3(presigned[i].presignedUrl, selectedFiles[i]);
+          photoIds.push(presigned[i].photoId);
+        }
+      }
+
+      // 3. إذا وصلنا لـ 100% نحدّث حالة الحل
+      // if (value === 100) {
+      //   updateSolutionStatus({
+      //     problemId,
+      //     solutionId,
+      //     status: "RESOLVED",
+      //   });
+      // }
+
+      toast.success("تم إضافة التقدم بنجاح");
+      form.reset();
+      setValue(lastPercentage);
+      setSelectedFiles([]);
+    } catch (error) {
+      toast.error("حدث خطأ أثناء إضافة التقدم");
+      console.error(error);
+    }
+  };
+
+  const deleteProgress = useDeleteProblemProgress();
+
+  const handleDeleteProgress = () => {
+    if (!lastProgress) return;
+
+    if (confirm("هل أنت متأكد أنك تريد حذف آخر تقدم؟")) {
+      deleteProgress.mutate(
+        { problemId, progressId: lastProgress.id },
+        {
+          onSuccess: () => toast.success("تم حذف التقدم الأخير بنجاح"),
+          onError: () => toast.error("فشل في حذف التقدم"),
+        }
+      );
+    }
+  };
 
 
 
 
   return (
     <div className="flex flex-col gap-8">
+      {/* ✅ عرض آخر تقدم */}
       {lastProgress && !isProgressLoading && (
-        <div className="bg-gray-100 p-4 rounded-xl border text-right">
+        <div className="bg-gray-100 p-4 rounded-xl border text-right relative">
           <h4 className="text-lg font-semibold mb-2">آخر تقدم مسجل</h4>
-          <p><span className="font-medium">النسبة:</span> {lastProgress.percentage}%</p>
-          <p><span className="font-medium">التعليق:</span> {lastProgress.comment}</p>
-          <p><span className="font-medium">التاريخ:</span> {new Date(lastProgress.progressDate).toLocaleDateString()}</p>
+          <p>
+            <span className="font-medium">النسبة:</span>{" "}
+            {lastProgress.percentage}%
+          </p>
+          <p>
+            <span className="font-medium">التعليق:</span>{" "}
+            {lastProgress.comment}
+          </p>
+          <p>
+            <span className="font-medium">التاريخ:</span>{" "}
+            {new Date(lastProgress.progressDate).toLocaleDateString()}
+          </p>
+
+          {/* ✅ زر الحذف يظهر فقط للتقدم الأخير */}
+          {lastProgress.percentage < 100 && (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="absolute top-4 left-4 flex items-center gap-1"
+              onClick={handleDeleteProgress}
+            >
+              <Trash2 className="w-4 h-4" />
+              حذف
+            </Button>
+          )}
         </div>
       )}
 
-      {lastProgress?.percentage === 100 ? (
-        <></>
-      ) : (
+      {/* ✅ إذا كانت آخر نسبة 100%، لا نسمح بإضافة تقدم جديد */}
+      {lastProgress?.percentage === 100 ? null : (
         <div className="flex flex-col gap-6">
-          <h3 className="text-xl font-semibold text-right">إضافة نسبة إنجاز جديدة</h3>
+          <h3 className="text-xl font-semibold text-right">
+            إضافة نسبة إنجاز جديدة
+          </h3>
 
+          {/* ✅ السلايدر */}
           <div className="flex flex-row-reverse items-center gap-3">
             <span className="text-lg">0</span>
             <Slider
@@ -136,8 +190,12 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
 
           <p className="text-center text-[18px]">نسبة الإنجاز {value}%</p>
 
+          {/* ✅ النموذج */}
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-5">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col gap-5"
+            >
               <FormField
                 control={form.control}
                 name="comment"
@@ -145,14 +203,17 @@ const onSubmit = async (values: z.infer<typeof formSchema>) => {
                   <FormItem>
                     <FormLabel className="font-semibold">إضافة تعليق</FormLabel>
                     <FormControl>
-                      <Input placeholder="تعليق عن نسبة الإنجاز" {...field} />
+                      <Input
+                        placeholder="تعليق عن نسبة الإنجاز"
+                        {...field}
+                      />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
               <div className="w-full flex flex-col gap-2">
-                <FormLabel className="font-semibold">صور الشكوى</FormLabel>
+                <FormLabel className="font-semibold">صور المشكلة</FormLabel>
                 <FileUploader onFilesChange={setSelectedFiles} />
                 {selectedFiles.length > 0 && (
                   <ul className="list-disc pr-4 text-right text-sm text-gray-600">

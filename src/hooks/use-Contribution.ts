@@ -496,44 +496,44 @@ export const useUpdateContributionDates = ({ problemId, onSuccess }: UpdateDates
 
 
 
-interface UpdateSolutionStatus {
-  problemId: number;
-  solutionId: number;
-  status: string;
-}
+// interface UpdateSolutionStatus {
+//   problemId: number;
+//   solutionId: number;
+//   status: string;
+// }
 
-export const useUpdateSolutionStatus = () => {
-  const queryClient = useQueryClient();
+// export const useUpdateSolutionStatus = () => {
+//   const queryClient = useQueryClient();
 
-  return useMutation(
-    async ({ problemId, solutionId, status }: UpdateSolutionStatus) => {
-      const accessToken = keycloak.token;
+//   return useMutation(
+//     async ({ problemId, solutionId, status }: UpdateSolutionStatus) => {
+//       const accessToken = keycloak.token;
 
-      const payload: Partial<SolutionDTO> = {
-        status, // ✅ الآن أصبح معرفًا بشكل صحيح
-      };
+//       const payload: Partial<SolutionDTO> = {
+//         status, // ✅ الآن أصبح معرفًا بشكل صحيح
+//       };
 
-      const response = await axios.patch(
-        `${import.meta.env.VITE_API_BASE_URL}/api/v1/problems/${problemId}/solutions/${solutionId}/status`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+//       const response = await axios.patch(
+//         `${import.meta.env.VITE_API_BASE_URL}/api/v1/problems/${problemId}/solutions/${solutionId}/status`,
+//         payload,
+//         {
+//           headers: {
+//             Authorization: `Bearer ${accessToken}`,
+//             "Content-Type": "application/json",
+//           },
+//         }
+//       );
 
-      return response.data;
-    },
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries("problems");
-        toast.success("تم تعديل حالة المساهمة");
-      },
-      onError: (error: any) => {
-        toast.error("حدث خطأ أثناء تعديل 'contribution status': " + error.message);
-      },
-    }
-  );
-};
+//       return response.data;
+//     },
+//     {
+//       onSuccess: () => {
+//         queryClient.invalidateQueries("problems");
+//         toast.success("تم تعديل حالة المساهمة");
+//       },
+//       onError: (error: any) => {
+//         toast.error("حدث خطأ أثناء تعديل 'contribution status': " + error.message);
+//       },
+//     }
+//   );
+// };

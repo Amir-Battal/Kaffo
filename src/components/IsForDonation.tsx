@@ -2,14 +2,14 @@ import { Check, ChevronLeft, Timer } from "lucide-react";
 import { Button } from "./ui/button";
 import { JSX, useEffect, useState } from "react";
 import { useGetProblemById, useUpdateProblemForDonation } from "@/hooks/use-problem";
-import { useUpdateSolutionStatus } from "@/hooks/use-Contribution";
+// import { useUpdateSolutionStatus } from "@/hooks/use-Contribution";
 
 const IsForDonation = ({...prop}): JSX.Element => {
 
   const [isForDonation, setIsForDonation] = useState<boolean>();
 
   const { mutate: updateForDonation } = useUpdateProblemForDonation();
-  const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
+  // const { mutate: updateSolutionStatus } = useUpdateSolutionStatus();
   const { problem } = useGetProblemById(prop.problemId);
 
   
@@ -21,11 +21,11 @@ const IsForDonation = ({...prop}): JSX.Element => {
       forContribution: problem?.forContribution,
       status: "PENDING_FUNDING"
     });
-    updateSolutionStatus({
-      problemId: prop.problemId,
-      solutionId: prop.acceptedContribution.id,
-      status: "PENDING_FUNDING"
-    })
+    // updateSolutionStatus({
+    //   problemId: prop.problemId,
+    //   solutionId: prop.acceptedContribution.id,
+    //   status: "PENDING_FUNDING"
+    // })
 
     prop.setIsForDonation(true);
     setIsForDonation(true);
