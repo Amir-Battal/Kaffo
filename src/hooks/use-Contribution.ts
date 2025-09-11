@@ -464,7 +464,6 @@ export const useUpdateContributionDates = ({ problemId, onSuccess }: UpdateDates
         ...existing,
         startDate,
         endDate,
-        status,
       };
 
       const { data: updatedSolution } = await axios.put(

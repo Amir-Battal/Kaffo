@@ -320,6 +320,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                                 gov={govMinistry?.name}
                                 ministry={parentMinistry?.name}
                                 userPhoto={proposedUser?.photoUrl}
+                                proposedByUserId={proposedUser?.id}
                               />
                             </div>
                           )}

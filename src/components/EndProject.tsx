@@ -36,9 +36,14 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
   
 
 
-  const formatLocalDate = (date: Date): string => {
-    return date.toLocaleDateString("en-CA", { timeZone: "Asia/Riyadh" }); // "YYYY-MM-DD"
+  const formatLocalDate = (input: Date | string): string => {
+    const date = input instanceof Date ? input : new Date(input);
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date value: " + input);
+    }
+    return date.toLocaleDateString("en-CA", { timeZone: "Asia/Riyadh" }); 
   };
+
 
 
   // useEffect(() => {
@@ -47,16 +52,17 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
   // }, [])
 
   useEffect(() => {
-    if(startDate && endDate){
+    if (startDate && endDate) {
       setDate({
-        from: startDate,
-        to: endDate
-      })
+        from: new Date(startDate),
+        to: new Date(endDate)
+      });
       
       setIsDateSet(true);
       setIsEndProject(true);
     }
-  } ,[])
+  }, []);
+
 
 
   const handleSubmitDate = () => {
@@ -68,19 +74,20 @@ const EndProject = ({ contributionId, problemId, setIsEndProject, startDate, end
       endDate: formatLocalDate(date.to),
       status: "WORK_IN_PROGRESS"
     });
+
     updateProblemStatus({
       isReal: problem?.isReal,
       forContribution: problem?.forContribution,
       forDonation: problem?.forDonation,
       problemId: problemId,
       status: "WORK_IN_PROGRESS"
-    })
-
+    });
 
     setIsDateSet(true);
     setIsEndProject(true);
     setIsEditing(false); 
   };
+
 
   const handleEditDate = () => {
     setIsEditing(true);

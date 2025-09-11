@@ -100,7 +100,7 @@ const ContributionCard = ({
   const cityOfContributor = cities?.find(c => c.value === contributorAddress?.city)?.arabic ?? contributorAddress?.city;
 
 
-  console.log("contributor", contributor);
+  // console.log("contributor", contributor);
   // const ContributorDetails = (user: ContributionCardProps | undefined): boolean => {
   //   if (!user) return false;
     

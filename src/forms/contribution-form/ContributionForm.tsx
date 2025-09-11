@@ -111,6 +111,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
     });
   };
 
+
   const renderForm = () => (
     <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
       <FormField
@@ -167,7 +168,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
         budget={userContribution.estimatedCost || 0}
         userPhoto={userCotnributionDetails?.photoUrl}
         status={userContribution.status}
-        proposedByUserId={userContribution.id}
+        proposedByUserId={userContribution.proposedByUserId}
       >
         {/* <div className={` text-white text-sm flex justify-center items-center w-[30%] h-[50px]
           ${userContribution?.status === "REJECTED"
