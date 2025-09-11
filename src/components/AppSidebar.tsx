@@ -188,7 +188,13 @@ export function AppSidebar() {
           <SidebarHeaderElements roles={roles}/>
         </SidebarHeader>
         
-        <Separator />
+        <Separator className={`border-b-4 border-green-600 ${
+          roles.includes("ROLE_ADMIN") 
+            ? "border-b-4 border-red-600" 
+            : roles.includes("ROLE_GOV") 
+            ? "border-b-4 border-blue-600"
+            : "border-b-4 border-green-600"
+        }`} />
 
         <SidebarGroup>
 

@@ -64,7 +64,6 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
   // console.log("solution", solution);
 
 
-
   return (
     <div className="flex flex-col gap-5">
       {(select && solution) && (
@@ -74,6 +73,8 @@ const SelectContributionsProcess = ({...props}): JSX.Element => {
           contribution={solution?.description}
           budget={solution?.estimatedCost}
           userPhoto={user?.data?.photoUrl}
+          proposedByUserId={solution.proposedByUserId}
+          suggestionContributions
         >
           {props.isThereNotDonation && (
             <div className="flex flex-row-reverse">

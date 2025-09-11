@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ChevronLeft, DollarSign, Image } from "lucide-react";
+import { ChevronLeft, DollarSign, FileText, Image } from "lucide-react";
 import { useGetProblemById } from "@/hooks/use-problem";
 import { useGetUserById } from "@/hooks/use-user";
 import { useCategory } from "@/hooks/use-category";
@@ -100,6 +100,7 @@ const ContributionCard = ({
   const cityOfContributor = cities?.find(c => c.value === contributorAddress?.city)?.arabic ?? contributorAddress?.city;
 
 
+  console.log("contributor", contributor);
   // const ContributorDetails = (user: ContributionCardProps | undefined): boolean => {
   //   if (!user) return false;
     
@@ -126,7 +127,7 @@ const ContributionCard = ({
             <div className="flex flex-row items-center gap-2">
               {!isSelfSolv && (
                 <Avatar className="w-10 h-10 rounded-none">
-                  <AvatarImage src={userPhoto} />
+                  <AvatarImage src={contributor?.photoUrl} />
                   <AvatarFallback>{username?.split("")[0]}</AvatarFallback>
                 </Avatar>
               )}
@@ -142,11 +143,35 @@ const ContributionCard = ({
               {isEmployee && (
                 <h3>الجهة المعنية التابع لها: <span className="font-bold">{gov}, {ministry}</span></h3>
               )}
-              { suggestionContributions && (
-                <div>
-                  <h3 className="text-[14px]"><span className="font-bold text-[14px]">البريد الإلكتروني: </span>{contributor?.email}</h3>
-                  <h3 className="text-[14px]"><span className="font-bold text-[14px]">رقم الهاتف: </span><span dir="ltr">{contributor?.phone}</span></h3>
-                  <h3 className="text-[14px]"><span className="font-bold text-[14px]">العنوان: </span>{cityOfContributor}, {contributorAddress?.description}</h3>
+              {suggestionContributions && (
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-row gap-15">
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-[14px]"><span className="font-bold text-[14px]">البريد الإلكتروني: </span>{contributor?.email}</h3>
+                      <h3 className="text-[14px]"><span className="font-bold text-[14px]">رقم الهاتف: </span><span dir="ltr">{contributor?.phone}</span></h3>
+                      <h3 className="text-[14px]"><span className="font-bold text-[14px]">العنوان: </span>{cityOfContributor}, {contributorAddress?.description}</h3>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <h3 className="text-[14px]"><span className="font-bold text-[14px]">الدراسة: </span>{contributor?.collegeDegree}</h3>
+                      <h3 className="text-[14px]"><span className="font-bold text-[14px]">العمل: </span><span dir="ltr">{contributor?.job}</span></h3>
+                      <h3 className="text-[14px]"><span className="font-bold text-[14px]">تاريخ الميلاد: </span><span dir="ltr">{contributor?.dateOfBirth}</span></h3>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[14px]"><span className="font-bold text-[14px]">الوصف: </span><span dir="ltr">{contributor?.description}</span></p>
+                    {contributor?.cvUrl &&(
+                      <a
+                        href={contributor?.cvUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-black text-white w-full text-center px-4 py-2 rounded-lg hover:bg-zinc-800 underline flex flex-row justify-between"
+                      >
+                        <h3>عرض السيرة الذاتية</h3>
+                        <FileText />
+                      </a>
+                    )}
+                  </div>
+
                 </div>
               )}
             </div>

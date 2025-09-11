@@ -15,6 +15,7 @@ import { useCreateDonation, useGetProblemDonations, useGetPublicDonors } from "@
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+import DonorsTable from "./DonorsTable";
 
 
 
@@ -191,8 +192,8 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
 
 
 
-  console.log("STATUS change", isStatusChanged);
-  console.log("DONORS change", isDonorsChanged);
+  // console.log("STATUS change", isStatusChanged);
+  // console.log("DONORS change", isDonorsChanged);
 
 
 
@@ -224,7 +225,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
     try {
       const response = await donationMutation.mutateAsync({
         amount,
-        currency: "LBP", // ✅ تغيير العملة إلى الليرة اللبنانية
+        currency: "USD", // ✅ تغيير العملة إلى الليرة اللبنانية
         paymentMethod: "STRIPE",
         isAnonymous: false,
         successUrl: window.location.href,
@@ -243,7 +244,7 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
   };
 
 
-  console.log("publicDonros",publicDonors);
+  // console.log("publicDonros",publicDonors);
 
   return (
     <div className="flex flex-col gap-10 mt-10">
@@ -350,17 +351,18 @@ const SolveControl = ({ problemId }: { problemId: number }): JSX.Element => {
                             </thead>
                             <tbody>
                               {publicDonors.content.map((donation, idx) => (
-                                <tr key={idx} className="hover:bg-gray-50">
-                                  <td className="py-3 px-4 border-b">
-                                    {donation.firstName} {donation.lastName}
-                                  </td>
-                                  <td className="py-3 px-4 border-b">
-                                    {donation.amount} $
-                                  </td>
-                                  <td className="py-3 px-4 border-b">
-                                    {donation.donationDate.split("T")[0]}
-                                  </td>
-                                </tr>
+                                <DonorsTable idx={idx} donation={donation} />
+                                // <tr key={idx} className="hover:bg-gray-50">
+                                //   <td className="py-3 px-4 border-b">
+                                //     {donation.firstName} {donation.lastName} 
+                                //   </td>
+                                //   <td className="py-3 px-4 border-b">
+                                //     {donation.amount} $
+                                //   </td>
+                                //   <td className="py-3 px-4 border-b">
+                                //     {donation.donationDate.split("T")[0]}
+                                //   </td>
+                                // </tr>
                               ))}
                             </tbody>
                           </table>

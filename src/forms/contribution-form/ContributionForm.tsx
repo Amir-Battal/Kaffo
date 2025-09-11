@@ -167,6 +167,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
         budget={userContribution.estimatedCost || 0}
         userPhoto={userCotnributionDetails?.photoUrl}
         status={userContribution.status}
+        proposedByUserId={userContribution.id}
       >
         {/* <div className={` text-white text-sm flex justify-center items-center w-[30%] h-[50px]
           ${userContribution?.status === "REJECTED"
@@ -206,6 +207,7 @@ const ContributionForm: React.FC<Props> = ({ problemId }) => {
           contribution={c.description}
           budget={c.estimatedCost}
           userPhoto={c.user.photoUrl}
+          proposedByUserId={c.user.id}
           // status={c.status}
         />
       ));

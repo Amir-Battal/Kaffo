@@ -26,6 +26,7 @@ import GovPerson from "@/forms/problem-form/GovPerson";
 import ProgressPreview from "./ProgressPreview";
 import { useMinistryById } from "@/hooks/use-gov";
 import { useGetProblemProgress } from "@/hooks/use-progress";
+import DonorsTable from "./DonorsTable";
 
 type MainDetailsProp = {
   contribution?: boolean;
@@ -236,6 +237,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                               contribution={acceptedContribution.description}
                               budget={acceptedContribution.estimatedCost}
                               userPhoto={proposedUser.photoUrl}
+                              proposedByUserId={proposedUserId}
                             />
                           )}
                         </div>
@@ -366,17 +368,7 @@ const ProblemMainDetails = (prop: MainDetailsProp) => {
                                     </thead>
                                     <tbody>
                                       {publicDonors.content.map((donation, idx) => (
-                                        <tr key={idx} className="hover:bg-gray-50">
-                                          <td className="py-3 px-4 border-b">
-                                            {donation.firstName} {donation.lastName}
-                                          </td>
-                                          <td className="py-3 px-4 border-b">
-                                            {donation.amount} $
-                                          </td>
-                                          <td className="py-3 px-4 border-b">
-                                            {donation.donationDate.split("T")[0]}
-                                          </td>
-                                        </tr>
+                                        <DonorsTable idx={idx} donation={donation} />
                                       ))}
                                     </tbody>
                                   </table>
