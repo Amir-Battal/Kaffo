@@ -145,7 +145,7 @@ export function ProblemsTable() {
 
 
   const [page, setPage] = useState(0);
-  const size = 6;
+  const size = 10;
 
   const criteria = useMemo(() => {
     return {

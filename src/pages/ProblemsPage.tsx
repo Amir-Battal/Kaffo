@@ -96,21 +96,27 @@ const ProblemsPage = () => {
   return (
     <div className="flex flex-col gap-10 pr-10 mb-25">
       <ProblemHeader onFilterChange={setCriteria} />
-
-      <div className="grid grid-cols-3 gap-5">
-        {isLoading ? (
-          <p>جاري التحميل...</p>
-        ) : (
-          problems.map((problem) => (
-            // problem.isReal && (
-              <ProblemCard key={problem.id} problem={problem} />
-            // )
-          ))
-        )}
+      {problems.length >= 1 ? (
+        <div>
+          <div className="grid grid-cols-3 gap-5">
+            {isLoading ? (
+              <p>جاري التحميل...</p>
+            ) : (
+              problems.map((problem) => (
+                // problem.isReal && (
+                  <ProblemCard key={problem.id} problem={problem} />
+                // )
+              ))
+            )}
+          </div>
+    
+          <PaginationComp page={page} setPage={setPage} totalPages={totalPages} />
+        </div>
+      ):(
+        <p>لا يوجد شكاوي حتى الآن...</p>
+      )
+      }
       </div>
-
-      <PaginationComp page={page} setPage={setPage} totalPages={totalPages} />
-    </div>
   );
 };
 

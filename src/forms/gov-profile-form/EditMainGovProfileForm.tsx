@@ -214,7 +214,7 @@ export function EditMainGovProfileForm() {
           )} /> */}
         </div>
 
-        {!isMinistry && (
+        {/* {!isMinistry && (
           <div className="grid grid-cols-2 gap-5">
             <div className="flex flex-col gap-2">
               <FormLabel>الوزارة</FormLabel>
@@ -244,7 +244,7 @@ export function EditMainGovProfileForm() {
               </div>
             )}
           </div>
-        )}
+        )} */}
 
         <Button type="submit" className="w-[60%] cursor-pointer">
           <h3>تأكيد التعديل</h3>
