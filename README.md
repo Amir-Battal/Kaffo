@@ -122,6 +122,8 @@ The system is built as a multi-layered application using modern technologies and
 
 ## Getting Started Locally
 
+### Setup Backend from <a href="https://github.com/Abdulhadi-Assi/kafu">HERE</a>
+
 ### 1. Clone the Repository
 
 ```bash
